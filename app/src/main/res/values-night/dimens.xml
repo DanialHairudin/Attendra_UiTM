@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- No shadow on cards in dark mode. -->
+    <dimen name="card_elevation">0dp</dimen>
+</resources>

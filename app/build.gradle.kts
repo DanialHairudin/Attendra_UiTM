@@ -17,10 +17,27 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Realtime Database URL. Set here because google-services.json was downloaded
+        // before the database existed, so it has no firebase_url in it.
+        buildConfigField(
+            "String", "DATABASE_URL",
+            "\"https://attendra-uitm-default-rtdb.asia-southeast1.firebasedatabase.app\""
+        )
+    }
+
+    buildFeatures {
+        buildConfig = true
+        viewBinding = true
     }
 
     buildTypes {
+        debug {
+            // false in debug so Gmail accounts can be used for testing (CLAUDE.md section 4)
+            buildConfigField("boolean", "REQUIRE_UITM_EMAIL", "false")
+        }
         release {
+            buildConfigField("boolean", "REQUIRE_UITM_EMAIL", "true")
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="screen_padding">20dp</dimen>
+    <dimen name="card_radius">20dp</dimen>
+    <dimen name="hero_radius">24dp</dimen>
+    <dimen name="button_height">52dp</dimen>
+    <dimen name="button_radius">14dp</dimen>
+    <dimen name="list_row_min_height">56dp</dimen>
+    <!-- Light mode cards get a very soft lift; values-night sets this to 0. -->
+    <dimen name="card_elevation">1dp</dimen>
+</resources>

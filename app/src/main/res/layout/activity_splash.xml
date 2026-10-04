@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash, matching the "Splash" screen in design/Attendra_App_Preview.html.
+     Logo, eyebrow, title and tagline sit at the top; the two buttons sit at the bottom. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/splash_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="vertical"
+    android:paddingStart="28dp"
+    android:paddingTop="72dp"
+    android:paddingEnd="28dp"
+    android:paddingBottom="40dp"
+    tools:context=".ui.splash.SplashActivity">
+
+    <!-- Full Attendra logo. The PNG has a little transparent margin around the gold
+         square, so a negative start margin lines the square up with the text below. -->
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="-4dp"
+        android:contentDescription="@string/logo_description"
+        android:scaleType="fitCenter"
+        android:src="@drawable/attendra_logo" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:text="@string/splash_eyebrow"
+        android:textAppearance="@style/TextAppearance.Attendra.Eyebrow" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:accessibilityHeading="true"
+        android:lineSpacingMultiplier="0.95"
+        android:text="@string/splash_title"
+        android:textAppearance="@style/TextAppearance.Attendra.Display" />
+
+    <TextView
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:lineSpacingMultiplier="1.2"
+        android:text="@string/splash_body"
+        android:textAppearance="@style/TextAppearance.Attendra.Body.Muted"
+        android:textSize="16sp" />
+
+    <!-- Pushes the buttons to the bottom of the screen -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_get_started"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:text="@string/get_started" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_create_account"
+        style="@style/Widget.Attendra.Button.Secondary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginTop="12dp"
+        android:text="@string/create_account" />
+
+</LinearLayout>

@@ -1,3 +1,140 @@
 <resources>
+    <!-- Every user-facing text is kept here so the wording is easy to change.
+         Style: formal, short, polite full sentences; no contractions. -->
+
     <string name="app_name">Attendra UiTM</string>
+    <string name="logo_description">Attendra UiTM logo</string>
+    <string name="back">Back</string>
+    <string name="retry">Retry</string>
+
+    <!-- Splash -->
+    <string name="splash_eyebrow">UiTM Shah Alam · KPPIM</string>
+    <string name="splash_title">Attendra\nUiTM</string>
+    <string name="splash_body">Attendance for classes, tests and activities, verified by your location.</string>
+    <string name="get_started">Get started</string>
+    <string name="create_account">Create an account</string>
+
+    <!-- Shared field labels and hints -->
+    <string name="label_email">Email address</string>
+    <string name="label_email_student">Student email address</string>
+    <string name="label_email_staff">UiTM email address</string>
+    <string name="hint_email">name@example.com</string>
+    <string name="hint_email_student">2025123456@student.uitm.edu.my</string>
+    <string name="hint_email_staff">name@uitm.edu.my</string>
+    <string name="label_password">Password</string>
+    <string name="hint_password_login">Enter your password</string>
+
+    <!-- Log in -->
+    <string name="auth_login_eyebrow">Welcome back</string>
+    <string name="auth_login_title">Log in to Attendra</string>
+    <string name="forgot_password_link">Forgot your password?</string>
+    <string name="log_in">Log in</string>
+    <string name="logging_in">Logging in…</string>
+    <string name="new_to_attendra">New to Attendra UiTM?</string>
+
+    <!-- Register -->
+    <string name="register_title">Create an account</string>
+    <string name="role_student">Student</string>
+    <string name="role_lecturer">Lecturer</string>
+    <string name="label_full_name">Full name</string>
+    <string name="hint_full_name">As shown on your UiTM ID card</string>
+    <string name="label_student_id">Student ID</string>
+    <string name="hint_student_id">e.g. 2025123456</string>
+    <string name="label_staff_id">Staff ID</string>
+    <string name="hint_staff_id">e.g. 123456</string>
+    <string name="label_phone">Phone number</string>
+    <string name="phone_prefix">+60</string>
+    <string name="hint_phone">12-345 6789</string>
+    <string name="label_programme">Programme</string>
+    <string name="hint_programme">Select your programme</string>
+    <string name="label_part">Part (semester)</string>
+    <string name="hint_part">Select</string>
+    <string name="label_group">Group</string>
+    <string name="hint_group">Select</string>
+    <string name="part_n">Part %1$d</string>
+    <string name="label_clubs_student">Clubs joined</string>
+    <string name="label_clubs_lecturer">Clubs advised</string>
+    <string name="clubs_optional_note">Optional. You may change this later in your profile.</string>
+    <string name="clubs_loading">Loading clubs…</string>
+    <string name="hint_password_new">At least 8 characters</string>
+    <string name="label_confirm_password">Confirm password</string>
+    <string name="hint_confirm_password">Re-enter your password</string>
+    <string name="create_account_button">Create account</string>
+    <string name="creating_account">Creating account…</string>
+    <string name="register_footer">A verification link will be sent to your email address.</string>
+
+    <!-- Verify email -->
+    <string name="verify_title">Verify your email address</string>
+    <string name="verify_body">A verification link has been sent to %1$s. Please open the link on any device, then return to this screen.</string>
+    <string name="verify_done">I have verified my email</string>
+    <string name="verify_checking">Checking…</string>
+    <string name="verify_resend">Resend verification email</string>
+    <string name="verify_resend_wait">Resend available in %1$d s</string>
+    <string name="verify_resent">The verification email has been sent again.</string>
+    <string name="verify_not_yet">Your email address has not been verified yet. Please open the link in the email, then try again. You may need to check your spam folder.</string>
+    <string name="verify_wrong_email">Incorrect email address?</string>
+    <string name="verify_change_it">Change email</string>
+    <string name="back_to_login">Return to log in</string>
+
+    <!-- Forgot password -->
+    <string name="forgot_title">Reset password</string>
+    <string name="forgot_body">Enter your email address and a link to reset your password will be sent to you.</string>
+    <string name="forgot_send">Send reset link</string>
+    <string name="forgot_sending">Sending…</string>
+    <string name="forgot_sent">If an account exists for %1$s, a password reset link has been sent. Please open the link to set a new password, then log in.</string>
+
+    <!-- Placeholder home screens (C3) -->
+    <string name="home_role_lecturer">Lecturer</string>
+    <string name="home_role_student">Student</string>
+    <string name="home_greeting">Welcome, %1$s</string>
+    <string name="home_greeting_plain">Welcome</string>
+    <string name="home_lecturer_placeholder">You are signed in as a lecturer. The lecturer home screen will be available in a later version.</string>
+    <string name="home_student_placeholder">You are signed in as a student. The student home screen will be available in a later version.</string>
+    <string name="sign_out">Sign out</string>
+
+    <!-- Validation messages (shown under a field) -->
+    <string name="error_name_required">Please enter your full name.</string>
+    <string name="error_name_short">Full name must be at least 3 characters.</string>
+    <string name="error_email_required">Please enter your email address.</string>
+    <string name="error_email_invalid">Please enter a valid email address.</string>
+    <string name="error_email_student_domain">Please use your UiTM student email address (%1$s).</string>
+    <string name="error_email_staff_domain">Please use your UiTM staff email address (%1$s).</string>
+    <string name="error_phone_required">Please enter your phone number.</string>
+    <string name="error_phone_invalid">Please enter a valid phone number.</string>
+    <string name="error_student_id_required">Please enter your student ID.</string>
+    <string name="error_student_id_invalid">Student ID must be 10 digits.</string>
+    <string name="error_staff_id_required">Please enter your staff ID.</string>
+    <string name="error_staff_id_invalid">Staff ID may contain letters and numbers only.</string>
+    <string name="error_password_required">Please enter your password.</string>
+    <string name="error_password_short">Password must be at least 8 characters.</string>
+    <string name="error_confirm_required">Please confirm your password.</string>
+    <string name="error_password_mismatch">Passwords do not match.</string>
+    <string name="error_choose_programme">Please select your programme.</string>
+    <string name="error_choose_part">Please select your part.</string>
+    <string name="error_choose_group">Please select your group.</string>
+    <string name="error_no_groups">No groups are available for this programme and part.</string>
+    <string name="error_fix_fields">Please correct the highlighted fields.</string>
+
+    <!-- Account and connection messages (shown in a snackbar) -->
+    <string name="error_wrong_credentials">The email or password is incorrect.</string>
+    <string name="error_email_in_use">An account with this email already exists.</string>
+    <string name="error_account_unavailable">This account does not exist or has been disabled.</string>
+    <string name="error_too_many_requests">Too many attempts. Please wait a few minutes and try again.</string>
+    <string name="error_sign_in_disabled">Email sign-in is not enabled for this project. Please contact the administrator.</string>
+    <string name="error_network">Unable to connect. Please check your internet connection and try again.</string>
+    <string name="error_permission_denied">You do not have permission to perform this action.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_create_account">Unable to create the account. Please try again.</string>
+    <string name="error_save_profile">Unable to save your profile. %1$s</string>
+    <string name="error_login_failed">Unable to log in. Please try again.</string>
+    <string name="error_no_profile">This account does not have an Attendra profile. Please register with a different email address.</string>
+    <string name="error_session_ended">Your session has ended. Please log in again.</string>
+    <string name="error_seed_empty">No programmes were found. Please import seed/attendra_seed.json into the Realtime Database.</string>
+    <string name="error_seed_load">Unable to load programmes and clubs. %1$s</string>
+
+    <!-- Attendance statuses (badges) -->
+    <string name="status_present">Present</string>
+    <string name="status_late">Late</string>
+    <string name="status_absent">Absent</string>
+    <string name="status_rejected">Rejected</string>
 </resources>

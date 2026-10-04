@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Role toggle segment fill: surface when selected, see-through otherwise. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/surface" android:state_checked="true" />
+    <item android:color="@android:color/transparent" />
+</selector>

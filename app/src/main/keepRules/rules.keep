@@ -10,3 +10,9 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+# Realtime Database turns snapshots into these POJOs by reflection
+# (snapshot.getValue(Programme.class)), so R8 must keep their names and fields.
+-keepclassmembers class com.attendra.uitm.model.** {
+    public <init>();
+    public *;
+}

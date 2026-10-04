@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Attendra palette, light mode. values-night/colors.xml has the same names
+     with the dark values. Layouts must use these names, never raw hex. -->
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="bg">#FAF7F0</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="raised">#F3EDE1</color>
+    <color name="line">#E6DCC8</color>
+    <color name="hero">#FFFDF8</color>
+    <color name="heroLine">#D9C38F</color>
+    <color name="ink">#1E1A14</color>
+    <color name="muted">#6A6152</color>
+    <color name="gold">#B8892B</color>
+    <color name="goldText">#8A6414</color>
+    <color name="onGold">#1E1A14</color>
+    <color name="present">#2E7D5B</color>
+    <color name="late">#B45309</color>
+    <color name="absent">#6A6152</color>
+    <color name="rejected">#B42318</color>
 </resources>

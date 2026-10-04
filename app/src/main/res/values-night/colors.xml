@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Attendra palette, dark mode. Same names as values/colors.xml. -->
+<resources>
+    <color name="bg">#0D0C0A</color>
+    <color name="surface">#17150F</color>
+    <color name="raised">#221E16</color>
+    <color name="line">#2E2920</color>
+    <color name="hero">#1B170F</color>
+    <color name="heroLine">#6B5520</color>
+    <color name="ink">#F4EEE2</color>
+    <color name="muted">#ABA290</color>
+    <color name="gold">#D9B24C</color>
+    <color name="goldText">#E6C466</color>
+    <color name="onGold">#15120A</color>
+    <color name="present">#52C08A</color>
+    <color name="late">#F29A48</color>
+    <color name="absent">#ABA290</color>
+    <color name="rejected">#F2685F</color>
+</resources>

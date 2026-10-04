@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shared component styles (CLAUDE.md section 3, "Shapes and components"). -->
+<resources>
+
+    <!-- Default TextView: Manrope body text. Only textAppearance is set here, so a
+         layout's own android:textAppearance (e.g. H1) replaces it cleanly. -->
+    <style name="Widget.Attendra.TextView" parent="Widget.AppCompat.TextView">
+        <item name="android:textAppearance">@style/TextAppearance.Attendra.Body</item>
+    </style>
+
+    <!-- Card: radius 20dp, surface fill, 1dp line stroke, shadow only in light mode
+         (card_elevation is 0dp in values-night/dimens.xml) -->
+    <style name="Widget.Attendra.Card" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardCornerRadius">@dimen/card_radius</item>
+        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="strokeColor">@color/line</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+    </style>
+
+    <!-- Hero card at the top of home screens: radius 24dp, hero fill, heroLine stroke -->
+    <style name="Widget.Attendra.Card.Hero">
+        <item name="cardCornerRadius">@dimen/hero_radius</item>
+        <item name="cardBackgroundColor">@color/hero</item>
+        <item name="strokeColor">@color/heroLine</item>
+    </style>
+
+    <!-- Primary button: 52dp tall, radius 14dp, gold fill, onGold text.
+         insetTop/insetBottom are zeroed so the visible button really is 52dp. -->
+    <style name="Widget.Attendra.Button.Primary" parent="Widget.Material3.Button">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">@dimen/button_radius</item>
+        <item name="backgroundTint">@color/gold</item>
+        <item name="android:textColor">@color/onGold</item>
+        <item name="android:textAppearance">@style/TextAppearance.Attendra.Button</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Secondary button: transparent with a line-coloured outline -->
+    <style name="Widget.Attendra.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">@dimen/button_radius</item>
+        <item name="strokeColor">@color/line</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textAppearance">@style/TextAppearance.Attendra.Button</item>
+        <item name="rippleColor">@color/gold_tint</item>
+    </style>
+
+    <!-- Text link button ("Forgot password?") -->
+    <style name="Widget.Attendra.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/goldText</item>
+        <item name="android:textAppearance">@style/TextAppearance.Attendra.Body.SemiBold</item>
+        <item name="rippleColor">@color/gold_tint</item>
+    </style>
+
+    <!-- Pill: selectable chip, one line. Put pills in a HorizontalScrollView around a
+         ChipGroup with app:singleLine="true" so they scroll instead of wrapping. -->
+    <style name="Widget.Attendra.Pill" parent="Widget.Material3.Chip.Filter">
+        <item name="chipMinHeight">38dp</item>
+        <item name="chipCornerRadius">12dp</item>
+        <item name="chipBackgroundColor">@color/pill_bg</item>
+        <item name="chipStrokeColor">@color/pill_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">@color/ink</item>
+        <item name="android:textAppearance">@style/TextAppearance.Attendra.Body.SemiBold</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <!-- Status badges: coloured text on a 12% tint of the same colour -->
+    <style name="Widget.Attendra.Badge" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">26dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:background">@drawable/bg_badge</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="Widget.Attendra.Badge.Present">
+        <item name="android:textColor">@color/present</item>
+        <item name="android:backgroundTint">@color/present_tint</item>
+    </style>
+
+    <style name="Widget.Attendra.Badge.Late">
+        <item name="android:textColor">@color/late</item>
+        <item name="android:backgroundTint">@color/late_tint</item>
+    </style>
+
+    <style name="Widget.Attendra.Badge.Absent">
+        <item name="android:textColor">@color/absent</item>
+        <item name="android:backgroundTint">@color/absent_tint</item>
+    </style>
+
+    <style name="Widget.Attendra.Badge.Rejected">
+        <item name="android:textColor">@color/rejected</item>
+        <item name="android:backgroundTint">@color/rejected_tint</item>
+    </style>
+
+    <!-- List row: at least 56dp tall -->
+    <style name="Widget.Attendra.ListRow" parent="">
+        <item name="android:minHeight">@dimen/list_row_min_height</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
+    <!-- Bottom nav: the active item gets a gold pill behind its icon -->
+    <style name="Widget.Attendra.BottomNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="backgroundTint">@color/surface</item>
+        <item name="itemIconTint">@color/nav_item</item>
+        <item name="itemTextColor">@color/nav_item</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.Attendra.BottomNav.ActiveIndicator</item>
+        <item name="labelVisibilityMode">labeled</item>
+    </style>
+
+    <style name="Widget.Attendra.BottomNav.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/gold_tint</item>
+    </style>
+
+    <!-- Text field: 14dp radius, line outline, gold when focused -->
+    <style name="Widget.Attendra.TextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">14dp</item>
+        <item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item>
+        <item name="boxCornerRadiusBottomEnd">14dp</item>
+        <item name="boxStrokeColor">@color/input_stroke</item>
+        <item name="boxBackgroundColor">@color/surface</item>
+        <item name="hintTextColor">@color/goldText</item>
+        <!-- The label sits above the field (prototype style), so no floating hint.
+             The grey example text goes in the EditText's own android:hint. -->
+        <item name="hintEnabled">false</item>
+        <item name="startIconTint">@color/muted</item>
+        <item name="endIconTint">@color/muted</item>
+    </style>
+</resources>

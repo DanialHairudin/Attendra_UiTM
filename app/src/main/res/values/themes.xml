@@ -1,8 +1,60 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+<resources>
+    <!-- App theme. The parent is DayNight, so colours swap automatically between
+         values/colors.xml and values-night/colors.xml. There is deliberately no
+         values-night/themes.xml: one theme, two palettes. -->
     <style name="Base.Theme.AttendraUiTM" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Material colour roles mapped onto the Attendra palette -->
+        <item name="colorPrimary">@color/gold</item>
+        <item name="colorOnPrimary">@color/onGold</item>
+        <item name="colorPrimaryContainer">@color/raised</item>
+        <item name="colorOnPrimaryContainer">@color/ink</item>
+        <item name="colorSecondary">@color/goldText</item>
+        <item name="colorOnSecondary">@color/onGold</item>
+        <item name="colorSecondaryContainer">@color/gold_tint</item>
+        <item name="colorOnSecondaryContainer">@color/goldText</item>
+        <item name="colorError">@color/rejected</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="colorOnBackground">@color/ink</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/ink</item>
+        <item name="colorSurfaceVariant">@color/raised</item>
+        <item name="colorOnSurfaceVariant">@color/muted</item>
+        <item name="colorOutline">@color/line</item>
+        <!-- Snackbar action text ("Retry") sits on a dark bar, so it uses gold -->
+        <item name="colorPrimaryInverse">@color/gold</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:textColorPrimary">@color/ink</item>
+        <item name="android:textColorSecondary">@color/muted</item>
+        <item name="android:textColorHint">@color/muted</item>
+        <item name="android:textColorLink">@color/goldText</item>
+
+        <!-- Manrope as the default for plain TextViews. This goes through textViewStyle
+             (not android:fontFamily on the theme) because a theme-level fontFamily
+             overrides every textAppearance, which would wipe out the heading fonts. -->
+        <item name="android:textViewStyle">@style/Widget.Attendra.TextView</item>
+
+        <!-- Material 3 text slots pointed at our type scale (values/type.xml) -->
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.Attendra.H1</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.Attendra.H2</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.Attendra.CardTitle</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.Attendra.Body</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.Attendra.Body</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.Attendra.Caption</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.Attendra.Button</item>
+
+        <!-- Default component styles (values/styles.xml) -->
+        <item name="materialButtonStyle">@style/Widget.Attendra.Button.Primary</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.Attendra.Button.Secondary</item>
+        <item name="borderlessButtonStyle">@style/Widget.Attendra.Button.Text</item>
+        <item name="materialCardViewStyle">@style/Widget.Attendra.Card</item>
+        <item name="chipStyle">@style/Widget.Attendra.Pill</item>
+        <item name="bottomNavigationStyle">@style/Widget.Attendra.BottomNav</item>
+        <item name="textInputStyle">@style/Widget.Attendra.TextInput</item>
+
+        <!-- Edge-to-edge: system bars are transparent and content draws behind them.
+             BaseActivity pads each screen with the system bar insets. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
     <style name="Theme.AttendraUiTM" parent="Base.Theme.AttendraUiTM" />
