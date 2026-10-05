@@ -64,6 +64,11 @@ public class RegisterFragment extends Fragment {
         binding.btnRoleLecturer.setOnClickListener(v -> setRole(Registration.ROLE_LECTURER));
         setRole(vm.role);
 
+        // Long programme names wrap onto up to 3 lines instead of being cut off.
+        // setSingleLine(false) resets maxLines, so maxLines is set after it.
+        binding.inputProgramme.setSingleLine(false);
+        binding.inputProgramme.setMaxLines(3);
+
         binding.btnCreate.setOnClickListener(v -> submit());
 
         vm.getSubmitting().observe(getViewLifecycleOwner(), loading -> {
@@ -100,11 +105,12 @@ public class RegisterFragment extends Fragment {
         binding.txtLabelClubs.setText(student
                 ? R.string.label_clubs_student : R.string.label_clubs_lecturer);
 
-        // The UiTM-specific label and example only make sense when the UiTM
-        // domain is actually required (release builds).
+        // The example always shows the UiTM format for the chosen role. The
+        // UiTM-specific label only appears when that domain is actually
+        // required (release builds); debug builds also accept Gmail.
+        binding.inputEmail.setHint(student ? R.string.hint_email_student : R.string.hint_email_staff);
         if (BuildConfig.REQUIRE_UITM_EMAIL) {
             binding.txtLabelEmail.setText(student ? R.string.label_email_student : R.string.label_email_staff);
-            binding.inputEmail.setHint(student ? R.string.hint_email_student : R.string.hint_email_staff);
         }
 
         // Errors on fields that just got hidden would be confusing later.
@@ -148,36 +154,46 @@ public class RegisterFragment extends Fragment {
         }
     }
 
+    // In each dropdown below, the chosen item is read from the clicked row itself
+    // (parent.getItemAtPosition), never looked up by position in another list.
+    // The field and the list rows both use the adapter's label, so they match.
+
     private void bindProgrammeDropdown() {
-        List<String> labels = new ArrayList<>();
-        for (Programme p : vm.programmes) labels.add(p.label());
-        binding.inputProgramme.setAdapter(new DropdownAdapter(requireContext(), labels));
+        DropdownAdapter<Programme> adapter =
+                new DropdownAdapter<>(requireContext(), vm.programmes, Programme::label);
+        binding.inputProgramme.setAdapter(adapter);
+        // Re-show the remembered choice (e.g. after rotation) in the same format.
+        if (vm.programme != null) {
+            binding.inputProgramme.setText(adapter.labelOf(vm.programme), false);
+        }
         binding.inputProgramme.setOnItemClickListener((parent, v, position, id) -> {
-            Programme chosen = vm.programmes.get(position);
-            if (chosen == vm.programme) return;
+            Programme chosen = (Programme) parent.getItemAtPosition(position);
+            binding.layoutProgramme.setError(null);
+            if (vm.programme != null && vm.programme.code.equals(chosen.code)) return;
             // A new programme means the old part and group no longer apply.
             vm.programme = chosen;
             vm.part = 0;
             vm.groupId = null;
             binding.inputPart.setText("", false);
             binding.inputGroup.setText("", false);
-            binding.layoutProgramme.setError(null);
             bindPartDropdown();
             bindGroupDropdown();
         });
     }
 
     private void bindPartDropdown() {
-        List<String> labels = new ArrayList<>();
-        for (int i = 1; i <= vm.partCount(); i++) labels.add(getString(R.string.part_n, i));
-        binding.inputPart.setAdapter(new DropdownAdapter(requireContext(), labels));
+        List<Integer> parts = new ArrayList<>();
+        for (int i = 1; i <= vm.partCount(); i++) parts.add(i);
+        binding.inputPart.setAdapter(new DropdownAdapter<>(requireContext(), parts,
+                p -> getString(R.string.part_n, p)));
         binding.inputPart.setOnItemClickListener((parent, v, position, id) -> {
-            int chosen = position + 1;
+            int chosen = (Integer) parent.getItemAtPosition(position);
+            binding.layoutPart.setError(null);
             if (chosen == vm.part) return;
+            // A new part means the old group no longer applies.
             vm.part = chosen;
             vm.groupId = null;
             binding.inputGroup.setText("", false);
-            binding.layoutPart.setError(null);
             bindGroupDropdown();
         });
         updateCascadeEnabled();
@@ -185,11 +201,10 @@ public class RegisterFragment extends Fragment {
 
     private void bindGroupDropdown() {
         List<Group> groups = vm.groupsForSelection();
-        List<String> labels = new ArrayList<>();
-        for (Group g : groups) labels.add(g.id);
-        binding.inputGroup.setAdapter(new DropdownAdapter(requireContext(), labels));
+        binding.inputGroup.setAdapter(new DropdownAdapter<>(requireContext(), groups, g -> g.id));
         binding.inputGroup.setOnItemClickListener((parent, v, position, id) -> {
-            vm.groupId = groups.get(position).id;
+            Group chosen = (Group) parent.getItemAtPosition(position);
+            vm.groupId = chosen.id;
             binding.layoutGroup.setError(null);
         });
         if (vm.programme != null && vm.part != 0 && groups.isEmpty()) {

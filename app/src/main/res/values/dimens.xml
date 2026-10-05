@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Overrides a Material library value: the gap between a field prefix
+         ("+60") and the typed number. The default is 2dp. -->
+    <dimen name="material_input_text_to_prefix_suffix_padding" tools:override="true">6dp</dimen>
     <dimen name="screen_padding">20dp</dimen>
     <dimen name="card_radius">20dp</dimen>
     <dimen name="hero_radius">24dp</dimen>

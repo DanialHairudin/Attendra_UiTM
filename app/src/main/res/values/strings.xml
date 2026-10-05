@@ -18,9 +18,9 @@
     <string name="label_email">Email address</string>
     <string name="label_email_student">Student email address</string>
     <string name="label_email_staff">UiTM email address</string>
-    <string name="hint_email">name@example.com</string>
-    <string name="hint_email_student">2025123456@student.uitm.edu.my</string>
-    <string name="hint_email_staff">name@uitm.edu.my</string>
+    <string name="hint_email">e.g. 2025123456@student.uitm.edu.my</string>
+    <string name="hint_email_student">e.g. 2025123456@student.uitm.edu.my</string>
+    <string name="hint_email_staff">e.g. ahmad@uitm.edu.my</string>
     <string name="label_password">Password</string>
     <string name="hint_password_login">Enter your password</string>
 

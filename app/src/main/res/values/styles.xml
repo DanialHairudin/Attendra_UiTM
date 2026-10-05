@@ -141,6 +141,11 @@
         <!-- The label sits above the field (prototype style), so no floating hint.
              The grey example text goes in the EditText's own android:hint. -->
         <item name="hintEnabled">false</item>
+        <!-- Prefix such as "+60": Material styles it as textAppearanceTitleMedium,
+             which our theme maps to the bold card-title font. Use the same
+             Manrope 15sp ink as the typed text instead. -->
+        <item name="prefixTextAppearance">@style/TextAppearance.Attendra.Body</item>
+        <item name="prefixTextColor">@color/ink</item>
         <item name="startIconTint">@color/muted</item>
         <item name="endIconTint">@color/muted</item>
     </style>
