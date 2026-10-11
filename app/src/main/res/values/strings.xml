@@ -61,17 +61,29 @@
     <string name="hint_confirm_password">Re-enter your password</string>
     <string name="create_account_button">Create account</string>
     <string name="creating_account">Creating account…</string>
-    <string name="register_footer">A verification link will be sent to your email address.</string>
+    <string name="register_footer">A 6-digit verification code will be sent to your email address.</string>
 
     <!-- Verify email -->
     <string name="verify_title">Verify your email address</string>
-    <string name="verify_body">A verification link has been sent to %1$s. Please open the link on any device, then return to this screen.</string>
-    <string name="verify_done">I have verified my email</string>
+    <string name="verify_body">Enter the 6-digit code we sent to %1$s. You may need to check your spam folder.</string>
+    <string name="verify_button">Verify</string>
     <string name="verify_checking">Checking…</string>
-    <string name="verify_resend">Resend verification email</string>
-    <string name="verify_resend_wait">Resend available in %1$d s</string>
-    <string name="verify_resent">The verification email has been sent again.</string>
-    <string name="verify_not_yet">Your email address has not been verified yet. Please open the link in the email, then try again. You may need to check your spam folder.</string>
+    <string name="verify_no_code_yet">Didn\'t get a code?</string>
+    <string name="verify_resend">Resend code</string>
+    <string name="verify_resend_wait">Resend in %1$s</string>
+    <string name="verify_sending">Sending code…</string>
+    <string name="verify_loading">Loading…</string>
+    <string name="verify_sent">A new code has been sent to your email.</string>
+    <string name="verify_digit_description">Digit %1$d of 6</string>
+    <!-- Messages from CLAUDE.md 12.3 (keep the wording) -->
+    <string name="code_expires_in">Code expires in %1$s</string>
+    <string name="code_expired">This code has expired. Tap Resend code to get a new one.</string>
+    <string name="code_incorrect">The code is incorrect. Please try again.</string>
+    <string name="code_too_many">Too many attempts. Please request a new code.</string>
+    <string name="code_send_failed">We could not send the email. Please check your internet connection and tap Resend code.</string>
+    <!-- Plain-text version of res/raw/verification_email.html.
+         %1$s name, %2$s code, %3$s minutes, %4$s role, %5$s email, %6$s year -->
+    <string name="code_email_text">Hi %1$s,\n\nYour Attendra UiTM verification code is: %2$s\n\nEnter this code in the Attendra UiTM app to finish creating your %4$s account for %5$s. This code expires in %3$s minute(s).\n\nIf the code has expired, tap Resend code in the app to get a new one. Only the newest code will work.\n\nDid not request this? You can ignore this email. Never share this code with anyone, including lecturers or staff.\n\nAttendra UiTM · Final Year Project, KPPIM, UiTM Shah Alam · %6$s</string>
     <string name="verify_wrong_email">Incorrect email address?</string>
     <string name="verify_change_it">Change email</string>
     <string name="back_to_login">Return to log in</string>
@@ -83,14 +95,133 @@
     <string name="forgot_sending">Sending…</string>
     <string name="forgot_sent">If an account exists for %1$s, a password reset link has been sent. Please open the link to set a new password, then log in.</string>
 
-    <!-- Placeholder home screens (C3) -->
+    <!-- Roles -->
     <string name="home_role_lecturer">Lecturer</string>
     <string name="home_role_student">Student</string>
-    <string name="home_greeting">Welcome, %1$s</string>
-    <string name="home_greeting_plain">Welcome</string>
-    <string name="home_lecturer_placeholder">You are signed in as a lecturer. The lecturer home screen will be available in a later version.</string>
-    <string name="home_student_placeholder">You are signed in as a student. The student home screen will be available in a later version.</string>
-    <string name="sign_out">Sign out</string>
+
+    <!-- Bottom navigation (CLAUDE.md 12.5) -->
+    <string name="nav_home">Home</string>
+    <string name="nav_classes">Classes</string>
+    <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_attendance">Attendance</string>
+    <string name="nav_notifications">Notifications</string>
+
+    <!-- Shared bits -->
+    <string name="loading">Loading…</string>
+    <string name="dash">–</string>
+    <string name="cancel">Cancel</string>
+    <string name="percent">%1$d%%</string>
+    <string name="open_profile">Open profile</string>
+    <string name="greeting_morning">Good morning, %1$s</string>
+    <string name="greeting_afternoon">Good afternoon, %1$s</string>
+    <string name="greeting_evening">Good evening, %1$s</string>
+    <string name="closes_at">closes %1$s</string>
+    <string name="room_pin">Pinned location</string>
+    <!-- "DK1, CS1 1st floor": %1$s room, %2$s building and floor -->
+    <string name="room_in_building">%1$s, %2$s</string>
+    <!-- "CS1 1st floor" -->
+    <string name="building_floor">%1$s %2$s</string>
+    <string name="status_scheduled">Scheduled</string>
+    <string name="status_live">Live</string>
+    <string name="status_closed">Closed</string>
+    <string name="coming_soon">Coming soon</string>
+
+    <!-- Lecturer Dashboard Page -->
+    <string name="live_now">● Live now</string>
+    <string name="count_checked_in">checked in</string>
+    <string name="count_expected">expected</string>
+    <string name="count_rejected">rejected</string>
+    <string name="open_live_monitor">Open live monitor</string>
+    <string name="today">Today</string>
+    <string name="see_history">See history</string>
+    <string name="create_session">Create attendance session</string>
+    <string name="empty_today_title">No sessions today</string>
+    <string name="empty_today_body">Sessions you create for today will appear here.</string>
+    <string name="create_session_later">Creating attendance sessions will be available in a later version.</string>
+    <string name="live_monitor_later">The live monitor will be available in a later version.</string>
+    <string name="session_report">Session report</string>
+    <string name="session_report_later">Session reports will be available in a later version.</string>
+    <string name="history_title">Session history</string>
+    <string name="history_later">Your past sessions and their reports will appear here in a later version.</string>
+
+    <!-- Lecturer Classes tab and Class Detail Page -->
+    <string name="classes_title">Teaching classes</string>
+    <string name="classes_note">Assigned by the KPPIM academic office. If a class or group is missing, contact the office; lecturers can\'t add classes themselves.</string>
+    <string name="clubs_you_advise">Clubs you advise</string>
+    <string name="clubs_you_advise_note">Members are students who joined the club in the app.</string>
+    <string name="empty_classes_title">No classes assigned yet</string>
+    <string name="empty_classes_body">Classes assigned to you by the KPPIM academic office will appear here.</string>
+    <string name="empty_advised_title">No clubs</string>
+    <string name="empty_advised_body">You are not an advisor of any club.</string>
+    <string name="group_label">Group %1$s</string>
+    <string name="class_title_fallback">Class</string>
+    <string name="sessions">Sessions</string>
+    <string name="students">Students</string>
+    <string name="empty_class_sessions_title">No sessions yet</string>
+    <string name="empty_class_sessions_body">Sessions you run for this class will appear here.</string>
+    <string name="empty_students_title">No students yet</string>
+    <string name="empty_students_body">Students appear here after they register in this group.</string>
+
+    <!-- Student Dashboard Page -->
+    <string name="greeting_student">Hi, %1$s</string>
+    <string name="open_now">● Open now</string>
+    <string name="check_in">Check in</string>
+    <string name="already_checked_in">✓ Checked in</string>
+    <string name="check_in_later">Check-in will be available in a later version.</string>
+    <string name="overall_attendance">Overall attendance</string>
+    <string name="overall_detail">This semester · %1$d of %2$d sessions</string>
+    <string name="no_attendance_yet">No attendance yet</string>
+    <string name="my_courses">My courses</string>
+    <string name="see_all">See all</string>
+    <string name="empty_courses_title">No attendance yet</string>
+    <string name="empty_courses_body">Your courses and their attendance appear here after your first session.</string>
+    <!-- Read aloud by TalkBack for a course row -->
+    <string name="course_pct_description">%1$s, %2$d percent attendance</string>
+    <string name="my_attendance_title">My attendance</string>
+    <string name="my_attendance_later">Your attendance per course and your full history will appear here in a later version.</string>
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_later">Session alerts will appear here in a later version.</string>
+
+    <!-- Settings, Profile and My Clubs -->
+    <string name="view_profile">View your profile</string>
+    <string name="theme">Theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System default</string>
+    <string name="log_out">Log out</string>
+    <string name="profile_title">Profile</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_phone">Phone</string>
+    <string name="profile_staff_id">Staff ID</string>
+    <string name="profile_student_id">Student ID</string>
+    <string name="profile_programme">Programme</string>
+    <string name="profile_part">Part</string>
+    <string name="profile_group">Group</string>
+    <string name="no_clubs_yet">No clubs yet · optional</string>
+    <string name="profile_edit_later">Editing your name and phone number will be available in a later version.</string>
+    <string name="my_clubs_body_student">The clubs you have joined. Sessions for these clubs appear on your home screen.</string>
+    <string name="my_clubs_body_lecturer">The clubs you advise. You can create club sessions for these clubs.</string>
+    <string name="empty_my_clubs_title">No clubs yet</string>
+    <string name="empty_my_clubs_body">Clubs are optional.</string>
+    <string name="clubs_edit_later">Joining and leaving clubs will be available in a later version.</string>
+
+    <plurals name="students_count">
+        <item quantity="one">%d student</item>
+        <item quantity="other">%d students</item>
+    </plurals>
+    <plurals name="members_count">
+        <item quantity="one">%d member</item>
+        <item quantity="other">%d members</item>
+    </plurals>
+    <plurals name="sessions_held">
+        <item quantity="one">%d session held</item>
+        <item quantity="other">%d sessions held</item>
+    </plurals>
+    <plurals name="clubs_count">
+        <item quantity="one">%d club</item>
+        <item quantity="other">%d clubs</item>
+    </plurals>
 
     <!-- Tester access (DEBUG builds only, CLAUDE.md 12.4) -->
     <string name="tester_title">Tester access</string>

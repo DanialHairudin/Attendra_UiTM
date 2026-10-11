@@ -38,6 +38,12 @@ android {
             "String", "DATABASE_URL",
             "\"https://attendra-uitm-default-rtdb.asia-southeast1.firebasedatabase.app\""
         )
+
+        // Gmail account that sends the 6-digit verification codes (CLAUDE.md 12.3).
+        // Prototype only: in production a server would send them, so the app
+        // would never hold an SMTP password.
+        buildConfigField("String", "SMTP_USER", localString("SMTP_USER"))
+        buildConfigField("String", "SMTP_PASS", localString("SMTP_PASS"))
     }
 
     buildFeatures {
@@ -47,6 +53,10 @@ android {
 
     buildTypes {
         debug {
+            // How long a verification code stays valid. Short in debug so the
+            // "expired" state is quick to test.
+            buildConfigField("int", "CODE_TTL_MINUTES", "1")
+
             // Test account logins for the hidden tester panel (CLAUDE.md 12.4).
             // Only the debug build gets the real values.
             buildConfigField("String", "TEST_LECTURER_EMAIL", localString("TEST_LECTURER_EMAIL"))
@@ -55,6 +65,8 @@ android {
             buildConfigField("String", "TEST_STUDENT_PASS", localString("TEST_STUDENT_PASS"))
         }
         release {
+            buildConfigField("int", "CODE_TTL_MINUTES", "10")
+
             // Empty in release, so no test password is ever inside a release APK.
             buildConfigField("String", "TEST_LECTURER_EMAIL", "\"\"")
             buildConfigField("String", "TEST_LECTURER_PASS", "\"\"")
@@ -64,6 +76,13 @@ android {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
+        }
+    }
+    packaging {
+        resources {
+            // android-mail and android-activation both ship these licence files,
+            // and an APK can only hold one copy of each path.
+            excludes += setOf("META-INF/NOTICE.md", "META-INF/LICENSE.md")
         }
     }
     compileOptions {
@@ -81,6 +100,9 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
+    // JavaMail for Android: sends the verification code email over SMTP
+    implementation(libs.android.mail)
+    implementation(libs.android.activation)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
 }

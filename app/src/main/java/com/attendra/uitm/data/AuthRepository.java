@@ -25,7 +25,7 @@ public class AuthRepository {
     private final UserRepository users = new UserRepository();
 
     public AuthRepository() {
-        // Verification and reset emails follow the phone's language.
+        // Password reset emails follow the phone's language.
         auth.useAppLanguage();
     }
 
@@ -39,15 +39,16 @@ public class AuthRepository {
     }
 
     /**
-     * Register flow from CLAUDE.md section 4:
+     * Register flow (CLAUDE.md 12.1 and 12.3):
      * 1. createUserWithEmailAndPassword
-     * 2. write the profile + indexes in one multi-path update
-     * 3. sendEmailVerification
+     * 2. write the role, profile + indexes in one multi-path update
+     * 3. the caller opens the Verify screen, which creates and emails the
+     *    6-digit code straight away (so the send result can be shown there)
      *
      * If step 2 fails, the new Auth account is deleted again. Otherwise the
      * email would be "taken" by an account that has no profile and can never log in.
-     * The user stays signed in afterwards so the Verify screen can resend the
-     * email and reload the user.
+     * The user stays signed in afterwards so the Verify screen can save the code
+     * and set emailVerified.
      */
     public void register(Registration r, Callback<Void> callback) {
         auth.createUserWithEmailAndPassword(r.email, r.password)
@@ -60,8 +61,6 @@ public class AuthRepository {
                     users.createProfile(user.getUid(), r, new Callback<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
-                            // A failed send is not fatal: the Verify screen has Resend.
-                            user.sendEmailVerification();
                             callback.onSuccess(null);
                         }
 
@@ -98,21 +97,15 @@ public class AuthRepository {
     /**
      * Works out where a signed-in user should go: their role, or UNVERIFIED.
      *
-     * The email counts as verified if EITHER
-     * - emailVerified is true in the profile node (CLAUDE.md 12.1; the test
-     *   accounts are set up this way), or
-     * - Firebase Auth says it is verified (the email link from C3, still used
-     *   until the 6-digit code verification replaces it).
+     * Firebase Auth's own isEmailVerified() is NOT used, because the app sends its
+     * own 6-digit code (CLAUDE.md 12.3). The source of truth is emailVerified in
+     * lecturers/{uid} or students/{uid}. Test accounts (isTest: true) skip it.
      */
     public void resolveHome(FirebaseUser user, Callback<String> callback) {
         loadRole(user, new Callback<String>() {
             @Override
             public void onSuccess(String role) {
-                if (user.isEmailVerified()) {
-                    callback.onSuccess(role);
-                    return;
-                }
-                users.isEmailVerified(user.getUid(), role, new Callback<Boolean>() {
+                users.isVerifiedOrTest(user.getUid(), role, new Callback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean verified) {
                         callback.onSuccess(verified ? role : UNVERIFIED);
@@ -153,36 +146,6 @@ public class AuthRepository {
                 callback.onError(message);
             }
         });
-    }
-
-    public void resendVerification(Callback<Void> callback) {
-        FirebaseUser user = auth.getCurrentUser();
-        if (user == null) {
-            callback.onError(str(R.string.error_session_ended));
-            return;
-        }
-        user.sendEmailVerification()
-                .addOnSuccessListener(unused -> callback.onSuccess(null))
-                .addOnFailureListener(e -> callback.onError(AuthErrors.message(e)));
-    }
-
-    /**
-     * user.reload() fetches the latest account state from Firebase. Without it,
-     * isEmailVerified() keeps returning the old value even after the link is clicked.
-     * Returns true if the email is now verified.
-     */
-    public void reloadAndCheckVerified(Callback<Boolean> callback) {
-        FirebaseUser user = auth.getCurrentUser();
-        if (user == null) {
-            callback.onError(str(R.string.error_session_ended));
-            return;
-        }
-        user.reload()
-                .addOnSuccessListener(unused -> {
-                    FirebaseUser fresh = auth.getCurrentUser();
-                    callback.onSuccess(fresh != null && fresh.isEmailVerified());
-                })
-                .addOnFailureListener(e -> callback.onError(AuthErrors.message(e)));
     }
 
     /**

@@ -3,9 +3,14 @@ package com.attendra.uitm.data;
 
 import com.attendra.uitm.model.Registration;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,6 +30,37 @@ public class UserRepository {
         return Registration.ROLE_LECTURER.equals(role) ? "lecturers" : "students";
     }
 
+    /** lecturers/{uid} or students/{uid}, for a live listener. */
+    public static DatabaseReference profileRef(String uid, String role) {
+        return Db.root().child(profileNode(role)).child(uid);
+    }
+
+    /**
+     * Where a user's clubs are listed:
+     * - student: studentClubs/{uid} = {clubId: true}
+     * - lecturer: there is no per-lecturer index, so the whole clubAdvisors node
+     *   ({clubId: {uid: true}}) is read. It is small (one entry per club).
+     * Use clubIds() to turn the snapshot into a list.
+     */
+    public static Query clubsQuery(String uid, String role) {
+        return Registration.ROLE_LECTURER.equals(role)
+                ? Db.root().child("clubAdvisors")
+                : Db.root().child("studentClubs").child(uid);
+    }
+
+    /** Club IDs (sorted) from a clubsQuery() snapshot. */
+    public static List<String> clubIds(DataSnapshot snapshot, String uid, String role) {
+        List<String> ids = new ArrayList<>();
+        for (DataSnapshot club : snapshot.getChildren()) {
+            boolean mine = Registration.ROLE_LECTURER.equals(role)
+                    ? Boolean.TRUE.equals(club.child(uid).getValue(Boolean.class))
+                    : Boolean.TRUE.equals(club.getValue(Boolean.class));
+            if (mine) ids.add(club.getKey());
+        }
+        Collections.sort(ids);
+        return ids;
+    }
+
     /**
      * Writes the new user's role, profile and every index node in ONE multi-path
      * updateChildren() call. Either all paths are written or none are, so the
@@ -36,8 +72,8 @@ public class UserRepository {
      * Lecturer writes:
      *   roles/{uid}, lecturers/{uid}, clubAdvisors/{clubId}/{uid}
      *
-     * emailVerified starts false. It becomes true once the user proves they own
-     * the email address.
+     * emailVerified starts false. It becomes true once the user enters the
+     * 6-digit code from the email (VerificationRepository).
      */
     public void createProfile(String uid, Registration r, Callback<Void> callback) {
         Map<String, Object> profile = new HashMap<>();
@@ -81,15 +117,20 @@ public class UserRepository {
     }
 
     /**
-     * Reads {lecturers|students}/{uid}/emailVerified. A missing value counts as
-     * false. The test accounts have it set to true in the database.
+     * True if {lecturers|students}/{uid} has emailVerified: true, or is a test
+     * account (isTest: true), which skips verification (CLAUDE.md 12.4).
+     * Missing values count as false.
      */
-    public void isEmailVerified(String uid, String role, Callback<Boolean> callback) {
-        Db.readOnce(Db.root().child(profileNode(role)).child(uid).child("emailVerified"),
+    public void isVerifiedOrTest(String uid, String role, Callback<Boolean> callback) {
+        Db.readOnce(Db.root().child(profileNode(role)).child(uid),
                 new Callback<DataSnapshot>() {
                     @Override
-                    public void onSuccess(DataSnapshot snapshot) {
-                        callback.onSuccess(Boolean.TRUE.equals(snapshot.getValue(Boolean.class)));
+                    public void onSuccess(DataSnapshot profile) {
+                        boolean verified = Boolean.TRUE.equals(
+                                profile.child("emailVerified").getValue(Boolean.class));
+                        boolean test = Boolean.TRUE.equals(
+                                profile.child("isTest").getValue(Boolean.class));
+                        callback.onSuccess(verified || test);
                     }
 
                     @Override

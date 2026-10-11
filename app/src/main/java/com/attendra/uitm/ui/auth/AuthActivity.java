@@ -52,12 +52,13 @@ public class AuthActivity extends BaseActivity {
     }
 
     /**
-     * @param justSent true straight after registering: the email was just sent,
-     *                 so Resend starts on its 60 s cooldown.
+     * @param sendNow true straight after registering: the Verify screen creates
+     *                and emails the first code. false from Login: no code is sent
+     *                until the user taps Resend code (CLAUDE.md 12.3).
      */
-    public void showVerify(String email, boolean justSent) {
+    public void showVerify(String email, boolean sendNow) {
         clearBackStack();
-        show(VerifyEmailFragment.newInstance(email, justSent), false);
+        show(VerifyEmailFragment.newInstance(email, sendNow), false);
     }
 
     private void show(Fragment fragment, boolean addToBackStack) {
