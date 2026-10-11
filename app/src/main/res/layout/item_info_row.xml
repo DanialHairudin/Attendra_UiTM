@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Label / value row on the Profile Page ("Email   2025125181@student.uitm.edu.my"). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Attendra.ListRow"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@null"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/info_label"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+
+    <TextView
+        android:id="@+id/info_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="end"
+        android:textAppearance="@style/TextAppearance.Attendra.Body.SemiBold"
+        android:textIsSelectable="true"
+        android:textSize="14sp" />
+</LinearLayout>

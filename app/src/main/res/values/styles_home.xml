@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Styles for the dashboards, Classes, Settings and Profile screens
+     (CLAUDE.md 12.5, matching design/Attendra_App_Preview.html). -->
+<resources>
+
+    <!-- Prototype ".h3": Manrope Bold 16sp, used for section titles ("Today") -->
+    <style name="TextAppearance.Attendra.H3" parent="TextAppearance.Attendra.Body">
+        <item name="fontFamily">@font/manrope_bold</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- Bold first line of a list row -->
+    <style name="TextAppearance.Attendra.RowTitle" parent="TextAppearance.Attendra.Body">
+        <item name="fontFamily">@font/manrope_bold</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <!-- Big percentage on the attendance card (prototype 44px) -->
+    <style name="TextAppearance.Attendra.Number.Big">
+        <item name="android:textSize">44sp</item>
+        <item name="android:textColor">@color/goldText</item>
+    </style>
+
+    <!-- Bottom nav labels: Manrope SemiBold 11sp (prototype .tab) -->
+    <style name="TextAppearance.Attendra.NavLabel" parent="TextAppearance.Material3.LabelMedium">
+        <item name="fontFamily">@font/manrope_semibold</item>
+        <item name="android:fontFamily">@font/manrope_semibold</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <!-- Initials avatar, 40dp circle -->
+    <style name="Widget.Attendra.Avatar" parent="">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:background">@drawable/bg_avatar</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/goldText</item>
+        <item name="android:fontFamily">@font/manrope_bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <!-- Icon on a rounded square at the start of a list row -->
+    <style name="Widget.Attendra.IconTile" parent="">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:background">@drawable/bg_icon_tile</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:importantForAccessibility">no</item>
+        <item name="tint">@color/goldText</item>
+    </style>
+
+    <!-- Number tile inside the live-session card -->
+    <style name="Widget.Attendra.Tile" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/bg_tile</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">10dp</item>
+    </style>
+
+    <!-- Gold badge (course code, "Scheduled", member count) -->
+    <style name="Widget.Attendra.Badge.Gold">
+        <item name="android:textColor">@color/goldText</item>
+        <item name="android:backgroundTint">@color/gold_tint</item>
+    </style>
+
+    <!-- "Log out": outlined in the rejected colour -->
+    <style name="Widget.Attendra.Button.Danger" parent="Widget.Attendra.Button.Secondary">
+        <item name="strokeColor">@color/rejected</item>
+        <item name="android:textColor">@color/rejected</item>
+        <item name="rippleColor">@color/rejected_tint</item>
+    </style>
+
+    <!-- The gold (+) in the middle of the lecturer's bottom nav: 52dp, radius 18dp -->
+    <style name="Widget.Attendra.Fab" parent="Widget.Attendra.Button.Primary">
+        <item name="android:layout_width">52dp</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:minWidth">52dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="cornerRadius">18dp</item>
+        <item name="icon">@drawable/ic_plus</item>
+        <item name="iconSize">24dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconTint">@color/onGold</item>
+    </style>
+
+    <!-- Percentage bar: 8dp, raised track, gold fill -->
+    <style name="Widget.Attendra.Bar" parent="Widget.Material3.LinearProgressIndicator">
+        <item name="trackThickness">8dp</item>
+        <item name="trackCornerRadius">4dp</item>
+        <item name="trackColor">@color/raised</item>
+        <item name="indicatorColor">@color/gold</item>
+    </style>
+</resources>

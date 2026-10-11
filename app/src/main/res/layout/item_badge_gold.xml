@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One gold badge in a horizontal row (club short names on the Profile Page). -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Attendra.Badge.Gold"
+    android:layout_height="30dp"
+    android:textSize="13sp" />

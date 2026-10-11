@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Coming soon" screen in the Empty State Page style, for buttons whose real
+     screen is built in a later step (Create session, Live monitor, Check in). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coming_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:padding="28dp">
+
+    <FrameLayout
+        android:layout_width="88dp"
+        android:layout_height="88dp"
+        android:background="@drawable/bg_verify_icon">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_clock"
+            app:tint="@color/goldText" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/coming_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:accessibilityHeading="true"
+        android:textAppearance="@style/TextAppearance.Attendra.H1" />
+
+    <TextView
+        android:id="@+id/coming_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:lineSpacingMultiplier="1.2"
+        android:textAppearance="@style/TextAppearance.Attendra.Body.Muted" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_coming_back"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginTop="24dp"
+        android:text="@string/back" />
+</LinearLayout>
