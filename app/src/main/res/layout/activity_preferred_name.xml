@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preferred Name Page "What should we call you?" (CLAUDE.md 12.6).
+     Shown once after the email code is verified, and opened from the Profile
+     Page to change the name (and the title, for lecturers). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/name_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="vertical">
+
+    <!-- Only shown when editing from the Profile Page -->
+    <include
+        android:id="@+id/appbar"
+        layout="@layout/include_appbar" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/screen_padding"
+            android:paddingTop="24dp"
+            android:paddingEnd="@dimen/screen_padding"
+            android:paddingBottom="24dp">
+
+            <TextView
+                android:id="@+id/txt_eyebrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/name_eyebrow"
+                android:textAppearance="@style/TextAppearance.Attendra.Eyebrow" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:accessibilityHeading="true"
+                android:text="@string/name_title"
+                android:textAppearance="@style/TextAppearance.Attendra.H1" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:lineSpacingMultiplier="1.2"
+                android:text="@string/name_body"
+                android:textAppearance="@style/TextAppearance.Attendra.Body.Muted" />
+
+            <TextView
+                style="@style/Widget.Attendra.FieldLabel"
+                android:layout_marginTop="24dp"
+                android:text="@string/name_suggestions" />
+
+            <!-- One line of chips that scrolls sideways (CLAUDE.md section 3) -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chips_names"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:chipSpacingHorizontal="8dp"
+                    app:selectionRequired="true"
+                    app:singleLine="true"
+                    app:singleSelection="true" />
+            </HorizontalScrollView>
+
+            <!-- "Other": type your own name -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layout_other"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:visibility="gone"
+                app:counterEnabled="true"
+                app:counterMaxLength="20"
+                app:helperText="@string/name_other_helper">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_other"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/name_other_hint"
+                    android:imeOptions="actionDone"
+                    android:inputType="textPersonName|textCapWords"
+                    android:maxLength="20" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Lecturers only -->
+            <LinearLayout
+                android:id="@+id/group_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/Widget.Attendra.FieldLabel"
+                    android:layout_marginTop="20dp"
+                    android:labelFor="@id/input_title"
+                    android:text="@string/name_title_label" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layout_title"
+                    style="@style/Widget.Attendra.TextInput.Dropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/input_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!-- Live preview of the dashboard greeting -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Attendra.Card.Hero"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/name_preview"
+                        android:textAppearance="@style/TextAppearance.Attendra.Eyebrow" />
+
+                    <TextView
+                        android:id="@+id/txt_preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:accessibilityLiveRegion="polite"
+                        android:textAppearance="@style/TextAppearance.Attendra.H2" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:minHeight="24dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="@string/name_continue" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>
