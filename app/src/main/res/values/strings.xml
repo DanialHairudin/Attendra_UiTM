@@ -199,7 +199,25 @@
     <string name="profile_part">Part</string>
     <string name="profile_group">Group</string>
     <string name="no_clubs_yet">No clubs yet · optional</string>
-    <string name="profile_edit_later">Editing your name and phone number will be available in a later version.</string>
+    <string name="profile_edit_later">Editing your full name and phone number will be available in a later version.</string>
+    <string name="profile_preferred_name">Preferred name</string>
+    <string name="profile_title_row">Title</string>
+    <string name="profile_not_set">Not set</string>
+
+    <!-- Preferred Name Page (CLAUDE.md 12.6) -->
+    <string name="name_eyebrow">Almost done</string>
+    <string name="name_title">What should we call you?</string>
+    <string name="name_body">Pick the name you would like to see in Attendra. You can change it any time in your profile.</string>
+    <string name="name_suggestions">Suggestions</string>
+    <string name="name_other">Other</string>
+    <string name="name_other_hint">Your preferred name</string>
+    <string name="name_other_helper">2–20 letters and spaces</string>
+    <string name="name_other_error">Please use 2–20 letters and spaces.</string>
+    <string name="name_title_label">Title</string>
+    <string name="name_title_none">None</string>
+    <string name="name_preview">Preview</string>
+    <string name="name_continue">Continue</string>
+    <string name="name_save">Save</string>
     <string name="my_clubs_body_student">The clubs you have joined. Sessions for these clubs appear on your home screen.</string>
     <string name="my_clubs_body_lecturer">The clubs you advise. You can create club sessions for these clubs.</string>
     <string name="empty_my_clubs_title">No clubs yet</string>

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Label / value row on the Profile Page ("Email   2025125181@student.uitm.edu.my"). -->
+<!-- Label / value row on the Profile Page ("Email   2025125181@student.uitm.edu.my").
+     Editable rows (Preferred name, Title) show the chevron and are tappable. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/Widget.Attendra.ListRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -22,4 +24,14 @@
         android:textAppearance="@style/TextAppearance.Attendra.Body.SemiBold"
         android:textIsSelectable="true"
         android:textSize="14sp" />
+
+    <ImageView
+        android:id="@+id/info_chevron"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="8dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_right"
+        android:visibility="gone"
+        app:tint="@color/muted" />
 </LinearLayout>

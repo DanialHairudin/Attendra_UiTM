@@ -3,6 +3,8 @@ package com.attendra.uitm.ui.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -29,8 +31,9 @@ import com.google.firebase.database.DataSnapshot;
 import java.util.List;
 
 /**
- * Profile Page (read-only for now; editing name and phone comes in C4).
- * Shows lecturers/{uid} or students/{uid} and the user's clubs, live.
+ * Profile Page. Shows lecturers/{uid} or students/{uid} and the user's clubs, live.
+ * Preferred name (and Title for lecturers) can be changed here (CLAUDE.md 12.6);
+ * editing the full name and phone comes in C4.
  */
 public class ProfileActivity extends BaseActivity {
 
@@ -128,9 +131,19 @@ public class ProfileActivity extends BaseActivity {
             binding.txtAvatar.setText(Names.initials(name));
 
             binding.listInfo.removeAllViews();
+            // Editable rows (CLAUDE.md 12.6): both open the Preferred Name Page.
+            String preferred = text("preferredName");
+            addEditable(R.string.profile_preferred_name, preferred.isEmpty()
+                    ? getString(R.string.profile_not_set) : preferred);
+            boolean lecturer = Registration.ROLE_LECTURER.equals(role);
+            if (lecturer) {
+                String title = text("title");
+                addEditable(R.string.profile_title_row, title.isEmpty()
+                        ? getString(R.string.name_title_none) : title);
+            }
             addInfo(R.string.profile_email, text("email"));
             addInfo(R.string.profile_phone, text("phone"));
-            if (Registration.ROLE_LECTURER.equals(role)) {
+            if (lecturer) {
                 addInfo(R.string.profile_staff_id, text("staffId"));
             } else {
                 addInfo(R.string.profile_student_id, text("studentId"));
@@ -157,12 +170,24 @@ public class ProfileActivity extends BaseActivity {
         }
     }
 
-    private void addInfo(@StringRes int label, String value) {
+    private ItemInfoRowBinding addInfo(@StringRes int label, String value) {
         ItemInfoRowBinding row = ItemInfoRowBinding.inflate(getLayoutInflater(),
                 binding.listInfo, false);
         row.infoLabel.setText(label);
         row.infoValue.setText(value);
         Ui.addRow(binding.listInfo, row.getRoot());
+        return row;
+    }
+
+    /** A row with a chevron that opens the Preferred Name Page. */
+    private void addEditable(@StringRes int label, String value) {
+        ItemInfoRowBinding row = addInfo(label, value);
+        row.infoValue.setTextIsSelectable(false); // so a tap reaches the row
+        row.infoChevron.setVisibility(View.VISIBLE);
+        TypedValue ripple = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
+        row.getRoot().setBackgroundResource(ripple.resourceId);
+        row.getRoot().setOnClickListener(v -> PreferredNameActivity.openToEdit(this, role));
     }
 
     private String text(String key) {

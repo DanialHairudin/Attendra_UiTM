@@ -1,54 +1,55 @@
 package com.attendra.uitm.util;
 
+import com.google.firebase.database.DataSnapshot;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 /**
- * Short forms of a person's name for greetings and avatars.
+ * Names for greetings and avatars (CLAUDE.md 12.6).
  *
- * Malaysian names often have a title in front ("Prof. Madya Dr.") and a
- * patronymic ("bin", "binti"). Examples:
- *   "Prof. Madya Dr. Natrah binti Abdullah" → short "Dr. Natrah", first "Natrah", initials "NA"
- *   "Muhammad Danial bin Mohd Hairudin"     → short "Muhammad",   first "Muhammad", initials "MD"
+ * Greetings use the preferred name the user picked ("Danial"), with the title
+ * in front for lecturers ("Dr. Aina"). Until one is picked, the first suggestion
+ * from NameSuggestions is used.
  */
 public final class Names {
 
-    /** Titles that can appear before the name (compared in lower case, without dots). */
+    /** Titles a lecturer can choose. "" means None. */
+    public static final List<String> LECTURER_TITLES = Collections.unmodifiableList(
+            Arrays.asList("Dr.", "Prof. Madya", "Prof.", "Encik", "Puan", "Cik", ""));
+
+    /** Titles that can appear before a full name (lower case, without dots). */
     private static final Set<String> TITLES = new HashSet<>(Arrays.asList(
             "dr", "prof", "madya", "assoc", "professor", "ts", "ir", "encik", "en",
             "puan", "pn", "cik", "mr", "mrs", "ms", "miss", "sir", "dato", "datuk",
-            "datin", "tan", "sri", "haji", "hajah", "hj", "hjh"));
+            "datin", "haji", "hajah", "hj", "hjh"));
     /** Joining words that are not part of the initials. */
     private static final Set<String> JOINERS = new HashSet<>(Arrays.asList(
-            "bin", "binti", "bt", "b", "a/l", "a/p", "al", "ap"));
+            "bin", "binti", "bt", "bte", "b", "b.", "a/l", "a/p", "s/o", "d/o", "@"));
 
     private Names() {
     }
 
-    /** Lecturer greeting: the last title + the first real name, e.g. "Dr. Natrah". */
-    public static String shortName(String fullName) {
-        String[] words = words(fullName);
-        String lastTitle = null;
-        for (String w : words) {
-            if (isTitle(w)) {
-                lastTitle = w;
-            } else {
-                return lastTitle == null ? w : lastTitle + " " + w;
-            }
-        }
-        return fullName == null ? "" : fullName.trim();
+    /**
+     * The name to greet someone with: "{title} {preferredName}", e.g. "Dr. Aina".
+     * Falls back to the first suggestion from the full name.
+     */
+    public static String greetingName(String fullName, String preferredName, String title) {
+        String name = preferredName == null || preferredName.trim().isEmpty()
+                ? NameSuggestions.first(fullName) : preferredName.trim();
+        return title == null || title.trim().isEmpty() ? name : title.trim() + " " + name;
     }
 
-    /** Student greeting: the first word that is not a title, e.g. "Danial". */
-    public static String firstName(String fullName) {
-        for (String w : words(fullName)) {
-            if (!isTitle(w)) return w;
-        }
-        return fullName == null ? "" : fullName.trim();
+    /** greetingName() read straight from a lecturers/{uid} or students/{uid} snapshot. */
+    public static String greetingName(DataSnapshot profile) {
+        return greetingName(profile.child("name").getValue(String.class),
+                profile.child("preferredName").getValue(String.class),
+                profile.child("title").getValue(String.class));
     }
 
     /** Up to two capital letters from the real name words, e.g. "NA". */

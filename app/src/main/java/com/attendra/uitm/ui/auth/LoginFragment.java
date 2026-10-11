@@ -135,17 +135,20 @@ public class LoginFragment extends Fragment {
         login(email, password);
     }
 
-    /** Signs in and routes: Verify screen if unverified, otherwise the role's home. */
+    /**
+     * Signs in and routes: Verify screen if unverified, the Preferred Name Page if
+     * no name was picked yet, otherwise the role's dashboard.
+     */
     private void login(String email, String password) {
         setLoading(true);
-        auth.login(email, password, new Callback<String>() {
+        auth.login(email, password, new Callback<AuthRepository.Route>() {
             @Override
-            public void onSuccess(String result) {
+            public void onSuccess(AuthRepository.Route route) {
                 if (binding == null) return; // screen was closed meanwhile
-                if (AuthRepository.UNVERIFIED.equals(result)) {
+                if (route.unverified) {
                     host().showVerify(email, false);
                 } else {
-                    HomeRouter.openHome(requireActivity(), result);
+                    HomeRouter.open(requireActivity(), route);
                 }
             }
 

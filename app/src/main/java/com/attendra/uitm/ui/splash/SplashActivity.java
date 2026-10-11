@@ -46,16 +46,16 @@ public class SplashActivity extends BaseActivity {
 
         // Hide the buttons while the role loads, so they don't flash before routing.
         setButtonsVisible(false);
-        auth.resolveHome(user, new Callback<String>() {
+        auth.resolveHome(user, new Callback<AuthRepository.Route>() {
             @Override
-            public void onSuccess(String role) {
+            public void onSuccess(AuthRepository.Route route) {
                 if (isFinishing()) return; // user left the splash meanwhile
-                if (AuthRepository.UNVERIFIED.equals(role)) {
+                if (route.unverified) {
                     auth.signOut();
                     setButtonsVisible(true);
                     return;
                 }
-                HomeRouter.openHome(SplashActivity.this, role);
+                HomeRouter.open(SplashActivity.this, route);
             }
 
             @Override

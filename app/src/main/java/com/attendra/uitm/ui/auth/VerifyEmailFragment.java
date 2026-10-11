@@ -1,5 +1,6 @@
 package com.attendra.uitm.ui.auth;
 
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,7 +28,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.attendra.uitm.R;
 import com.attendra.uitm.data.AuthRepository;
 import com.attendra.uitm.databinding.FragmentVerifyBinding;
-import com.attendra.uitm.util.HomeRouter;
+import com.attendra.uitm.ui.settings.PreferredNameActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Locale;
@@ -125,8 +126,15 @@ public class VerifyEmailFragment extends Fragment {
                 });
 
         vm.getState().observe(getViewLifecycleOwner(), s -> render());
+        // Code accepted: a new account has no preferred name yet, so this opens
+        // the Preferred Name Page ("What should we call you?") once (CLAUDE.md 12.6).
         vm.getVerifiedRole().observe(getViewLifecycleOwner(), role -> {
-            if (role != null) HomeRouter.openHome(requireActivity(), role);
+            if (role != null) {
+                Intent intent = PreferredNameActivity.firstTimeIntent(requireContext(), role);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                requireActivity().finish();
+            }
         });
         vm.getClearBoxes().observe(getViewLifecycleOwner(), clear -> {
             if (Boolean.TRUE.equals(clear)) {

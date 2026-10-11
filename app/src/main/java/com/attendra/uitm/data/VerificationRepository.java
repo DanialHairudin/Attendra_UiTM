@@ -6,6 +6,7 @@ import android.content.Context;
 
 import com.attendra.uitm.BuildConfig;
 import com.attendra.uitm.R;
+import com.attendra.uitm.util.NameSuggestions;
 import com.google.firebase.database.DataSnapshot;
 
 import java.nio.charset.StandardCharsets;
@@ -85,7 +86,9 @@ public class VerificationRepository {
                             callback.onError(str(R.string.error_no_profile));
                             return;
                         }
-                        saveAndSend(uid, role, name == null ? "" : name, email, callback);
+                        // {{NAME}} is the first name suggestion ("Danial"): no
+                        // preferred name exists yet at this point (CLAUDE.md 12.6).
+                        saveAndSend(uid, role, NameSuggestions.first(name), email, callback);
                     }
 
                     @Override

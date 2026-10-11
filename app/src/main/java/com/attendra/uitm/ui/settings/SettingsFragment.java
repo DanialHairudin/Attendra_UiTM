@@ -181,16 +181,16 @@ public class SettingsFragment extends Fragment {
             AuthRepository auth = new AuthRepository();
             auth.signOut();
             auth.login(TestAccounts.email(target), TestAccounts.password(target),
-                    new Callback<String>() {
+                    new Callback<AuthRepository.Route>() {
                         @Override
-                        public void onSuccess(String result) {
+                        public void onSuccess(AuthRepository.Route route) {
                             if (getActivity() == null) return;
-                            if (AuthRepository.UNVERIFIED.equals(result)) {
+                            if (route.unverified) {
                                 // The test account is not marked verified in the database.
                                 auth.signOut();
                                 HomeRouter.openSplash(getActivity());
                             } else {
-                                HomeRouter.openHome(getActivity(), result);
+                                HomeRouter.open(getActivity(), route);
                             }
                         }
 

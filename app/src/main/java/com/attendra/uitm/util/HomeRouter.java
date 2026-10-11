@@ -3,8 +3,10 @@ package com.attendra.uitm.util;
 import android.app.Activity;
 import android.content.Intent;
 
+import com.attendra.uitm.data.AuthRepository;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.ui.lecturer.LecturerMainActivity;
+import com.attendra.uitm.ui.settings.PreferredNameActivity;
 import com.attendra.uitm.ui.splash.SplashActivity;
 import com.attendra.uitm.ui.student.StudentMainActivity;
 
@@ -12,6 +14,22 @@ import com.attendra.uitm.ui.student.StudentMainActivity;
 public final class HomeRouter {
 
     private HomeRouter() {
+    }
+
+    /**
+     * Follows a verified user's route: the Preferred Name Page first if they
+     * have not picked a name yet (CLAUDE.md 12.6), otherwise their dashboard.
+     * (route.unverified is handled by the caller, which shows the Verify screen.)
+     */
+    public static void open(Activity from, AuthRepository.Route route) {
+        if (route.needsName) {
+            Intent intent = PreferredNameActivity.firstTimeIntent(from, route.role);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            from.startActivity(intent);
+            from.finish();
+        } else {
+            openHome(from, route.role);
+        }
     }
 
     /** Opens LecturerMain or StudentMain depending on roles/{uid}. */

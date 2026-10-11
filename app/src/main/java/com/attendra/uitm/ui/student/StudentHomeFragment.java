@@ -145,7 +145,7 @@ public class StudentHomeFragment extends Fragment {
                         String name = profile.child("name").getValue(String.class);
                         if (binding != null && name != null) {
                             binding.txtGreeting.setText(getString(R.string.greeting_student,
-                                    Names.firstName(name)));
+                                    Names.greetingName(profile)));
                             binding.btnAvatar.setText(Names.initials(name));
                         }
                         // Follow the sessions of the student's (current) group.

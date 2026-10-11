@@ -121,7 +121,7 @@ public class LecturerHomeFragment extends Fragment {
                         String name = profile.child("name").getValue(String.class);
                         if (binding == null || name == null) return;
                         binding.txtGreeting.setText(Ui.greeting(requireContext(),
-                                Names.shortName(name), now()));
+                                Names.greetingName(profile), now()));
                         binding.btnAvatar.setText(Names.initials(name));
                     }
 

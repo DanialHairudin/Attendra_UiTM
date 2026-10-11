@@ -15,12 +15,6 @@ import com.google.firebase.auth.FirebaseUser;
  */
 public class AuthRepository {
 
-    /**
-     * Returned by login() instead of a role when the password was right but the
-     * email is not verified yet.
-     */
-    public static final String UNVERIFIED = "unverified";
-
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final UserRepository users = new UserRepository();
 
@@ -76,12 +70,24 @@ public class AuthRepository {
                 .addOnFailureListener(e -> callback.onError(AuthErrors.message(e)));
     }
 
-    /**
-     * Log in, then decide where to go. onSuccess receives:
-     * - UNVERIFIED if the email is not verified (caller shows the Verify screen), or
-     * - the role ("lecturer" / "student") read from roles/{uid}.
-     */
-    public void login(String email, String password, Callback<String> callback) {
+    /** Where a signed-in user should go next. HomeRouter.open() follows it. */
+    public static final class Route {
+        /** "lecturer" or "student", from roles/{uid}. */
+        public final String role;
+        /** Email not verified yet → the caller shows the Verify screen. */
+        public final boolean unverified;
+        /** No preferred name yet → the Preferred Name Page before the dashboard. */
+        public final boolean needsName;
+
+        Route(String role, boolean unverified, boolean needsName) {
+            this.role = role;
+            this.unverified = unverified;
+            this.needsName = needsName;
+        }
+    }
+
+    /** Log in, then work out where to go (see resolveHome). */
+    public void login(String email, String password, Callback<Route> callback) {
         auth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener(result -> {
                     FirebaseUser user = result.getUser();
@@ -95,20 +101,24 @@ public class AuthRepository {
     }
 
     /**
-     * Works out where a signed-in user should go: their role, or UNVERIFIED.
+     * Works out where a signed-in user should go: Verify screen, Preferred Name
+     * Page, or the dashboard for their role.
      *
      * Firebase Auth's own isEmailVerified() is NOT used, because the app sends its
      * own 6-digit code (CLAUDE.md 12.3). The source of truth is emailVerified in
-     * lecturers/{uid} or students/{uid}. Test accounts (isTest: true) skip it.
+     * lecturers/{uid} or students/{uid}. Test accounts (isTest: true) skip both
+     * verification and the Preferred Name Page (12.6).
      */
-    public void resolveHome(FirebaseUser user, Callback<String> callback) {
+    public void resolveHome(FirebaseUser user, Callback<Route> callback) {
         loadRole(user, new Callback<String>() {
             @Override
             public void onSuccess(String role) {
-                users.isVerifiedOrTest(user.getUid(), role, new Callback<Boolean>() {
+                users.loadAccountState(user.getUid(), role, new Callback<UserRepository.AccountState>() {
                     @Override
-                    public void onSuccess(Boolean verified) {
-                        callback.onSuccess(verified ? role : UNVERIFIED);
+                    public void onSuccess(UserRepository.AccountState s) {
+                        boolean unverified = !s.emailVerified && !s.isTest;
+                        boolean needsName = !s.isTest && !s.hasPreferredName;
+                        callback.onSuccess(new Route(role, unverified, needsName));
                     }
 
                     @Override

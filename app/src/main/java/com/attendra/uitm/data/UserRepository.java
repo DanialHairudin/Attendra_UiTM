@@ -116,21 +116,28 @@ public class UserRepository {
         readString(profileNode(role) + "/" + uid + "/name", callback);
     }
 
-    /**
-     * True if {lecturers|students}/{uid} has emailVerified: true, or is a test
-     * account (isTest: true), which skips verification (CLAUDE.md 12.4).
-     * Missing values count as false.
-     */
-    public void isVerifiedOrTest(String uid, String role, Callback<Boolean> callback) {
+    /** What login needs to know about a profile to decide where to go. */
+    public static final class AccountState {
+        public boolean emailVerified;
+        /** Test accounts skip verification and the Preferred Name Page (CLAUDE.md 12.4, 12.6). */
+        public boolean isTest;
+        public boolean hasPreferredName;
+    }
+
+    /** Reads {lecturers|students}/{uid} once. Missing values count as false. */
+    public void loadAccountState(String uid, String role, Callback<AccountState> callback) {
         Db.readOnce(Db.root().child(profileNode(role)).child(uid),
                 new Callback<DataSnapshot>() {
                     @Override
                     public void onSuccess(DataSnapshot profile) {
-                        boolean verified = Boolean.TRUE.equals(
+                        AccountState state = new AccountState();
+                        state.emailVerified = Boolean.TRUE.equals(
                                 profile.child("emailVerified").getValue(Boolean.class));
-                        boolean test = Boolean.TRUE.equals(
+                        state.isTest = Boolean.TRUE.equals(
                                 profile.child("isTest").getValue(Boolean.class));
-                        callback.onSuccess(verified || test);
+                        String preferred = profile.child("preferredName").getValue(String.class);
+                        state.hasPreferredName = preferred != null && !preferred.trim().isEmpty();
+                        callback.onSuccess(state);
                     }
 
                     @Override

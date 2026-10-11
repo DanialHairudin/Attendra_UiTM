@@ -108,11 +108,15 @@ public class MailSender {
     /**
      * MIME layout of the email:
      *
-     *   multipart/related
-     *   ├── multipart/alternative
-     *   │   ├── text/plain   (for mail apps that don't show HTML)
-     *   │   └── text/html    (res/raw/verification_email.html)
-     *   └── image/png        (the gold logo, Content-ID <logo>, used as cid:logo)
+     *   multipart/alternative
+     *   ├── text/plain          (for mail apps that don't show HTML)
+     *   └── multipart/related   (the HTML version and what it needs)
+     *       ├── text/html       (res/raw/verification_email.html)
+     *       └── image/png       (the gold logo: Content-ID <logo>, used as cid:logo)
+     *
+     * The logo sits INSIDE the HTML's related part, has Content-Disposition
+     * INLINE and no filename. That tells mail apps it is part of the page, so
+     * Gmail shows it in the email and not as an attachment chip (CLAUDE.md 12.6 C).
      */
     private MimeMessage buildMessage(String toEmail, String name, String role, String code)
             throws MessagingException, IOException {
@@ -129,32 +133,35 @@ public class MailSender {
         String text = context.getString(R.string.code_email_text, name, code, minutes, role,
                 toEmail, year);
 
-        MimeBodyPart textPart = new MimeBodyPart();
-        textPart.setText(text, "UTF-8");
+        // The HTML and its logo, bundled as multipart/related
         MimeBodyPart htmlPart = new MimeBodyPart();
         htmlPart.setContent(html, "text/html; charset=UTF-8");
-        MimeMultipart alternative = new MimeMultipart("alternative");
-        alternative.addBodyPart(textPart); // plainest first, as the MIME standard asks
-        alternative.addBodyPart(htmlPart);
-        MimeBodyPart alternativeWrapper = new MimeBodyPart();
-        alternativeWrapper.setContent(alternative);
-
         MimeBodyPart logoPart = new MimeBodyPart();
         logoPart.setDataHandler(new DataHandler(
                 new ByteArrayDataSource(readBytes(R.drawable.attendra_mark_gold), "image/png")));
         logoPart.setContentID("<logo>");
-        logoPart.setDisposition(MimeBodyPart.INLINE);
-        logoPart.setFileName("attendra_mark_gold.png");
-
+        logoPart.setDisposition(MimeBodyPart.INLINE); // no setFileName(): not an attachment
         MimeMultipart related = new MimeMultipart("related");
-        related.addBodyPart(alternativeWrapper);
+        related.addBodyPart(htmlPart);
         related.addBodyPart(logoPart);
+        MimeBodyPart relatedWrapper = new MimeBodyPart();
+        relatedWrapper.setContent(related);
 
+        // Plain text first, then the HTML version: mail apps show the last one they can.
+        MimeBodyPart textPart = new MimeBodyPart();
+        textPart.setText(text, "UTF-8");
+        MimeMultipart alternative = new MimeMultipart("alternative");
+        alternative.addBodyPart(textPart);
+        alternative.addBodyPart(relatedWrapper);
+
+        // "Attendra UiTM" is the name inboxes show instead of the bare address (12.6 B).
+        InternetAddress sender = new InternetAddress(BuildConfig.SMTP_USER, FROM_NAME, "UTF-8");
         MimeMessage message = new MimeMessage(session());
-        message.setFrom(new InternetAddress(BuildConfig.SMTP_USER, FROM_NAME, "UTF-8"));
+        message.setFrom(sender);
+        message.setReplyTo(new InternetAddress[]{sender});
         message.setRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
         message.setSubject(SUBJECT, "UTF-8");
-        message.setContent(related);
+        message.setContent(alternative);
         return message;
     }
 
