@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.attendra.uitm.BuildConfig;
 import com.attendra.uitm.R;
 import com.attendra.uitm.databinding.FragmentRegisterBinding;
 import com.attendra.uitm.model.Club;
@@ -105,13 +104,10 @@ public class RegisterFragment extends Fragment {
         binding.txtLabelClubs.setText(student
                 ? R.string.label_clubs_student : R.string.label_clubs_lecturer);
 
-        // The example always shows the UiTM format for the chosen role. The
-        // UiTM-specific label only appears when that domain is actually
-        // required (release builds); debug builds also accept Gmail.
+        // The UiTM email domain is required for both roles (CLAUDE.md 12.2),
+        // so the label and example always show the right format.
         binding.inputEmail.setHint(student ? R.string.hint_email_student : R.string.hint_email_staff);
-        if (BuildConfig.REQUIRE_UITM_EMAIL) {
-            binding.txtLabelEmail.setText(student ? R.string.label_email_student : R.string.label_email_staff);
-        }
+        binding.txtLabelEmail.setText(student ? R.string.label_email_student : R.string.label_email_staff);
 
         // Errors on fields that just got hidden would be confusing later.
         binding.layoutStudentId.setError(null);

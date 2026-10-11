@@ -92,13 +92,24 @@
     <string name="home_student_placeholder">You are signed in as a student. The student home screen will be available in a later version.</string>
     <string name="sign_out">Sign out</string>
 
+    <!-- Tester access (DEBUG builds only, CLAUDE.md 12.4) -->
+    <string name="tester_title">Tester access</string>
+    <string name="tester_body">Debug build only. Signs in with the test accounts from local.properties.</string>
+    <string name="tester_login_lecturer">Log in as Test Lecturer</string>
+    <string name="tester_login_student">Log in as Test Student</string>
+    <string name="tester_missing">Test account details are missing. Add TEST_LECTURER_EMAIL, TEST_LECTURER_PASS, TEST_STUDENT_EMAIL and TEST_STUDENT_PASS to local.properties and rebuild.</string>
+    <string name="tester_switch">Switch test account</string>
+    <string name="tester_switch_to_lecturer">Sign in as Test Lecturer</string>
+    <string name="tester_switch_to_student">Sign in as Test Student</string>
+    <string name="tester_switching">Switching account…</string>
+
     <!-- Validation messages (shown under a field) -->
     <string name="error_name_required">Please enter your full name.</string>
     <string name="error_name_short">Full name must be at least 3 characters.</string>
     <string name="error_email_required">Please enter your email address.</string>
     <string name="error_email_invalid">Please enter a valid email address.</string>
-    <string name="error_email_student_domain">Please use your UiTM student email address (%1$s).</string>
-    <string name="error_email_staff_domain">Please use your UiTM staff email address (%1$s).</string>
+    <string name="error_email_student_domain">Please use your UiTM student email (@student.uitm.edu.my).</string>
+    <string name="error_email_staff_domain">Please use your UiTM staff email (@uitm.edu.my).</string>
     <string name="error_phone_required">Please enter your phone number.</string>
     <string name="error_phone_invalid">Please enter a valid phone number.</string>
     <string name="error_student_id_required">Please enter your student ID.</string>

@@ -18,7 +18,8 @@ import com.google.firebase.auth.FirebaseUser;
 /**
  * First screen (launcher).
  *
- * - Already signed in and verified → skip straight to the right home screen.
+ * - Already signed in and verified (see AuthRepository.resolveHome) → skip
+ *   straight to the right home screen.
  * - Signed in but NOT verified (e.g. the app was closed on the Verify screen)
  *   → sign out, so only verified users are ever kept signed in.
  * - Otherwise show the logo with "Get started" (Log in) and "Create an account".
@@ -42,17 +43,18 @@ public class SplashActivity extends BaseActivity {
 
         FirebaseUser user = auth.currentUser();
         if (user == null) return;
-        if (!user.isEmailVerified()) {
-            auth.signOut();
-            return;
-        }
 
         // Hide the buttons while the role loads, so they don't flash before routing.
         setButtonsVisible(false);
-        auth.loadRole(user, new Callback<String>() {
+        auth.resolveHome(user, new Callback<String>() {
             @Override
             public void onSuccess(String role) {
                 if (isFinishing()) return; // user left the splash meanwhile
+                if (AuthRepository.UNVERIFIED.equals(role)) {
+                    auth.signOut();
+                    setButtonsVisible(true);
+                    return;
+                }
                 HomeRouter.openHome(SplashActivity.this, role);
             }
 

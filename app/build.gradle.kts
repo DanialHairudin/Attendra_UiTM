@@ -1,6 +1,20 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
+}
+
+// Secrets live in local.properties (never committed, see .gitignore).
+val localProps = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
+/** A local.properties value as a Java string literal for buildConfigField ("" if missing). */
+fun localString(key: String): String {
+    val value = localProps.getProperty(key, "")
+    return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 }
 
 android {
@@ -33,11 +47,19 @@ android {
 
     buildTypes {
         debug {
-            // false in debug so Gmail accounts can be used for testing (CLAUDE.md section 4)
-            buildConfigField("boolean", "REQUIRE_UITM_EMAIL", "false")
+            // Test account logins for the hidden tester panel (CLAUDE.md 12.4).
+            // Only the debug build gets the real values.
+            buildConfigField("String", "TEST_LECTURER_EMAIL", localString("TEST_LECTURER_EMAIL"))
+            buildConfigField("String", "TEST_LECTURER_PASS", localString("TEST_LECTURER_PASS"))
+            buildConfigField("String", "TEST_STUDENT_EMAIL", localString("TEST_STUDENT_EMAIL"))
+            buildConfigField("String", "TEST_STUDENT_PASS", localString("TEST_STUDENT_PASS"))
         }
         release {
-            buildConfigField("boolean", "REQUIRE_UITM_EMAIL", "true")
+            // Empty in release, so no test password is ever inside a release APK.
+            buildConfigField("String", "TEST_LECTURER_EMAIL", "\"\"")
+            buildConfigField("String", "TEST_LECTURER_PASS", "\"\"")
+            buildConfigField("String", "TEST_STUDENT_EMAIL", "\"\"")
+            buildConfigField("String", "TEST_STUDENT_PASS", "\"\"")
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")

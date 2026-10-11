@@ -12,7 +12,9 @@
         android:orientation="vertical"
         android:padding="@dimen/screen_padding">
 
+        <!-- Long-press for 2 s opens the tester panel (DEBUG builds only). -->
         <ImageView
+            android:id="@+id/img_logo"
             android:layout_width="88dp"
             android:layout_height="88dp"
             android:layout_gravity="center_horizontal"

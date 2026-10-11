@@ -80,7 +80,7 @@ public class AuthRepository {
     /**
      * Log in, then decide where to go. onSuccess receives:
      * - UNVERIFIED if the email is not verified (caller shows the Verify screen), or
-     * - the role ("lecturer" / "student") read from users/{uid}/role.
+     * - the role ("lecturer" / "student") read from roles/{uid}.
      */
     public void login(String email, String password, Callback<String> callback) {
         auth.signInWithEmailAndPassword(email, password)
@@ -88,17 +88,52 @@ public class AuthRepository {
                     FirebaseUser user = result.getUser();
                     if (user == null) {
                         callback.onError(str(R.string.error_login_failed));
-                    } else if (!user.isEmailVerified()) {
-                        callback.onSuccess(UNVERIFIED);
                     } else {
-                        loadRole(user, callback);
+                        resolveHome(user, callback);
                     }
                 })
                 .addOnFailureListener(e -> callback.onError(AuthErrors.message(e)));
     }
 
     /**
-     * Reads the signed-in user's role. If the account has no profile (or no role),
+     * Works out where a signed-in user should go: their role, or UNVERIFIED.
+     *
+     * The email counts as verified if EITHER
+     * - emailVerified is true in the profile node (CLAUDE.md 12.1; the test
+     *   accounts are set up this way), or
+     * - Firebase Auth says it is verified (the email link from C3, still used
+     *   until the 6-digit code verification replaces it).
+     */
+    public void resolveHome(FirebaseUser user, Callback<String> callback) {
+        loadRole(user, new Callback<String>() {
+            @Override
+            public void onSuccess(String role) {
+                if (user.isEmailVerified()) {
+                    callback.onSuccess(role);
+                    return;
+                }
+                users.isEmailVerified(user.getUid(), role, new Callback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean verified) {
+                        callback.onSuccess(verified ? role : UNVERIFIED);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    /**
+     * Reads the signed-in user's role from roles/{uid}. If the account has no role,
      * it signs out and reports an error, so nobody lands in the app half set up.
      */
     public void loadRole(FirebaseUser user, Callback<String> callback) {

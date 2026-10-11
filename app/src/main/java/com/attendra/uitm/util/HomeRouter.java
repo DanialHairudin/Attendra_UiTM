@@ -14,7 +14,7 @@ public final class HomeRouter {
     private HomeRouter() {
     }
 
-    /** Opens LecturerMain or StudentMain depending on users/{uid}/role. */
+    /** Opens LecturerMain or StudentMain depending on roles/{uid}. */
     public static void openHome(Activity from, String role) {
         Class<?> target = Registration.ROLE_LECTURER.equals(role)
                 ? LecturerMainActivity.class

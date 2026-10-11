@@ -6,9 +6,10 @@ import android.util.Patterns;
 
 import androidx.annotation.Nullable;
 
-import com.attendra.uitm.BuildConfig;
 import com.attendra.uitm.R;
 import com.attendra.uitm.model.Registration;
+
+import java.util.Locale;
 
 /**
  * Form checks for the Auth screens. Each method returns null when the value is
@@ -40,21 +41,22 @@ public final class Validators {
     }
 
     /**
-     * Email check on Register. When BuildConfig.REQUIRE_UITM_EMAIL is true (release),
-     * students must use @student.uitm.edu.my and lecturers @uitm.edu.my.
-     * It is false in debug so Gmail can be used for testing.
+     * Email check on Register (CLAUDE.md 12.2, always on in every build):
+     * - students must use @student.uitm.edu.my
+     * - lecturers must use @uitm.edu.my, and a student address is not accepted.
+     *   ("x@student.uitm.edu.my" does not end with "@uitm.edu.my" anyway, but the
+     *   explicit check makes the rule obvious.)
      */
     @Nullable
     public static String registerEmail(String s, String role) {
         String basic = email(s);
         if (basic != null) return basic;
-        if (BuildConfig.REQUIRE_UITM_EMAIL) {
-            String lower = s.toLowerCase();
-            if (Registration.ROLE_STUDENT.equals(role) && !lower.endsWith(STUDENT_DOMAIN)) {
-                return str(R.string.error_email_student_domain, STUDENT_DOMAIN);
-            }
-            if (Registration.ROLE_LECTURER.equals(role) && !lower.endsWith(STAFF_DOMAIN)) {
-                return str(R.string.error_email_staff_domain, STAFF_DOMAIN);
+        String lower = s.toLowerCase(Locale.ROOT);
+        if (Registration.ROLE_STUDENT.equals(role)) {
+            if (!lower.endsWith(STUDENT_DOMAIN)) return str(R.string.error_email_student_domain);
+        } else {
+            if (!lower.endsWith(STAFF_DOMAIN) || lower.endsWith(STUDENT_DOMAIN)) {
+                return str(R.string.error_email_staff_domain);
             }
         }
         return null;
