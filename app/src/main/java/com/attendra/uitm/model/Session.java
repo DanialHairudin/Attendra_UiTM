@@ -43,6 +43,8 @@ public class Session {
     public long lateAfter;
     public String status;
     public long createdAt;
+    /** Made by the Test Lecturer: only test students see it (data/TestWorld). */
+    public boolean isTest;
 
     public Session() {
     }

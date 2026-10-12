@@ -7,6 +7,8 @@ import com.attendra.uitm.model.Course;
 import com.attendra.uitm.model.Venue;
 import com.google.firebase.database.DataSnapshot;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,5 +122,13 @@ public final class SeedCache {
     @Nullable
     public static Club club(@Nullable String id) {
         return id == null ? null : CLUBS.get(id);
+    }
+
+    /** Every club, sorted by short name (My Clubs Page). */
+    public static List<Club> allClubs() {
+        List<Club> list = new ArrayList<>(CLUBS.values());
+        Collections.sort(list, (a, b) -> String.valueOf(a.shortName)
+                .compareToIgnoreCase(String.valueOf(b.shortName)));
+        return list;
     }
 }

@@ -206,7 +206,7 @@
         // Only a verified lecturer, only for themselves. After creation only its
         // own lecturer may change it (close, +10 min, radius), and never delete it.
         ".write": "auth != null && newData.exists() && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true && ((data.exists() && data.child('lecturerUid').val() === auth.uid) || (!data.exists() && newData.child('lecturerUid').val() === auth.uid))",
-        ".validate": "newData.hasChildren(['lecturerUid', 'type', 'title', 'where', 'lat', 'lng', 'radius', 'start', 'end', 'lateAfter', 'status']) && ((newData.child('type').val() === 'club' && newData.child('clubId').exists() && !newData.child('groups').exists()) || (newData.child('type').val() !== 'club' && newData.child('courseId').exists() && newData.child('groups').exists()))",
+        ".validate": "newData.hasChildren(['lecturerUid', 'type', 'title', 'where', 'lat', 'lng', 'radius', 'start', 'end', 'lateAfter', 'status']) && ((newData.child('type').val() === 'club' && newData.child('clubId').exists() && !newData.child('groups').exists()) || (newData.child('type').val() !== 'club' && newData.child('courseId').exists() && newData.child('groups').exists())) && (data.exists() || newData.child('isTest').val() === true || root.child('lecturers/' + auth.uid + '/isTest').val() !== true)",
 
         "lecturerUid": { ".validate": "newData.val() === auth.uid && (!data.exists() || newData.val() === data.val())" },
         "type": { ".validate": "(newData.val() === 'class' || newData.val() === 'test' || newData.val() === 'sulam' || newData.val() === 'club') && (!data.exists() || newData.val() === data.val())" },
@@ -237,6 +237,8 @@
         "status": { ".validate": "(newData.val() === 'open' && !data.exists()) || newData.val() === 'closed'" },
         "createdAt": { ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()" },
         "closedAt": { ".validate": "newData.val() === now" },
+        // Test Lecturer sessions only (data/TestWorld): only test students see them.
+        "isTest": { ".validate": "newData.val() === true && root.child('lecturers/' + auth.uid + '/isTest').val() === true && (!data.exists() || newData.val() === data.val())" },
         "$other": { ".validate": false }
       }
     },
@@ -287,7 +289,9 @@
           // (a) The student's own GPS check-in: verified, eligible, inside start–end.
           //     method "debug" is the DEBUG-build "Simulate check-in", test accounts only.
           // (b) The session's lecturer: manual marks, and Absent when closing.
-          ".write": "auth != null && !data.exists() && newData.exists() && root.child('sessions/' + $sid + '/status').val() === 'open' && ((auth.uid === $uid && root.child('roles/' + $uid).val() === 'student' && root.child('students/' + $uid + '/emailVerified').val() === true && now >= root.child('sessions/' + $sid + '/start').val() && now < root.child('sessions/' + $sid + '/end').val() && (root.child('sessions/' + $sid + '/groups/' + root.child('students/' + $uid + '/groupId').val()).val() === true || root.child('clubMembers/' + root.child('sessions/' + $sid + '/clubId').val() + '/' + $uid).val() === true) && (newData.child('method').val() === 'gps' || (newData.child('method').val() === 'debug' && root.child('students/' + $uid + '/isTest').val() === true))) || (root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && (newData.child('method').val() === 'manual' || newData.child('method').val() === 'auto')))",
+          // Both: the student and the session are in the same world, real or test
+          // (test accounts never mix with real ones, data/TestWorld).
+          ".write": "auth != null && !data.exists() && newData.exists() && root.child('sessions/' + $sid + '/status').val() === 'open' && (root.child('students/' + $uid + '/isTest').val() === true) === (root.child('sessions/' + $sid + '/isTest').val() === true) && ((auth.uid === $uid && root.child('roles/' + $uid).val() === 'student' && root.child('students/' + $uid + '/emailVerified').val() === true && now >= root.child('sessions/' + $sid + '/start').val() && now < root.child('sessions/' + $sid + '/end').val() && (root.child('sessions/' + $sid + '/groups/' + root.child('students/' + $uid + '/groupId').val()).val() === true || root.child('clubMembers/' + root.child('sessions/' + $sid + '/clubId').val() + '/' + $uid).val() === true) && (newData.child('method').val() === 'gps' || (newData.child('method').val() === 'debug' && root.child('students/' + $uid + '/isTest').val() === true))) || (root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && (newData.child('method').val() === 'manual' || newData.child('method').val() === 'auto')))",
           ".validate": "newData.hasChildren(['status', 'time', 'method'])",
           "method": { ".validate": "newData.val() === 'gps' || newData.val() === 'manual' || newData.val() === 'auto' || newData.val() === 'debug'" },
           // GPS: present if now <= lateAfter, otherwise late (the server's clock decides).

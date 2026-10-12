@@ -199,7 +199,6 @@
     <string name="profile_part">Part</string>
     <string name="profile_group">Group</string>
     <string name="no_clubs_yet">No clubs yet · optional</string>
-    <string name="profile_edit_later">Editing your full name and phone number will be available in a later version.</string>
     <string name="profile_preferred_name">Preferred name</string>
     <string name="profile_title_row">Title</string>
     <string name="profile_not_set">Not set</string>
@@ -218,11 +217,22 @@
     <string name="name_preview">Preview</string>
     <string name="name_continue">Continue</string>
     <string name="name_save">Save</string>
-    <string name="my_clubs_body_student">The clubs you have joined. Sessions for these clubs appear on your home screen.</string>
-    <string name="my_clubs_body_lecturer">The clubs you advise. You can create club sessions for these clubs.</string>
-    <string name="empty_my_clubs_title">No clubs yet</string>
-    <string name="empty_my_clubs_body">Clubs are optional.</string>
-    <string name="clubs_edit_later">Joining and leaving clubs will be available in a later version.</string>
+    <string name="my_clubs_body_student">Turn on the clubs you have joined. Sessions for these clubs appear on your home screen.</string>
+    <string name="my_clubs_body_lecturer">Turn on the clubs you advise. You can create club sessions for these clubs.</string>
+    <string name="empty_my_clubs_title">No clubs available</string>
+    <string name="empty_my_clubs_body">No clubs have been set up yet.</string>
+    <string name="club_leave_title_student">Leave %1$s?</string>
+    <string name="club_leave_body_student">You will stop seeing this club’s sessions.</string>
+    <string name="club_leave_title_lecturer">Stop advising %1$s?</string>
+    <string name="club_leave_body_lecturer">You will no longer be able to create sessions for this club. Past sessions stay in your history.</string>
+    <string name="club_leave">Leave</string>
+    <string name="club_stop_advising">Stop advising</string>
+    <string name="club_joined">Joined %1$s</string>
+    <string name="club_left">Left %1$s</string>
+    <string name="club_advising">You now advise %1$s</string>
+    <string name="club_not_advising">You no longer advise %1$s</string>
+    <string name="phone_edit_title">Phone number</string>
+    <string name="phone_saved">Phone number saved</string>
 
     <!-- Create Session wizard (C6) -->
     <string name="new_session">New session</string>
@@ -396,10 +406,6 @@
     <string name="tester_login_lecturer">Log in as Test Lecturer</string>
     <string name="tester_login_student">Log in as Test Student</string>
     <string name="tester_missing">Test account details are missing. Add TEST_LECTURER_EMAIL, TEST_LECTURER_PASS, TEST_STUDENT_EMAIL and TEST_STUDENT_PASS to local.properties and rebuild.</string>
-    <string name="tester_switch">Switch test account</string>
-    <string name="tester_switch_to_lecturer">Sign in as Test Lecturer</string>
-    <string name="tester_switch_to_student">Sign in as Test Student</string>
-    <string name="tester_switching">Switching account…</string>
 
     <!-- Validation messages (shown under a field) -->
     <string name="error_name_required">Please enter your full name.</string>

@@ -19,6 +19,7 @@ import com.attendra.uitm.data.TeachingRepository;
 import com.attendra.uitm.data.UserRepository;
 import com.attendra.uitm.databinding.ActivityProfileBinding;
 import com.attendra.uitm.databinding.ItemInfoRowBinding;
+import com.attendra.uitm.databinding.SheetPhoneBinding;
 import com.attendra.uitm.model.Club;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.ui.BaseActivity;
@@ -26,6 +27,8 @@ import com.attendra.uitm.ui.common.Ui;
 import com.attendra.uitm.ui.lecturer.LecturerMainActivity;
 import com.attendra.uitm.util.HomeRouter;
 import com.attendra.uitm.util.Names;
+import com.attendra.uitm.util.Validators;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,8 +38,9 @@ import java.util.List;
 
 /**
  * Profile Page. Shows lecturers/{uid} or students/{uid} and the user's clubs, live.
- * Preferred name (and Title for lecturers) can be changed here (CLAUDE.md 12.6);
- * editing the full name and phone comes in C4.
+ * Preferred name (and Title for lecturers) and the phone number can be changed
+ * here. The full name, email and IDs are fixed; the greeting uses the preferred
+ * name (CLAUDE.md 12.6). The clubs card opens My Clubs.
  */
 public class ProfileActivity extends BaseActivity {
 
@@ -71,6 +75,7 @@ public class ProfileActivity extends BaseActivity {
         binding.txtRole.setText(lecturer ? R.string.home_role_lecturer : R.string.home_role_student);
         binding.txtClubsTitle.setText(lecturer
                 ? R.string.label_clubs_lecturer : R.string.label_clubs_student);
+        binding.cardClubs.setOnClickListener(v -> MyClubsActivity.open(this, role));
     }
 
     @Override
@@ -170,7 +175,7 @@ public class ProfileActivity extends BaseActivity {
                 });
             }
             addInfo(R.string.profile_email, text("email"));
-            addInfo(R.string.profile_phone, text("phone"));
+            addTappable(R.string.profile_phone, text("phone"), v -> editPhone());
             if (lecturer) {
                 addInfo(R.string.profile_staff_id, text("staffId"));
             } else {
@@ -221,6 +226,44 @@ public class ProfileActivity extends BaseActivity {
         getTheme().resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
         row.getRoot().setBackgroundResource(ripple.resourceId);
         row.getRoot().setOnClickListener(onTap);
+    }
+
+    /** Bottom sheet with the +60 phone field, prefilled with the current number. */
+    private void editPhone() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || profile == null) return;
+        BottomSheetDialog sheet = new BottomSheetDialog(this);
+        SheetPhoneBinding s = SheetPhoneBinding.inflate(getLayoutInflater());
+        sheet.setContentView(s.getRoot());
+
+        String current = text("phone");
+        if (current.startsWith("+60")) current = current.substring(3);
+        s.inputPhone.setText(current);
+        s.inputPhone.setSelection(current.length());
+
+        s.btnSavePhone.setOnClickListener(v -> {
+            String input = s.inputPhone.getText() == null ? "" : s.inputPhone.getText().toString();
+            String error = Validators.phone(input);
+            s.layoutPhone.setError(error);
+            if (error != null) return;
+            s.btnSavePhone.setEnabled(false);
+            new UserRepository().setPhone(user.getUid(), role,
+                    "+60" + Validators.phoneDigits(input), new Callback<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            sheet.dismiss();
+                            Snackbar.make(binding.getRoot(), R.string.phone_saved,
+                                    Snackbar.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            s.btnSavePhone.setEnabled(true);
+                            s.layoutPhone.setError(message);
+                        }
+                    });
+        });
+        sheet.show();
     }
 
     /** A profile field as text; Db.text() also copes with numbers typed in the console. */

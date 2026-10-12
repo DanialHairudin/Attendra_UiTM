@@ -7,7 +7,7 @@ import com.attendra.uitm.model.Registration;
  * The two tester accounts (CLAUDE.md 12.4). Their emails and passwords come from
  * local.properties through BuildConfig, and only the DEBUG build type gets them.
  * In release every value is "", so available() is false and the tester panel
- * and "Switch test account" row never appear.
+ * on the Login Page never appears.
  */
 public final class TestAccounts {
 
@@ -32,11 +32,5 @@ public final class TestAccounts {
     public static String password(String role) {
         return Registration.ROLE_LECTURER.equals(role)
                 ? BuildConfig.TEST_LECTURER_PASS : BuildConfig.TEST_STUDENT_PASS;
-    }
-
-    /** The role of the other test account: lecturer ↔ student. */
-    public static String otherRole(String role) {
-        return Registration.ROLE_LECTURER.equals(role)
-                ? Registration.ROLE_STUDENT : Registration.ROLE_LECTURER;
     }
 }

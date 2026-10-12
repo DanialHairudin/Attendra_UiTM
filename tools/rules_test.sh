@@ -68,6 +68,9 @@ check() {
 # Every key the tests create starts with zzTest_ so it is easy to spot.
 SU=zzTest_stu; SU2=zzTest_stu2; LU=zzTest_lec; LU2=zzTest_lec2
 ST=$(token $SU); ST2=$(token $SU2); LT=$(token $LU); LT2=$(token $LU2)
+# Tester accounts (isTest: true): kept apart from the real ones (data/TestWorld).
+TSU=zzTest_tstu; TLU=zzTest_tlec; TST=$(token $TSU); TLT=$(token $TLU)
+TSID=zzTest_ts1
 SID=zzTest_s1
 NOW=$(( $(date +%s) * 1000 ))
 START=$((NOW - 600000)); LATE=$((NOW + 1800000)); END=$((NOW + 3600000))
@@ -78,9 +81,17 @@ echo "Seeding the emulator at $DB ..."
 FIXTURE=$(cat <<EOF
 {
   "buildings/CS1/lat": $LAT, "buildings/CS1/lng": $LNG,
-  "roles/$SU": "student", "roles/$SU2": "student", "roles/$LU": "lecturer", "roles/$LU2": "lecturer",
+  "roles/$TSU": "student", "roles/$TLU": "lecturer", "roles/$SU": "student", "roles/$SU2": "student", "roles/$LU": "lecturer", "roles/$LU2": "lecturer",
   "students/$SU":  {"name":"zzTest Student","email":"zztest.stu@student.uitm.edu.my","phone":"0","studentId":"2025009901",
+                    "programme":"CS240","part":5,"groupId":"CDCS2405A","emailVerified":true,"createdAt":1},
+  "students/$TSU": {"name":"zzTest Tester","email":"zztest.tstu@student.uitm.edu.my","phone":"0","studentId":"2025009903",
                     "programme":"CS240","part":5,"groupId":"CDCS2405A","emailVerified":true,"isTest":true,"createdAt":1},
+  "lecturers/$TLU": {"name":"zzTest Test Lecturer","email":"zztest.tlec@uitm.edu.my","phone":"0","staffId":"zzTest3","emailVerified":true,"isTest":true,"createdAt":1},
+  "studentsByGroup/CDCS2405A/$TSU": true,
+  "teachingAssignments/$TLU/CS240_ICT600_CDCS2405A": {"courseId":"CS240_ICT600","groupId":"CDCS2405A"},
+  "sessions/$TSID": {"lecturerUid":"$TLU","type":"class","title":"zzTest test class","courseId":"CS240_ICT600",
+                    "groups":{"CDCS2405A":true},"where":"building","building":"CS1","lat":$LAT,"lng":$LNG,"radius":60,
+                    "start":$START,"end":$END,"lateAfter":$LATE,"status":"open","createdAt":$NOW,"isTest":true},
   "students/$SU2": {"name":"zzTest Student Two","email":"zztest.stu2@student.uitm.edu.my","phone":"0","studentId":"2025009902",
                     "programme":"CS240","part":5,"groupId":"CDCS2405B","emailVerified":true,"createdAt":1},
   "lecturers/$LU":  {"name":"zzTest Lecturer","email":"zztest.lec@uitm.edu.my","phone":"0","staffId":"zzTest1","emailVerified":true,"createdAt":1},
@@ -101,11 +112,18 @@ echo "----"
 
 TS='{".sv":"timestamp"}'
 # A new Class session (plus its indexes) for <group>, as one multi-path update.
+# new_session <id> <group> [lecturer uid] [extra session JSON, e.g. ,"isTest":true]
 new_session() {
-  echo '{"sessions/'$1'":{"lecturerUid":"'$LU'","type":"class","title":"zzTest new","courseId":"CS240_ICT600",
+  local lu=${3:-$LU}
+  echo '{"sessions/'$1'":{"lecturerUid":"'$lu'","type":"class","title":"zzTest new","courseId":"CS240_ICT600",
     "groups":{"'$2'":true},"where":"building","building":"CS1","lat":'$LAT',"lng":'$LNG',"radius":60,
-    "start":'$START',"end":'$END',"lateAfter":'$LATE',"status":"open","createdAt":'$TS'},
-    "sessionsByLecturer/'$LU'/'$1'":true,"sessionsByGroup/'$2'/'$1'":true}'
+    "start":'$START',"end":'$END',"lateAfter":'$LATE',"status":"open","createdAt":'$TS$4'},
+    "sessionsByLecturer/'$lu'/'$1'":true,"sessionsByGroup/'$2'/'$1'":true}'
+}
+# check-in update for <student uid> <session id>
+checkin() {
+  echo '{"attendance/'$2'/'$1'":{"status":"present","time":'$TS',"method":"gps","distance":10,"accuracy":8,"lat":3.0695,"lng":101.5},
+    "studentAttendance/'$1'/'$2'":{"status":"present","time":'$TS'}}'
 }
 
 # Seed data
@@ -120,7 +138,8 @@ check "student changes own role"           deny  PUT "roles/$SU" "$ST" '"lecture
 check "student reads own profile"          allow GET "students/$SU" "$ST"
 check "student reads lecturer profile"     deny  GET "lecturers/$LU" "$ST"
 check "lecturer reads student profile"     allow GET "students/$SU" "$LT"
-check "student sets own isTest"            deny  PUT "students/$SU/isTest" "$ST" 'false'
+check "student sets own isTest"            deny  PUT "students/$SU/isTest" "$ST" 'true'
+check "tester clears own isTest"           deny  PUT "students/$TSU/isTest" "$TST" 'false'
 check "student changes own groupId"        deny  PUT "students/$SU/groupId" "$ST" '"CDCS2405B"'
 check "student sets emailVerified (no code)" deny PUT "students/$SU/emailVerified" "$ST" 'true'
 check "student edits own phone"            allow PUT "students/$SU/phone" "$ST" '"0123456789"'
@@ -146,6 +165,14 @@ check "extra field"                        deny  PUT "teachingAssignments/$LU/CS
 check "lecturer removes own class"         allow DELETE "teachingAssignments/$LU/CS240_ICT602_CDCS2405B" "$LT"
 check "lecturer reads clubAdvisors"        allow GET clubAdvisors "$LT"
 check "student reads clubAdvisors"         deny  GET clubAdvisors "$ST"
+# My Clubs (C4): both student indexes change together; advisors only themselves
+check "student joins a club (both indexes)" allow PATCH "" "$ST" '{"studentClubs/'$SU'/CSCLUB":true,"clubMembers/CSCLUB/'$SU'":true}'
+check "student joins, studentClubs only"   deny  PATCH "" "$ST" '{"studentClubs/'$SU'/NETS":true}'
+check "student leaves a club (both indexes)" allow PATCH "" "$ST" '{"studentClubs/'$SU'/CSCLUB":null,"clubMembers/CSCLUB/'$SU'":null}'
+check "student removes another member"     deny  PATCH "" "$ST" '{"clubMembers/ITEC/'$SU2'":null}'
+check "lecturer starts advising a club"    allow PATCH "" "$LT" '{"clubAdvisors/CSCLUB/'$LU'":true}'
+check "lecturer stops advising a club"     allow PATCH "" "$LT" '{"clubAdvisors/CSCLUB/'$LU'":null}'
+check "lecturer removes another advisor"   deny  PATCH "" "$LT2" '{"clubAdvisors/ITEC/'$LU'":null}'
 check "student reads studentsByGroup"      deny  GET "studentsByGroup/CDCS2405A" "$ST"
 check "lecturer reads studentsByGroup"     allow GET "studentsByGroup/CDCS2405A" "$LT"
 
@@ -179,6 +206,14 @@ check "student fakes accepted attempt"     deny  PUT "attempts/$SID/zzTest_a3" "
 check "student reads attempts"             deny  GET "attempts/$SID" "$ST"
 check "student reads own notifications"    allow GET "notifications/$SU" "$ST"
 check "lecturer reads student notifications" deny GET "notifications/$SU" "$LT"
+# Test accounts never mix with real ones (data/TestWorld)
+check "test lecturer session without isTest"  deny  PATCH "" "$TLT" "$(new_session zzTest_ts2 CDCS2405A $TLU)"
+check "test lecturer session with isTest"     allow PATCH "" "$TLT" "$(new_session zzTest_ts3 CDCS2405A $TLU ',"isTest":true')"
+check "real lecturer session with isTest"     deny  PATCH "" "$LT" "$(new_session zzTest_s4 CDCS2405A $LU ',"isTest":true')"
+check "tester checks in to a real session"    deny  PATCH "" "$TST" "$(checkin $TSU $SID)"
+check "real student checks in to test session" deny PATCH "" "$ST" "$(checkin $SU $TSID)"
+check "real lecturer marks tester manually"   deny  PATCH "" "$LT" '{"attendance/'$SID'/'$TSU'":{"status":"present","time":'$TS',"method":"manual","reason":"zzTest","markedBy":"'$LU'"}}'
+check "tester checks in to test session"      allow PATCH "" "$TST" "$(checkin $TSU $TSID)"
 check "student reads own mirror"           allow GET "studentAttendance/$SU" "$ST"
 # studentAttendance must carry a status that matches an attendance record written
 # in the same update (zzTest_none is a session id that does not exist).

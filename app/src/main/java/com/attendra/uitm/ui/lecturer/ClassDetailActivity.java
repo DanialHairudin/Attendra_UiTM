@@ -12,6 +12,7 @@ import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.data.SessionWatcher;
 import com.attendra.uitm.data.Subscriptions;
+import com.attendra.uitm.data.TestWorld;
 import com.attendra.uitm.databinding.ActivityClassDetailBinding;
 import com.attendra.uitm.databinding.ItemPersonRowBinding;
 import com.attendra.uitm.databinding.ItemSessionRowBinding;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Class Detail Page: one assigned class (course + group).
@@ -132,11 +134,22 @@ public class ClassDetailActivity extends BaseActivity {
         subs.listen(Db.root().child("studentsByGroup").child(groupId), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
-                List<String> uids = new ArrayList<>();
-                for (DataSnapshot s : snapshot.getChildren()) uids.add(s.getKey());
-                syncRoster(uids);
-                rosterLoaded = true;
-                render();
+                // Only students in the lecturer's world (the Test Student is hidden).
+                TestWorld.forLecturer(TestWorld.keys(snapshot), new Callback<Set<String>>() {
+                    @Override
+                    public void onSuccess(Set<String> uids) {
+                        syncRoster(new ArrayList<>(uids));
+                        rosterLoaded = true;
+                        render();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        rosterLoaded = true;
+                        showError(message);
+                        render();
+                    }
+                });
             }
 
             @Override

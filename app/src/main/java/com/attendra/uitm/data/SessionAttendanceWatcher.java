@@ -158,13 +158,22 @@ public class SessionAttendanceWatcher {
             subs.listen(Db.root().child(path), new Callback<DataSnapshot>() {
                 @Override
                 public void onSuccess(DataSnapshot snapshot) {
-                    Set<String> uids = new LinkedHashSet<>();
-                    for (DataSnapshot child : snapshot.getChildren()) {
-                        uids.add(child.getKey());
-                        lookUp(child.getKey());
-                    }
-                    eligibleByIndex.put(path, uids);
-                    listener.onChanged();
+                    // Only students in the session's world (real or test) are expected.
+                    TestWorld.filter(TestWorld.keys(snapshot), TestWorld.of(s),
+                            new Callback<Set<String>>() {
+                                @Override
+                                public void onSuccess(Set<String> uids) {
+                                    if (!eligibleByIndex.containsKey(path)) return; // stopped
+                                    for (String uid : uids) lookUp(uid);
+                                    eligibleByIndex.put(path, uids);
+                                    listener.onChanged();
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    listener.onError(message);
+                                }
+                            });
                 }
 
                 @Override

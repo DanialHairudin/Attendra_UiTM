@@ -3,6 +3,7 @@ package com.attendra.uitm.ui.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 
@@ -18,16 +19,21 @@ import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.ui.BaseActivity;
 import com.attendra.uitm.ui.common.Ui;
 import com.attendra.uitm.util.HomeRouter;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * My Clubs Page: the clubs a student joins (studentClubs/{uid}) or a lecturer
- * advises (clubAdvisors). Read-only for now; joining and leaving come in C4.
+ * advises (clubAdvisors). Every club is listed with a switch: on = joined /
+ * advising. Turning one off asks first. Each change is one multi-path write
+ * (UserRepository.setClub), so studentClubs and clubMembers stay in sync.
  */
 public class MyClubsActivity extends BaseActivity {
 
@@ -42,7 +48,10 @@ public class MyClubsActivity extends BaseActivity {
     private ActivityMyClubsBinding binding;
     private final Subscriptions subs = new Subscriptions();
     private String role;
+    private String uid;
     private List<String> clubIds;
+    /** Clubs with a write in progress; their switch is disabled until it finishes. */
+    private final Set<String> saving = new HashSet<>();
     private boolean seedReady;
 
     @Override
@@ -71,7 +80,7 @@ public class MyClubsActivity extends BaseActivity {
             HomeRouter.openSplash(this);
             return;
         }
-        String uid = user.getUid();
+        uid = user.getUid();
 
         SeedCache.load(new Callback<Void>() {
             @Override
@@ -108,22 +117,79 @@ public class MyClubsActivity extends BaseActivity {
 
     private void render() {
         binding.listClubs.removeAllViews();
-        if (clubIds == null || !seedReady || clubIds.isEmpty()) {
-            Ui.showListState(clubIds == null || !seedReady
+        List<Club> all = seedReady ? SeedCache.allClubs() : null;
+        if (clubIds == null || all == null || all.isEmpty()) {
+            Ui.showListState(clubIds == null || all == null
                             ? Ui.ListState.LOADING : Ui.ListState.EMPTY,
                     binding.txtClubsLoading, binding.emptyClubs, binding.listClubs);
             return;
         }
         Ui.showListState(Ui.ListState.CONTENT, binding.txtClubsLoading, binding.emptyClubs,
                 binding.listClubs);
-        for (String id : clubIds) {
-            Club club = SeedCache.club(id);
+        for (Club club : all) {
             ItemClubRowBinding row = ItemClubRowBinding.inflate(getLayoutInflater(),
                     binding.listClubs, false);
-            row.clubShort.setText(club != null ? club.shortName : id);
-            row.clubName.setText(club != null ? club.name : "");
+            row.clubShort.setText(club.shortName);
+            row.clubName.setText(club.name);
+            row.clubSwitch.setVisibility(View.VISIBLE);
+            row.clubSwitch.setContentDescription(club.shortName);
+            row.clubSwitch.setChecked(clubIds.contains(club.id));
+            row.clubSwitch.setEnabled(!saving.contains(club.id));
+            // Set after setChecked, so drawing the row does not count as a tap.
+            row.clubSwitch.setOnCheckedChangeListener((b, on) -> {
+                if (on) {
+                    save(club, true);
+                } else {
+                    confirmLeave(club);
+                }
+            });
+            row.getRoot().setOnClickListener(v -> {
+                if (row.clubSwitch.isEnabled()) row.clubSwitch.toggle();
+            });
             Ui.addRow(binding.listClubs, row.getRoot());
         }
+    }
+
+    /** Leaving (or no longer advising) is asked first; Cancel puts the switch back. */
+    private void confirmLeave(Club club) {
+        boolean lecturer = Registration.ROLE_LECTURER.equals(role);
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(getString(lecturer ? R.string.club_leave_title_lecturer
+                        : R.string.club_leave_title_student, club.shortName))
+                .setMessage(lecturer ? R.string.club_leave_body_lecturer
+                        : R.string.club_leave_body_student)
+                .setPositiveButton(lecturer ? R.string.club_stop_advising : R.string.club_leave,
+                        (d, w) -> save(club, false))
+                .setNegativeButton(R.string.cancel, null)
+                .setOnDismissListener(d -> {
+                    if (!saving.contains(club.id)) render();
+                })
+                .show();
+    }
+
+    private void save(Club club, boolean on) {
+        saving.add(club.id);
+        render();
+        new UserRepository().setClub(uid, role, club.id, on, new Callback<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                saving.remove(club.id);
+                boolean lecturer = Registration.ROLE_LECTURER.equals(role);
+                int msg = lecturer
+                        ? (on ? R.string.club_advising : R.string.club_not_advising)
+                        : (on ? R.string.club_joined : R.string.club_left);
+                Snackbar.make(binding.getRoot(), getString(msg, club.shortName),
+                        Snackbar.LENGTH_SHORT).show();
+                render();
+            }
+
+            @Override
+            public void onError(String message) {
+                saving.remove(club.id);
+                showError(message);
+                render(); // the switch goes back to what the database says
+            }
+        });
     }
 
     private void showError(String message) {

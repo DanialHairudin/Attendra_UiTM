@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- My Clubs Page, matching "clubs" in the prototype. Shows the clubs the user
-     joins (student) or advises (lecturer). Read-only for now. -->
+     joins (student) or advises (lecturer). Every club has an on/off switch. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/clubs_root"
     android:layout_width="match_parent"
@@ -64,13 +64,6 @@
                         android:textAppearance="@style/TextAppearance.Attendra.Caption" />
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/clubs_edit_later"
-                android:textAppearance="@style/TextAppearance.Attendra.Caption" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

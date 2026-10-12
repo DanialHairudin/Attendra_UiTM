@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- One club: star icon, short name, full name, and an optional gold badge
-     (member count on the Classes tab). -->
+     (member count on the Classes tab) or on/off switch (My Clubs Page). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/Widget.Attendra.ListRow"
@@ -40,6 +40,13 @@
     <TextView
         android:id="@+id/club_badge"
         style="@style/Widget.Attendra.Badge.Gold"
+        android:layout_marginStart="12dp"
+        android:visibility="gone" />
+
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/club_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:visibility="gone" />
 </LinearLayout>

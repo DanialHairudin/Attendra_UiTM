@@ -3,6 +3,7 @@ package com.attendra.uitm.data;
 import static com.attendra.uitm.AttendraApp.str;
 
 import com.attendra.uitm.R;
+import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.model.Session;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.ServerValue;
@@ -36,10 +37,22 @@ public class SessionRepository {
      * onSuccess receives the new session ID.
      */
     public void create(Session s, String title, String body, Callback<String> callback) {
-        eligibleStudents(s, new Callback<Set<String>>() {
+        // A session by the Test Lecturer is marked isTest, so it stays in the test world.
+        TestWorld.mine(Registration.ROLE_LECTURER, new Callback<Boolean>() {
             @Override
-            public void onSuccess(Set<String> students) {
-                write(s, students, title, body, callback);
+            public void onSuccess(Boolean test) {
+                s.isTest = test;
+                eligibleStudents(s, new Callback<Set<String>>() {
+                    @Override
+                    public void onSuccess(Set<String> students) {
+                        write(s, students, title, body, callback);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
             }
 
             @Override
@@ -60,9 +73,22 @@ public class SessionRepository {
         return paths;
     }
 
-    /** Reads, once and fresh, the uids of every student who may attend the session. */
+    /**
+     * Reads, once and fresh, the uids of every student who may attend the session:
+     * the group/club members in the same world as the session (real or test).
+     */
     public static void eligibleStudents(Session s, Callback<Set<String>> callback) {
-        readEligible(eligibleIndexPaths(s), 0, new LinkedHashSet<>(), callback);
+        readEligible(eligibleIndexPaths(s), 0, new LinkedHashSet<>(), new Callback<Set<String>>() {
+            @Override
+            public void onSuccess(Set<String> uids) {
+                TestWorld.filter(uids, TestWorld.of(s), callback);
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
     }
 
     /** Reads the index nodes one after another and collects the student uids. */
@@ -121,6 +147,7 @@ public class SessionRepository {
         session.put("lateAfter", s.lateAfter);
         session.put("status", Session.STATUS_OPEN);
         session.put("createdAt", ServerValue.TIMESTAMP);
+        if (s.isTest) session.put("isTest", true);
 
         Map<String, Object> updates = new HashMap<>();
         updates.put("sessions/" + id, session);

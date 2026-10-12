@@ -16,6 +16,7 @@ import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.data.Subscriptions;
+import com.attendra.uitm.data.TestWorld;
 import com.attendra.uitm.databinding.FragmentStepWhoBinding;
 import com.attendra.uitm.databinding.ItemPickRowBinding;
 import com.attendra.uitm.model.Club;
@@ -29,6 +30,7 @@ import com.google.firebase.database.DataSnapshot;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Step 2, Session Participants Page (CLAUDE.md section 5):
@@ -113,8 +115,21 @@ public class WhoStepFragment extends BaseStepFragment {
         subs.listen(Db.root().child(prefix + id), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
-                counts.put(id, (int) snapshot.getChildrenCount());
-                render();
+                // Count only students in the lecturer's world (the Test Student is hidden).
+                TestWorld.forLecturer(TestWorld.keys(snapshot), new Callback<Set<String>>() {
+                    @Override
+                    public void onSuccess(Set<String> uids) {
+                        counts.put(id, uids.size());
+                        render();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        if (binding != null) {
+                            Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
+                        }
+                    }
+                });
             }
 
             @Override

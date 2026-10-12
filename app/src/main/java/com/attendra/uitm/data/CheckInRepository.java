@@ -2,6 +2,7 @@ package com.attendra.uitm.data;
 
 import com.attendra.uitm.model.Attendance;
 import com.attendra.uitm.model.AttendanceRecord;
+import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.model.Session;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.ServerValue;
@@ -31,9 +32,28 @@ public class CheckInRepository {
     /**
      * Is this student allowed into this session? Class/Test/SULAM: the
      * student's group is one of the session's groups. Club: they are in
-     * clubMembers/{clubId}.
+     * clubMembers/{clubId}. And the session is in the student's world: real
+     * students never join a Test Lecturer session, and the reverse (TestWorld).
      */
     public void isEligible(Session s, String uid, Callback<Boolean> callback) {
+        TestWorld.mine(Registration.ROLE_STUDENT, new Callback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean test) {
+                if (test != TestWorld.of(s)) {
+                    callback.onSuccess(false);
+                } else {
+                    isMember(s, uid, callback);
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void isMember(Session s, String uid, Callback<Boolean> callback) {
         if (s.isClub()) {
             Db.readOnce(Db.root().child("clubMembers").child(s.clubId).child(uid),
                     new Callback<DataSnapshot>() {

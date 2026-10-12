@@ -16,6 +16,7 @@ import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.data.Subscriptions;
 import com.attendra.uitm.data.TeachingRepository;
+import com.attendra.uitm.data.TestWorld;
 import com.attendra.uitm.data.UserRepository;
 import com.attendra.uitm.databinding.FragmentClassesBinding;
 import com.attendra.uitm.databinding.ItemClassCardBinding;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Lecturer Classes tab (CLAUDE.md 12.5, C5b "Teaching Classes Page"):
@@ -155,8 +157,20 @@ public class ClassesFragment extends Fragment {
         countHandles.put(path, subs.listen(Db.root().child(path), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
-                into.put(id, (int) snapshot.getChildrenCount());
-                render();
+                // Count only students in the lecturer's world (the Test Student is hidden).
+                TestWorld.forLecturer(TestWorld.keys(snapshot), new Callback<Set<String>>() {
+                    @Override
+                    public void onSuccess(Set<String> uids) {
+                        if (!countHandles.containsKey(path)) return; // stopped
+                        into.put(id, uids.size());
+                        render();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        showError(message);
+                    }
+                });
             }
 
             @Override

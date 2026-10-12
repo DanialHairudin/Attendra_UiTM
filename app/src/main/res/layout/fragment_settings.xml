@@ -89,21 +89,6 @@
                 android:orientation="vertical" />
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- DEBUG only (CLAUDE.md 12.4) -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/card_tester"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:id="@+id/list_tester"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-        </com.google.android.material.card.MaterialCardView>
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_log_out"
             style="@style/Widget.Attendra.Button.Danger"

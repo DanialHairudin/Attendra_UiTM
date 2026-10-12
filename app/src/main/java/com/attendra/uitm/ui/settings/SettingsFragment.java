@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,7 +11,6 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 
 import com.attendra.uitm.R;
-import com.attendra.uitm.data.AuthRepository;
 import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Subscriptions;
 import com.attendra.uitm.data.UserRepository;
@@ -25,7 +23,6 @@ import com.attendra.uitm.ui.student.StudentMainActivity;
 import com.attendra.uitm.util.HomeRouter;
 import com.attendra.uitm.util.NotificationPrefs;
 import com.attendra.uitm.util.Names;
-import com.attendra.uitm.util.TestAccounts;
 import com.attendra.uitm.util.ThemePrefs;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -35,7 +32,7 @@ import com.google.firebase.database.DataSnapshot;
 
 /**
  * Settings Page for both roles: profile button, theme (Light / Dark / System),
- * My clubs, the DEBUG-only "Switch test account" row (CLAUDE.md 12.4) and Log out.
+ * My clubs, session notifications (students) and Log out.
  */
 public class SettingsFragment extends Fragment {
 
@@ -84,8 +81,6 @@ public class SettingsFragment extends Fragment {
 
         // Only students receive notifications.
         if (Registration.ROLE_STUDENT.equals(role)) addNotificationsRow();
-
-        setUpSwitchTestAccount();
 
         binding.btnLogOut.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
@@ -163,52 +158,6 @@ public class SettingsFragment extends Fragment {
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
-    }
-
-    // ------------------------------------------------------ switch test account
-
-    /**
-     * DEBUG only: sign out, then sign in as the other test account
-     * (lecturer ↔ student) and open that account's dashboard.
-     */
-    private void setUpSwitchTestAccount() {
-        String target = TestAccounts.otherRole(role);
-        if (!TestAccounts.available(target)) return; // release build, or no test login set
-
-        binding.cardTester.setVisibility(View.VISIBLE);
-        ItemSettingRowBinding row = addRow(binding.listTester, R.string.tester_switch);
-        row.settingSubtitle.setText(Registration.ROLE_LECTURER.equals(target)
-                ? R.string.tester_switch_to_lecturer : R.string.tester_switch_to_student);
-        row.getRoot().setOnClickListener(v -> {
-            row.getRoot().setEnabled(false);
-            binding.btnLogOut.setEnabled(false);
-            row.settingSubtitle.setText(R.string.tester_switching);
-
-            AuthRepository auth = new AuthRepository();
-            auth.signOut();
-            auth.login(TestAccounts.email(target), TestAccounts.password(target),
-                    new Callback<AuthRepository.Route>() {
-                        @Override
-                        public void onSuccess(AuthRepository.Route route) {
-                            if (getActivity() == null) return;
-                            if (route.unverified) {
-                                // The test account is not marked verified in the database.
-                                auth.signOut();
-                                HomeRouter.openSplash(getActivity());
-                            } else {
-                                HomeRouter.open(getActivity(), route);
-                            }
-                        }
-
-                        @Override
-                        public void onError(String message) {
-                            if (getActivity() == null) return;
-                            // Already signed out, so the only safe place is the start.
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                            HomeRouter.openSplash(getActivity());
-                        }
-                    });
-        });
     }
 
     /** "Session notifications" on/off (NotificationPrefs). Off hides the unread badge. */

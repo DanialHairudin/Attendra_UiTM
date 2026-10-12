@@ -116,6 +116,7 @@ public class AuthRepository {
                 users.loadAccountState(user.getUid(), role, new Callback<UserRepository.AccountState>() {
                     @Override
                     public void onSuccess(UserRepository.AccountState s) {
+                        TestWorld.remember(user.getUid(), s.isTest);
                         boolean unverified = !s.emailVerified && !s.isTest;
                         boolean needsName = !s.isTest && !s.hasPreferredName;
                         callback.onSuccess(new Route(role, unverified, needsName));

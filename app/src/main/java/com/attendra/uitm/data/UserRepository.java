@@ -48,6 +48,33 @@ public class UserRepository {
                 : Db.root().child("studentClubs").child(uid);
     }
 
+    /**
+     * Joins or leaves a club (student), or starts or stops advising it (lecturer),
+     * in ONE updateChildren so the indexes stay in sync (CLAUDE.md C4):
+     * - student:  studentClubs/{uid}/{clubId} and clubMembers/{clubId}/{uid}
+     * - lecturer: clubAdvisors/{clubId}/{uid}
+     * null removes the entry.
+     */
+    public void setClub(String uid, String role, String clubId, boolean on,
+                        Callback<Void> callback) {
+        Object value = on ? Boolean.TRUE : null;
+        Map<String, Object> updates = new HashMap<>();
+        if (Registration.ROLE_LECTURER.equals(role)) {
+            updates.put("clubAdvisors/" + clubId + "/" + uid, value);
+        } else {
+            updates.put("studentClubs/" + uid + "/" + clubId, value);
+            updates.put("clubMembers/" + clubId + "/" + uid, value);
+        }
+        Db.write(updates, callback);
+    }
+
+    /** Saves {lecturers|students}/{uid}/phone, e.g. "+60123456789". */
+    public void setPhone(String uid, String role, String phone, Callback<Void> callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put(profileNode(role) + "/" + uid + "/phone", phone);
+        Db.write(updates, callback);
+    }
+
     /** Club IDs (sorted) from a clubsQuery() snapshot. */
     public static List<String> clubIds(DataSnapshot snapshot, String uid, String role) {
         List<String> ids = new ArrayList<>();

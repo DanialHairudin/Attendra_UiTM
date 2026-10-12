@@ -75,7 +75,9 @@
                     android:orientation="vertical" />
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Tapping the card opens My Clubs, where clubs are turned on or off. -->
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_clubs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp">
@@ -107,13 +109,6 @@
                     </HorizontalScrollView>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/profile_edit_later"
-                android:textAppearance="@style/TextAppearance.Attendra.Caption" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

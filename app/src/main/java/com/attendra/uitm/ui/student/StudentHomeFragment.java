@@ -18,6 +18,7 @@ import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.data.SessionWatcher;
+import com.attendra.uitm.data.TestWorld;
 import com.attendra.uitm.data.Subscriptions;
 import com.attendra.uitm.data.UserRepository;
 import com.attendra.uitm.databinding.FragmentStudentHomeBinding;
@@ -78,6 +79,8 @@ public class StudentHomeFragment extends Fragment {
 
     private boolean seedReady;
     private Map<String, Session> mySessions = new HashMap<>();
+    /** True for the Test Student, who only sees the Test Lecturer's sessions (TestWorld). */
+    private boolean myTest;
     private String watchedGroup;
     /** The session shown on the open-session card (for Simulate check-in). */
     private Session openSession;
@@ -116,6 +119,7 @@ public class StudentHomeFragment extends Fragment {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
         String uid = user.getUid();
+        myTest = TestWorld.cached(uid);
 
         SeedCache.load(new Callback<Void>() {
             @Override
@@ -147,6 +151,11 @@ public class StudentHomeFragment extends Fragment {
                 new Callback<DataSnapshot>() {
                     @Override
                     public void onSuccess(DataSnapshot profile) {
+                        boolean test = Boolean.TRUE.equals(profile.child("isTest").getValue(Boolean.class));
+                        if (test != myTest) {
+                            myTest = test;
+                            render();
+                        }
                         String name = profile.child("name").getValue(String.class);
                         if (binding != null && name != null) {
                             binding.txtGreeting.setText(getString(R.string.greeting_student,
@@ -265,6 +274,8 @@ public class StudentHomeFragment extends Fragment {
     private void renderOpenSession(long now) {
         Session open = null;
         for (Session s : mySessions.values()) {
+            // Real students never see test sessions, and the Test Student only sees those.
+            if (TestWorld.of(s) != myTest) continue;
             if (s.isCheckInOpen(now) && (open == null || s.end < open.end)) open = s;
         }
         if (open == null) {
@@ -281,7 +292,7 @@ public class StudentHomeFragment extends Fragment {
         binding.btnCheckIn.setVisibility(done ? View.GONE : View.VISIBLE);
         binding.txtCheckedIn.setVisibility(done ? View.VISIBLE : View.GONE);
         openSession = open;
-        binding.btnSimulate.setVisibility(BuildConfig.DEBUG && !done ? View.VISIBLE : View.GONE);
+        binding.btnSimulate.setVisibility(BuildConfig.DEBUG && myTest && !done ? View.VISIBLE : View.GONE);
     }
 
     /**

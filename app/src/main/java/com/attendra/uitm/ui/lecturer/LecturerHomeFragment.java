@@ -18,6 +18,7 @@ import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.data.SessionWatcher;
 import com.attendra.uitm.data.Subscriptions;
+import com.attendra.uitm.data.TestWorld;
 import com.attendra.uitm.data.UserRepository;
 import com.attendra.uitm.databinding.FragmentLecturerHomeBinding;
 import com.attendra.uitm.databinding.ItemSessionRowBinding;
@@ -307,8 +308,21 @@ public class LecturerHomeFragment extends Fragment {
             liveSubs.listen(Db.root().child(path), new Callback<DataSnapshot>() {
                 @Override
                 public void onSuccess(DataSnapshot snapshot) {
-                    expectedByIndex.put(path, (int) snapshot.getChildrenCount());
-                    render();
+                    // Only students in the session's world (real or test) are expected.
+                    TestWorld.filter(TestWorld.keys(snapshot), TestWorld.of(live),
+                            new Callback<Set<String>>() {
+                                @Override
+                                public void onSuccess(Set<String> uids) {
+                                    if (!expectedByIndex.containsKey(path)) return; // stopped
+                                    expectedByIndex.put(path, uids.size());
+                                    render();
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    showError(message);
+                                }
+                            });
                 }
 
                 @Override
