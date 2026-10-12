@@ -64,6 +64,14 @@ public class SessionAttendanceWatcher {
     /** All attempts, oldest first. null until attempts/{sid} has loaded once. */
     @Nullable
     public List<Attempt> attempts;
+    /**
+     * The latest raw snapshots of attendance/{sid} and attempts/{sid}, for the
+     * live check-in map (map/LiveCheckInMap.fromSnapshots). null until loaded.
+     */
+    @Nullable
+    public DataSnapshot attendanceSnapshot;
+    @Nullable
+    public DataSnapshot attemptsSnapshot;
     /** Index path → its student uids; null value = that index is still loading. */
     private final Map<String, Set<String>> eligibleByIndex = new LinkedHashMap<>();
     public final Map<String, Person> people = new HashMap<>();
@@ -103,6 +111,7 @@ public class SessionAttendanceWatcher {
                     }
                 }
                 records = map;
+                attendanceSnapshot = snapshot;
                 listener.onChanged();
             }
 
@@ -123,6 +132,7 @@ public class SessionAttendanceWatcher {
                     }
                 }
                 attempts = list;
+                attemptsSnapshot = snapshot;
                 listener.onChanged();
             }
 

@@ -52,6 +52,30 @@ public final class Formats {
         return c.getTimeInMillis();
     }
 
+    /** "29" (History rows). */
+    public static String dayOfMonth(long time) {
+        return new SimpleDateFormat("d", Locale.ENGLISH).format(new Date(time));
+    }
+
+    /** "Sep" (History rows). */
+    public static String shortMonth(long time) {
+        return new SimpleDateFormat("MMM", Locale.ENGLISH).format(new Date(time));
+    }
+
+    /** "2026-09-29 14:05" (CSV export: sorts correctly in a spreadsheet). */
+    public static String isoDateTime(long time) {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH).format(new Date(time));
+    }
+
+    /** Midnight on the Monday of the week that contains `time` (History "This week"). */
+    public static long startOfWeek(long time) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(startOfDay(time));
+        int daysSinceMonday = (c.get(Calendar.DAY_OF_WEEK) + 5) % 7; // Mon=0 … Sun=6
+        c.add(Calendar.DAY_OF_MONTH, -daysSinceMonday);
+        return c.getTimeInMillis();
+    }
+
     /** True if both times fall on the same calendar day. */
     public static boolean sameDay(long a, long b) {
         return startOfDay(a) == startOfDay(b);

@@ -34,10 +34,7 @@ public class StudentMainActivity extends MainTabsActivity {
 
     @Override
     protected Fragment createTab(int itemId) {
-        if (itemId == R.id.nav_attendance) {
-            return PlaceholderTabFragment.newInstance(R.string.my_attendance_title,
-                    R.drawable.ic_chart, R.string.my_attendance_later);
-        }
+        if (itemId == R.id.nav_attendance) return new MyAttendanceFragment();
         if (itemId == R.id.nav_notifications) {
             return PlaceholderTabFragment.newInstance(R.string.notifications_title,
                     R.drawable.ic_bell, R.string.notifications_later);

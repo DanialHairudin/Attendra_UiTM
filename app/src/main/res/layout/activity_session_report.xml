@@ -190,4 +190,17 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- C11: share the full list as a CSV file (email, Drive, WhatsApp...) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_share_csv"
+        style="@style/Widget.Attendra.Button.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginStart="@dimen/screen_padding"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="@dimen/screen_padding"
+        android:layout_marginBottom="20dp"
+        android:enabled="false"
+        android:text="@string/share_csv" />
 </LinearLayout>

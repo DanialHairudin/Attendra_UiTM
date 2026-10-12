@@ -140,7 +140,11 @@
     <string name="empty_today_body">Sessions you create for today will appear here.</string>
     <string name="session_report">Session report</string>
     <string name="history_title">Session history</string>
-    <string name="history_later">Your past sessions and their reports will appear here in a later version.</string>
+    <string name="history_empty_title">No sessions yet</string>
+    <string name="history_empty_body">Sessions you create appear here, with their attendance and report.</string>
+    <string name="history_none_title">Nothing here</string>
+    <string name="history_none_body">No sessions match this filter.</string>
+    <string name="n_of_m">%1$d of %2$d</string>
 
     <!-- Lecturer Classes tab and Class Detail Page -->
     <string name="classes_title">Teaching classes</string>
@@ -175,7 +179,12 @@
     <!-- Read aloud by TalkBack for a course row -->
     <string name="course_pct_description">%1$s, %2$d percent attendance</string>
     <string name="my_attendance_title">My attendance</string>
-    <string name="my_attendance_later">Your attendance per course and your full history will appear here in a later version.</string>
+    <string name="my_history_title">History</string>
+    <string name="n_present">%1$d present</string>
+    <string name="n_late">%1$d late</string>
+    <string name="n_absent">%1$d absent</string>
+    <string name="of_total">of %1$d</string>
+    <string name="n_of_total_sessions">%1$d of %2$d sessions</string>
     <string name="notifications_title">Notifications</string>
     <string name="notifications_later">Session alerts will appear here in a later version.</string>
 
@@ -312,6 +321,10 @@
     <!-- Live Monitor, Manual Attendance, Session Report (C7) -->
     <string name="status_not_yet">Not yet</string>
     <string name="filter_all">All</string>
+    <string name="filter_class">Class</string>
+    <string name="filter_test">Test</string>
+    <string name="filter_activity">Activity</string>
+    <string name="filter_this_week">This week</string>
     <string name="countdown_left">left to check in</string>
     <string name="countdown_opens">check-in opens</string>
     <string name="countdown_over">check-in time is over</string>
@@ -350,6 +363,19 @@
     <string name="report_attended">attended (%1$d of %2$d)</string>
     <string name="report_no_absent_title">Nobody was absent</string>
     <string name="report_no_absent_body">Every student checked in or was marked.</string>
+    <string name="share_csv">Share CSV</string>
+    <string name="csv_subject">Attendance: %1$s (%2$s)</string>
+    <string name="csv_failed">Could not create the CSV file. Please try again.</string>
+    <string-array name="csv_columns">
+        <item>Student ID</item>
+        <item>Name</item>
+        <item>Group</item>
+        <item>Status</item>
+        <item>Time</item>
+        <item>Method</item>
+        <item>Distance (m)</item>
+        <item>Reason</item>
+    </string-array>
     <string name="simulate_check_in">Simulate check-in (debug)</string>
     <string name="simulate_done">Simulated check-in saved as %1$s.</string>
 
@@ -441,6 +467,8 @@
     <string name="live_map_title">Check-in locations</string>
     <string name="live_map_show_all">Show all</string>
     <string name="live_map_description">Map of where students checked in</string>
+    <string name="live_map_distance">%1$d m from the venue</string>
+    <string name="live_map_no_location">No location for this student (not checked in yet or marked manually).</string>
     <string name="live_map_legend">Green: Present   Orange: Late   Red: Rejected. Tap a student below to see where they checked in.</string>
 
     <!-- C9 Check in (CLAUDE.md section 6) -->

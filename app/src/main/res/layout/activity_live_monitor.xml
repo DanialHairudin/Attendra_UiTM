@@ -42,6 +42,7 @@
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_live"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -125,6 +126,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp" />
+
+            <!-- Where each student checked in (step M4) -->
+            <include
+                android:id="@+id/live_map"
+                layout="@layout/view_live_map" />
 
             <HorizontalScrollView
                 android:layout_width="match_parent"

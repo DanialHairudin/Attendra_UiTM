@@ -10,7 +10,6 @@ import com.attendra.uitm.databinding.ActivityLecturerMainBinding;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.ui.session.CreateSessionActivity;
 import com.attendra.uitm.ui.common.MainTabsActivity;
-import com.attendra.uitm.ui.common.PlaceholderTabFragment;
 import com.attendra.uitm.ui.settings.SettingsFragment;
 
 /**
@@ -37,10 +36,7 @@ public class LecturerMainActivity extends MainTabsActivity {
     @Override
     protected Fragment createTab(int itemId) {
         if (itemId == R.id.nav_classes) return new ClassesFragment();
-        if (itemId == R.id.nav_history) {
-            return PlaceholderTabFragment.newInstance(R.string.history_title, R.drawable.ic_clock,
-                    R.string.history_later);
-        }
+        if (itemId == R.id.nav_history) return new HistoryFragment();
         if (itemId == R.id.nav_settings) return SettingsFragment.newInstance(role());
         return new LecturerHomeFragment();
     }

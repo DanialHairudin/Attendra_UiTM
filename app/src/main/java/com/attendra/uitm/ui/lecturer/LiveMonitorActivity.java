@@ -17,6 +17,7 @@ import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.data.SessionAttendanceWatcher;
 import com.attendra.uitm.databinding.ActivityLiveMonitorBinding;
+import com.attendra.uitm.map.LiveCheckInMap;
 import com.attendra.uitm.databinding.SheetManualBinding;
 import com.attendra.uitm.databinding.SheetRadiusBinding;
 import com.attendra.uitm.model.Attendance;
@@ -34,11 +35,14 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Live Monitor Page (CLAUDE.md section 5). Everything is live
@@ -47,6 +51,7 @@ import java.util.Locale;
  *
  * - Header: title, course · groups, room or map pin · radius, and a countdown.
  * - Tiles: Present · Late · Not yet · Rejected.
+ * - Check-in map (step M4): where each student checked in; tap a row to fly there.
  * - Filter chips: All · Present · Late · Not yet, then the student list.
  * - "Rejected attempts" with the reason (Outside / Mock location).
  * - Buttons: Mark (Manual Attendance sheet), +10 min, Radius (sheet), Close.
@@ -72,6 +77,13 @@ public class LiveMonitorActivity extends BaseActivity {
     private boolean seedReady;
     private boolean busy;
     private String filter = FILTER_ALL;
+    /** Read-only check-in map under the tiles (step M4). */
+    private LiveCheckInMap liveMap;
+    /** What the map last drew, so it is only redrawn when something changed. */
+    private String drawnVenue;
+    private Object drawnAttendance;
+    private Object drawnAttempts;
+    private int drawnNames = -1;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable tick = new Runnable() {
@@ -105,6 +117,9 @@ public class LiveMonitorActivity extends BaseActivity {
         binding.btnRadius.setOnClickListener(v -> showRadiusSheet());
         binding.btnClose.setOnClickListener(v -> confirmClose());
         binding.btnReport.setOnClickListener(v -> openReport());
+
+        liveMap = new LiveCheckInMap(binding.liveMap.mapLive);
+        binding.liveMap.btnShowAll.setOnClickListener(v -> liveMap.showAll());
 
         watcher = new SessionAttendanceWatcher(sessionId, new SessionAttendanceWatcher.Listener() {
             @Override
@@ -145,6 +160,24 @@ public class LiveMonitorActivity extends BaseActivity {
         handler.removeCallbacks(tick);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        liveMap.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        liveMap.onPause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        liveMap.onDestroyView();
+        super.onDestroy();
+    }
+
     private void addFilter(String value, @StringRes int label) {
         Chip chip = new Chip(this); // Widget.Attendra.Pill from the theme
         chip.setText(label);
@@ -180,6 +213,7 @@ public class LiveMonitorActivity extends BaseActivity {
         binding.tiles.nThird.setText(String.valueOf(watcher.notYet().size()));
         binding.tiles.nRejected.setText(String.valueOf(watcher.rejectedCount()));
 
+        renderMap(s);
         renderStudents();
         renderRejected();
 
@@ -216,8 +250,9 @@ public class LiveMonitorActivity extends BaseActivity {
         Collections.sort(uids, (a, b) -> watcher.person(a).name
                 .compareToIgnoreCase(watcher.person(b).name));
         for (String uid : uids) {
-            AttendeeText.addStudent(binding.listStudents, watcher.person(uid),
+            View row = AttendeeText.addStudent(binding.listStudents, watcher.person(uid),
                     watcher.records == null ? null : watcher.records.get(uid));
+            row.setOnClickListener(v -> focusOnMap(uid));
         }
     }
 
@@ -226,7 +261,45 @@ public class LiveMonitorActivity extends BaseActivity {
         binding.groupRejected.setVisibility(rejected.isEmpty() ? View.GONE : View.VISIBLE);
         binding.listRejected.removeAllViews();
         for (Attempt a : rejected) {
-            AttendeeText.addRejected(binding.listRejected, watcher.person(a.uid), a);
+            View row = AttendeeText.addRejected(binding.listRejected, watcher.person(a.uid), a);
+            row.setOnClickListener(v -> focusOnMap(a.uid));
+        }
+    }
+
+    /**
+     * Check-in map (step M4): the venue circle, and one dot per student where
+     * they checked in (green present, orange late, red rejected). Only redrawn
+     * when the session's centre/radius, attendance, attempts or names change,
+     * so an open name bubble is not closed by an unrelated update.
+     */
+    private void renderMap(Session s) {
+        String venue = s.lat + "," + s.lng + "," + s.radius;
+        if (!venue.equals(drawnVenue)) {
+            drawnVenue = venue;
+            liveMap.setVenue(s.lat, s.lng, s.radius);
+        }
+        DataSnapshot attendance = watcher.attendanceSnapshot;
+        DataSnapshot attempts = watcher.attemptsSnapshot;
+        if (attendance == null || attempts == null) return;
+        if (attendance == drawnAttendance && attempts == drawnAttempts
+                && watcher.people.size() == drawnNames) return;
+        drawnAttendance = attendance;
+        drawnAttempts = attempts;
+        drawnNames = watcher.people.size();
+
+        Map<String, String> names = new HashMap<>();
+        for (Map.Entry<String, SessionAttendanceWatcher.Person> e : watcher.people.entrySet()) {
+            names.put(e.getKey(), e.getValue().name);
+        }
+        liveMap.setPoints(LiveCheckInMap.fromSnapshots(attendance, attempts, names));
+    }
+
+    /** A student row was tapped: scroll up to the map and fly to their dot. */
+    private void focusOnMap(String uid) {
+        if (liveMap.focusStudent(uid)) {
+            binding.scrollLive.smoothScrollTo(0, binding.liveMap.getRoot().getTop());
+        } else {
+            showMessage(getString(R.string.live_map_no_location));
         }
     }
 

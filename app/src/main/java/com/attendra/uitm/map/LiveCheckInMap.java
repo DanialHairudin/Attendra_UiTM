@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.core.content.ContextCompat;
 
 import com.attendra.uitm.R;
+import com.attendra.uitm.util.Formats;
 import com.google.firebase.database.DataSnapshot;
 
 import org.osmdroid.util.BoundingBox;
@@ -13,12 +14,9 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polygon;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -35,7 +33,6 @@ public class LiveCheckInMap {
     private final List<GeoPoint> allPoints = new ArrayList<>();
     private final Polygon circle;
     private GeoPoint venue;
-    private final SimpleDateFormat timeFmt = new SimpleDateFormat("h:mm a", Locale.getDefault());
 
     public LiveCheckInMap(MapView map) {
         this.map = map;
@@ -71,8 +68,8 @@ public class LiveCheckInMap {
             m.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
             m.setIcon(MapIcons.dot(ctx, MapIcons.statusColor(p.status)));
             m.setTitle(p.name);
-            m.setSnippet(label(p.status) + " · " + timeFmt.format(new Date(p.time)));
-            m.setSubDescription(Math.round(p.distanceM) + " m from the venue");
+            m.setSnippet(ctx.getString(label(p.status)) + " · " + Formats.time(p.time));
+            m.setSubDescription(ctx.getString(R.string.live_map_distance, Math.round(p.distanceM)));
             map.getOverlays().add(m);
             markers.put(p.uid, m);
             allPoints.add(g);
@@ -107,10 +104,10 @@ public class LiveCheckInMap {
     public void onPause() { map.onPause(); }
     public void onDestroyView() { map.onDetach(); }
 
-    private static String label(String status) {
-        if ("present".equals(status)) return "Present";
-        if ("late".equals(status)) return "Late";
-        return "Rejected";
+    private static int label(String status) {
+        if ("present".equals(status)) return R.string.status_present;
+        if ("late".equals(status)) return R.string.status_late;
+        return R.string.status_rejected;
     }
 
     /**

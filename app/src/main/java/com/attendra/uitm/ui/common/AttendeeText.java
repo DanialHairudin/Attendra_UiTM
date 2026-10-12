@@ -1,6 +1,7 @@
 package com.attendra.uitm.ui.common;
 
 import android.content.Context;
+import android.view.View;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
@@ -42,8 +43,9 @@ public final class AttendeeText {
      * - checked in by GPS: "2025000001 · 9:05 AM · 23 m"
      * - marked manually:   "2025000001 · 9:05 AM · Manual: phone GPS not working"
      * - not yet:           "2025000001 · CDCS2405A"
+     * Returns the row, so a screen can make it tappable.
      */
-    public static void addStudent(LinearLayout list, SessionAttendanceWatcher.Person p,
+    public static View addStudent(LinearLayout list, SessionAttendanceWatcher.Person p,
                                   @Nullable AttendanceRecord r) {
         Context c = list.getContext();
         ItemAttendeeRowBinding row = ItemAttendeeRowBinding.inflate(
@@ -65,10 +67,11 @@ public final class AttendeeText {
         row.rowMeta.setText(meta);
         statusChip(row.rowChip, r == null ? null : r.status);
         Ui.addRow(list, row.getRoot());
+        return row.getRoot();
     }
 
     /** One rejected attempt: "9:05 AM · 214 m away" with a red reason chip. */
-    public static void addRejected(LinearLayout list, SessionAttendanceWatcher.Person p,
+    public static View addRejected(LinearLayout list, SessionAttendanceWatcher.Person p,
                                    Attempt a) {
         Context c = list.getContext();
         ItemAttendeeRowBinding row = ItemAttendeeRowBinding.inflate(
@@ -81,6 +84,7 @@ public final class AttendeeText {
         row.rowChip.setText(reasonLabel(a.reason));
         Ui.tintBadge(row.rowChip, R.color.rejected, R.color.rejected_tint);
         Ui.addRow(list, row.getRoot());
+        return row.getRoot();
     }
 
     /** MOCK_LOCATION → "Mock location", OUTSIDE_RADIUS → "Outside". */
