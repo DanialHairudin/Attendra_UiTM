@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One in-app notification ("notifs" in the prototype): bell tile, title,
+     body, time, and a gold dot while it is unread. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Attendra.ListRow"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="horizontal">
+
+    <ImageView
+        style="@style/Widget.Attendra.IconTile"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_bell" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/notif_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Attendra.RowTitle" />
+
+        <TextView
+            android:id="@+id/notif_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:gravity="end"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/notif_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+
+        <View
+            android:id="@+id/notif_dot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_circle"
+            android:backgroundTint="@color/gold" />
+    </LinearLayout>
+</LinearLayout>
