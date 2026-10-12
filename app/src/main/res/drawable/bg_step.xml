@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One segment of the 4-step progress bar in the Create Session wizard (.steps div). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="9dp" />
+    <solid android:color="@color/line" />
+</shape>

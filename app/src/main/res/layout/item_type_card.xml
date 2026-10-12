@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One session type card on the Session Type Page (prototype .typecard).
+     Selected = 2dp gold border, set in TypeStepFragment. -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardCornerRadius="18dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="132dp"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/type_mark"
+            style="@style/Widget.Attendra.Avatar"
+            android:background="@drawable/bg_icon_tile"
+            android:importantForAccessibility="no" />
+
+        <TextView
+            android:id="@+id/type_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textAppearance="@style/TextAppearance.Attendra.RowTitle" />
+
+        <TextView
+            android:id="@+id/type_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

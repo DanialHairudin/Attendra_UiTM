@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Radius sheet on the Live Monitor: change the geofence while the session runs. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/screen_padding"
+    android:paddingTop="8dp"
+    android:paddingEnd="@dimen/screen_padding"
+    android:paddingBottom="28dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:accessibilityHeading="true"
+            android:text="@string/where_radius"
+            android:textAppearance="@style/TextAppearance.Attendra.H3"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/txt_radius"
+            style="@style/Widget.Attendra.Badge.Gold"
+            android:fontFeatureSettings="tnum" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/radius_sheet_body"
+        android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_radius"
+        style="@style/Widget.Attendra.Slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:contentDescription="@string/where_radius"
+        android:stepSize="5"
+        android:valueFrom="30"
+        android:valueTo="150" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/where_radius_min"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/where_radius_max"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginTop="16dp"
+        android:text="@string/name_save" />
+</LinearLayout>

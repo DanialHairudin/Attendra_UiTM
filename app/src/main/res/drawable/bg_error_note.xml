@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Warning note ("Building location not set"): rejected colour at 12% over the
+     surface colour, with a rejected border. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="16dp" />
+            <solid android:color="@color/surface" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="16dp" />
+            <solid android:color="@color/rejected_tint" />
+            <stroke android:width="1dp" android:color="@color/rejected" />
+        </shape>
+    </item>
+</layer-list>

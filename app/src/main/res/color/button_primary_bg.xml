@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Primary button fill: gold, faded when disabled so it clearly cannot be tapped. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:alpha="0.38" android:color="@color/gold" android:state_enabled="false" />
+    <item android:color="@color/gold" />
+</selector>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A choosable row on the Participants Page: a radio (pick one) or a check box
+     (tick several), a title, a small line, and an optional gold badge.
+     The whole row is the touch target; the radio / check box only shows the state. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Attendra.ListRow"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="horizontal">
+
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/pick_radio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:focusable="false"
+        android:importantForAccessibility="no"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        app:buttonTint="@color/gold" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/pick_check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:focusable="false"
+        android:importantForAccessibility="no"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:visibility="gone"
+        app:buttonTint="@color/gold" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/pick_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Attendra.RowTitle" />
+
+        <TextView
+            android:id="@+id/pick_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/pick_badge"
+        style="@style/Widget.Attendra.Badge.Gold"
+        android:layout_marginStart="12dp"
+        android:visibility="gone" />
+</LinearLayout>

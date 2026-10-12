@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Where" step map (included by fragment_step_where.xml).
+     Map pin mode (SULAM, outside Club): search + editable pin + "Use my location".
+     Building mode (Class, Test, inside Club): the search, suggestions, button and
+     hint are hidden, and the map only previews the building's geofence. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilPlaceSearch"
+        style="@style/Widget.Attendra.TextInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:endIconMode="clear_text"
+        app:startIconContentDescription="@string/place_search_button"
+        app:startIconDrawable="@drawable/ic_search">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPlaceSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/venue_search_hint"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/tvSearchStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:accessibilityLiveRegion="polite"
+        android:textAppearance="@style/TextAppearance.Attendra.Caption"
+        android:visibility="gone" />
+
+    <!-- Suggestions appear here while typing. -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardPlaceSuggestions"
+        style="@style/Widget.Attendra.Card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:visibility="gone">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvPlaceSuggestions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/Widget.Attendra.Card"
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:layout_marginTop="16dp">
+
+        <org.osmdroid.views.MapView
+            android:id="@+id/mapVenue"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/venue_map_description" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMyLocation"
+            style="@style/Widget.Attendra.Button.Secondary"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="10dp"
+            android:backgroundTint="@color/surface"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:text="@string/venue_use_my_location"
+            android:textSize="13sp"
+            app:icon="@drawable/ic_target"
+            app:iconSize="16dp"
+            app:iconTint="@color/goldText" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/tvPinHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/venue_pin_hint"
+        android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+</LinearLayout>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four count tiles in a row (Live Monitor: Present · Late · Not yet · Rejected;
+     Session Report: Present · Late · Absent · Rejected). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <LinearLayout style="@style/Widget.Attendra.Tile">
+
+        <TextView
+            android:id="@+id/n_present"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Attendra.Number"
+            android:textColor="@color/present" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_present"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/Widget.Attendra.Tile"
+        android:layout_marginStart="8dp">
+
+        <TextView
+            android:id="@+id/n_late"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Attendra.Number"
+            android:textColor="@color/late" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_late"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/Widget.Attendra.Tile"
+        android:layout_marginStart="8dp">
+
+        <TextView
+            android:id="@+id/n_third"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Attendra.Number"
+            android:textColor="@color/absent" />
+
+        <TextView
+            android:id="@+id/label_third"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/Widget.Attendra.Tile"
+        android:layout_marginStart="8dp">
+
+        <TextView
+            android:id="@+id/n_rejected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Attendra.Number"
+            android:textColor="@color/rejected" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_rejected"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </LinearLayout>
+</LinearLayout>

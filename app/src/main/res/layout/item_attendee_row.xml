@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One student on the Live Monitor / Session Report: initials, name, a small
+     line (student ID, time, distance or reason) and a status chip. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Attendra.ListRow"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@null"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/row_avatar"
+        style="@style/Widget.Attendra.Avatar"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/row_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Attendra.RowTitle"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/row_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFeatureSettings="tnum"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/row_chip"
+        style="@style/Widget.Attendra.Badge"
+        android:layout_marginStart="12dp" />
+</LinearLayout>

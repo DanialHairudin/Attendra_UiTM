@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Round icon background on Check in / Result. Colour set with backgroundTint
+     (present_tint, late_tint, rejected_tint, gold_tint). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="@android:color/white" />
+</shape>

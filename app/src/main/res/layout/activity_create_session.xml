@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Create Session wizard (CLAUDE.md section 5), matching cType → cWho → cWhere →
+     cWhen → cReview in the prototype. The steps are Fragments in step_container. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/wizard_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="vertical">
+
+    <!-- App bar: back, "New session", "2 of 4" -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/screen_padding"
+        android:paddingTop="20dp"
+        android:paddingEnd="@dimen/screen_padding"
+        android:paddingBottom="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_back"
+            style="@style/Widget.Attendra.IconButton"
+            android:contentDescription="@string/back"
+            app:icon="@drawable/ic_arrow_back" />
+
+        <TextView
+            android:id="@+id/txt_wizard_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:accessibilityHeading="true"
+            android:fontFamily="@font/manrope_bold"
+            android:text="@string/new_session"
+            android:textColor="@color/ink"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/txt_step"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </LinearLayout>
+
+    <!-- 4-step progress bar -->
+    <LinearLayout
+        android:id="@+id/steps_bar"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginStart="@dimen/screen_padding"
+        android:layout_marginEnd="@dimen/screen_padding"
+        android:importantForAccessibility="no"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/step_1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_step" />
+
+        <View
+            android:id="@+id/step_2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_step" />
+
+        <View
+            android:id="@+id/step_3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_step" />
+
+        <View
+            android:id="@+id/step_4"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_step" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <FrameLayout
+            android:id="@+id/step_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/txt_wizard_loading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="24dp"
+            android:text="@string/loading"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+    </FrameLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_continue"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginStart="@dimen/screen_padding"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="@dimen/screen_padding"
+        android:layout_marginBottom="24dp"
+        android:enabled="false"
+        android:text="@string/continue_label" />
+</LinearLayout>
