@@ -1,0 +1,357 @@
+{
+  /*
+   * Attendra UiTM: Realtime Database security rules (build step C12).
+   * Plan: CLAUDE.md section 8, updated by section 12 (roles / lecturers /
+   * students split, and our own 6-digit email code).
+   *
+   * Words used below:
+   * - "verified": {lecturers|students}/{uid}/emailVerified == true. Firebase
+   *   Auth's own email_verified is not used, because we send our own code.
+   * - "registration": the ONE multi-path write right after sign-up, before
+   *   the email is verified. It is allowed because the profile does not exist yet.
+   * - now: the server's clock. ServerValue.TIMESTAMP writes exactly `now`.
+   *
+   * Anything not listed here can be neither read nor written (default deny).
+   * Rules are not filters: a screen that reads a node must be allowed to
+   * read ALL of it.
+   */
+  "rules": {
+
+    /* ---------------- Seed data (imported by Danny, no client writes) ---------------- */
+
+    // Public, even signed out: the Register screen needs them before the account exists.
+    "programmes": { ".read": true, ".write": false },
+    "groups": { ".read": true, ".write": false },
+    "clubs": { ".read": true, ".write": false },
+
+    // Any signed-in user.
+    "courses": { ".read": "auth != null", ".write": false },
+    "buildings": { ".read": "auth != null", ".write": false },
+    "venues": { ".read": "auth != null", ".write": false },
+
+    /* ---------------- Accounts ---------------- */
+
+    // Set once at registration and never changed (a role cannot be switched).
+    "roles": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && !data.exists()",
+        ".validate": "newData.val() === 'lecturer' || newData.val() === 'student'"
+      }
+    },
+
+    "students": {
+      "$uid": {
+        // The student, and verified lecturers (they list students in their sessions and classes).
+        ".read": "auth != null && (auth.uid === $uid || (root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true))",
+        // Registration: create once, together with roles/{uid} = "student".
+        ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.parent().parent().child('roles/' + $uid).val() === 'student'",
+        ".validate": "newData.hasChildren(['name', 'email', 'studentId', 'programme', 'part', 'groupId', 'emailVerified'])",
+        // Starts false; set to true only while a code is pending (VerificationRepository).
+        "emailVerified": {
+          ".write": "auth != null && auth.uid === $uid && newData.val() === true && root.child('verificationCodes/' + $uid).exists()",
+          ".validate": "newData.isBoolean() && (data.exists() || newData.val() === false)"
+        },
+        // Editable later by the student, once verified (Profile, Preferred Name pages).
+        "name": {
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true",
+          ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100"
+        },
+        "phone": {
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true",
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "preferredName": {
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true",
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+        },
+        // Fixed after registration (they decide which sessions the student is in).
+        "email": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())" },
+        "studentId": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{10}$/) && (!data.exists() || newData.val() === data.val())" },
+        "programme": { ".validate": "root.child('programmes/' + newData.val()).exists() && (!data.exists() || newData.val() === data.val())" },
+        "part": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 6 && (!data.exists() || newData.val() === data.val())" },
+        "groupId": { ".validate": "root.child('groups/' + newData.val()).exists() && (!data.exists() || newData.val() === data.val())" },
+        "createdAt": { ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()" },
+        // Test accounts are made in the console only (CLAUDE.md 12.4).
+        "isTest": { ".validate": "newData.val() === data.val()" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "lecturers": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.parent().parent().child('roles/' + $uid).val() === 'lecturer'",
+        ".validate": "newData.hasChildren(['name', 'email', 'staffId', 'emailVerified'])",
+        "emailVerified": {
+          ".write": "auth != null && auth.uid === $uid && newData.val() === true && root.child('verificationCodes/' + $uid).exists()",
+          ".validate": "newData.isBoolean() && (data.exists() || newData.val() === false)"
+        },
+        "name": {
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true",
+          ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 100"
+        },
+        "phone": {
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true",
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "preferredName": {
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true",
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+        },
+        // Dr., Prof. Madya, Prof., Encik, Puan, Cik; removed (null) for "None".
+        "title": {
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true",
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "email": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())" },
+        "staffId": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())" },
+        "createdAt": { ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()" },
+        "isTest": { ".validate": "newData.val() === data.val()" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    // The pending 6-digit code (only its SHA-256 hash). Only its owner sees it.
+    "verificationCodes": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['codeHash', 'expiresAt', 'sentAt', 'attempts'])",
+        "codeHash": { ".validate": "newData.isString() && newData.val().length === 64" },
+        "expiresAt": { ".validate": "newData.isNumber()" },
+        "sentAt": { ".validate": "newData.isNumber()" },
+        // Wrong guesses can only go up, unless "Resend" replaced the code.
+        "attempts": { ".validate": "newData.isNumber() && (!data.exists() || newData.val() >= data.val() || newData.parent().child('codeHash').val() !== data.parent().child('codeHash').val())" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    /* ---------------- Group and club indexes ---------------- */
+
+    "studentsByGroup": {
+      "$groupId": {
+        // Verified lecturers read who is in a group (eligible students, class detail).
+        ".read": "auth != null && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true",
+        "$uid": {
+          // Registration only, and it must match the group in the new profile.
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && !root.child('students/' + $uid).exists()",
+          ".validate": "newData.val() === true && newData.parent().parent().parent().child('students/' + $uid + '/groupId').val() === $groupId"
+        }
+      }
+    },
+
+    // A student's clubs. Joined at registration, later only once verified.
+    // studentClubs and clubMembers must always be written together.
+    "studentClubs": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$clubId": {
+          ".write": "auth != null && auth.uid === $uid && (!root.child('students/' + $uid).exists() || root.child('students/' + $uid + '/emailVerified').val() === true)",
+          ".validate": "newData.val() === true && root.child('clubs/' + $clubId).exists() && newData.parent().parent().parent().child('roles/' + $uid).val() === 'student' && newData.parent().parent().parent().child('clubMembers/' + $clubId + '/' + $uid).val() === true"
+        }
+      }
+    },
+
+    "clubMembers": {
+      "$clubId": {
+        // Verified lecturers read the members (eligible students of a club session).
+        ".read": "auth != null && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true",
+        "$uid": {
+          // The student checks their own membership when checking in.
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid && (!root.child('students/' + $uid).exists() || root.child('students/' + $uid + '/emailVerified').val() === true)",
+          ".validate": "newData.val() === true && newData.parent().parent().parent().child('studentClubs/' + $uid + '/' + $clubId).val() === true"
+        }
+      }
+    },
+
+    // A lecturer adds or removes only themselves as an advisor. Not approved by
+    // anyone, but visible in the console (CLAUDE.md section 8).
+    "clubAdvisors": {
+      ".read": "auth != null && root.child('roles/' + auth.uid).val() === 'lecturer'",
+      "$clubId": {
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && newData.parent().parent().parent().child('roles/' + $uid).val() === 'lecturer' && (!root.child('lecturers/' + $uid).exists() || root.child('lecturers/' + $uid + '/emailVerified').val() === true)",
+          ".validate": "newData.val() === true && root.child('clubs/' + $clubId).exists()"
+        }
+      }
+    },
+
+    // Set by the academic office (Danny, in the console). Read-only to its lecturer.
+    // Key format: {courseId}_{groupId}, e.g. CS240_ICT652_CDCS2406A, so the
+    // sessions rule below can look an assignment up directly.
+    "teachingAssignments": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+
+    /* ---------------- Sessions ---------------- */
+
+    "sessions": {
+      "$sid": {
+        // Students need the session for check-in, home and history.
+        ".read": "auth != null",
+        // Only a verified lecturer, only for themselves. After creation only its
+        // own lecturer may change it (close, +10 min, radius), and never delete it.
+        ".write": "auth != null && newData.exists() && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true && ((data.exists() && data.child('lecturerUid').val() === auth.uid) || (!data.exists() && newData.child('lecturerUid').val() === auth.uid))",
+        ".validate": "newData.hasChildren(['lecturerUid', 'type', 'title', 'where', 'lat', 'lng', 'radius', 'start', 'end', 'lateAfter', 'status']) && ((newData.child('type').val() === 'club' && newData.child('clubId').exists() && !newData.child('groups').exists()) || (newData.child('type').val() !== 'club' && newData.child('courseId').exists() && newData.child('groups').exists()))",
+
+        "lecturerUid": { ".validate": "newData.val() === auth.uid && (!data.exists() || newData.val() === data.val())" },
+        "type": { ".validate": "(newData.val() === 'class' || newData.val() === 'test' || newData.val() === 'sulam' || newData.val() === 'club') && (!data.exists() || newData.val() === data.val())" },
+        "title": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100" },
+        "courseId": { ".validate": "root.child('courses/' + newData.val()).exists() && (!data.exists() || newData.val() === data.val())" },
+        // Club sessions: only for a club the lecturer advises.
+        "clubId": { ".validate": "root.child('clubAdvisors/' + newData.val() + '/' + auth.uid).val() === true && (!data.exists() || newData.val() === data.val())" },
+        // Class / Test / SULAM: every group must be one of the lecturer's teaching
+        // assignments for this course. Groups are set once, at creation.
+        "groups": {
+          "$groupId": {
+            ".validate": "newData.val() === true && !root.child('sessions/' + $sid).exists() && root.child('teachingAssignments/' + auth.uid + '/' + newData.parent().parent().child('courseId').val() + '_' + $groupId).exists()"
+          }
+        },
+        "where": { ".validate": "(newData.val() === 'building' || newData.val() === 'pin') && (!data.exists() || newData.val() === data.val())" },
+        "building": { ".validate": "root.child('buildings/' + newData.val()).exists() && (!data.exists() || newData.val() === data.val())" },
+        "venueId": { ".validate": "root.child('venues/' + newData.val()).exists() && (!data.exists() || newData.val() === data.val())" },
+        "placeName": { ".validate": "newData.isString() && newData.val().length <= 200 && (!data.exists() || newData.val() === data.val())" },
+        // A building session's centre must be that building's own location.
+        "lat": { ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90 && newData.val() !== 0 && (!data.exists() || newData.val() === data.val()) && (newData.parent().child('where').val() !== 'building' || newData.val() === root.child('buildings/' + newData.parent().child('building').val() + '/lat').val())" },
+        "lng": { ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180 && newData.val() !== 0 && (!data.exists() || newData.val() === data.val()) && (newData.parent().child('where').val() !== 'building' || newData.val() === root.child('buildings/' + newData.parent().child('building').val() + '/lng').val())" },
+        // Slider range, for building and pin sessions alike (section 5).
+        "radius": { ".validate": "newData.isNumber() && newData.val() >= 30 && newData.val() <= 150" },
+        "start": { ".validate": "newData.isNumber() && (!data.exists() || newData.val() === data.val())" },
+        "end": { ".validate": "newData.isNumber() && newData.val() > newData.parent().child('start').val()" },
+        "lateAfter": { ".validate": "newData.isNumber() && newData.val() >= newData.parent().child('start').val() && (!data.exists() || newData.val() === data.val())" },
+        // Created open; can be closed; a closed session never reopens.
+        "status": { ".validate": "(newData.val() === 'open' && !data.exists()) || newData.val() === 'closed'" },
+        "createdAt": { ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()" },
+        "closedAt": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    // Indexes written in the same update as the session they point to.
+    "sessionsByLecturer": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$sid": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.parent().parent().parent().child('sessions/' + $sid + '/lecturerUid').val() === auth.uid",
+          ".validate": "newData.val() === true"
+        }
+      }
+    },
+
+    "sessionsByGroup": {
+      "$groupId": {
+        // Students of that group, and verified lecturers.
+        ".read": "auth != null && (root.child('students/' + auth.uid + '/groupId').val() === $groupId || (root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true))",
+        "$sid": {
+          ".write": "auth != null && !data.exists() && newData.parent().parent().parent().child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && newData.parent().parent().parent().child('sessions/' + $sid + '/groups/' + $groupId).val() === true",
+          ".validate": "newData.val() === true"
+        }
+      }
+    },
+
+    "sessionsByClub": {
+      "$clubId": {
+        // Members of that club, and verified lecturers.
+        ".read": "auth != null && (root.child('clubMembers/' + $clubId + '/' + auth.uid).val() === true || (root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true))",
+        "$sid": {
+          ".write": "auth != null && !data.exists() && newData.parent().parent().parent().child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && newData.parent().parent().parent().child('sessions/' + $sid + '/clubId').val() === $clubId",
+          ".validate": "newData.val() === true"
+        }
+      }
+    },
+
+    /* ---------------- Attendance ---------------- */
+
+    "attendance": {
+      "$sid": {
+        // The session's lecturer sees every record (Live Monitor, report, map).
+        ".read": "auth != null && root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid",
+        "$uid": {
+          // A student sees their own record.
+          ".read": "auth != null && auth.uid === $uid",
+          // Records are created once and never edited, only while the session is open.
+          // (a) The student's own GPS check-in: verified, eligible, inside start–end.
+          //     method "debug" is the DEBUG-build "Simulate check-in", test accounts only.
+          // (b) The session's lecturer: manual marks, and Absent when closing.
+          ".write": "auth != null && !data.exists() && newData.exists() && root.child('sessions/' + $sid + '/status').val() === 'open' && ((auth.uid === $uid && root.child('roles/' + $uid).val() === 'student' && root.child('students/' + $uid + '/emailVerified').val() === true && now >= root.child('sessions/' + $sid + '/start').val() && now < root.child('sessions/' + $sid + '/end').val() && (root.child('sessions/' + $sid + '/groups/' + root.child('students/' + $uid + '/groupId').val()).val() === true || root.child('clubMembers/' + root.child('sessions/' + $sid + '/clubId').val() + '/' + $uid).val() === true) && (newData.child('method').val() === 'gps' || (newData.child('method').val() === 'debug' && root.child('students/' + $uid + '/isTest').val() === true))) || (root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && (newData.child('method').val() === 'manual' || newData.child('method').val() === 'auto')))",
+          ".validate": "newData.hasChildren(['status', 'time', 'method'])",
+          "method": { ".validate": "newData.val() === 'gps' || newData.val() === 'manual' || newData.val() === 'auto' || newData.val() === 'debug'" },
+          // GPS: present if now <= lateAfter, otherwise late (the server's clock decides).
+          // Manual: present or late. Closing: absent.
+          "status": { ".validate": "((newData.parent().child('method').val() === 'gps' || newData.parent().child('method').val() === 'debug') && ((now <= root.child('sessions/' + $sid + '/lateAfter').val() && newData.val() === 'present') || (now > root.child('sessions/' + $sid + '/lateAfter').val() && newData.val() === 'late'))) || (newData.parent().child('method').val() === 'manual' && (newData.val() === 'present' || newData.val() === 'late')) || (newData.parent().child('method').val() === 'auto' && newData.val() === 'absent')" },
+          // Must be the server's own timestamp (ServerValue.TIMESTAMP).
+          "time": { ".validate": "newData.val() === now" },
+          "distance": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "accuracy": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          // Where the student checked in (step M3), 5 decimals.
+          "lat": { ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90" },
+          "lng": { ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180" },
+          "reason": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
+          "markedBy": { ".validate": "newData.val() === auth.uid" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    // Mirror for "My attendance". Written in the same update as the record and
+    // must say the same status.
+    "studentAttendance": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$sid": {
+          ".write": "auth != null && !data.exists() && newData.exists() && (auth.uid === $uid || root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid)",
+          ".validate": "newData.hasChildren(['status', 'time']) && newData.child('status').val() === newData.parent().parent().parent().child('attendance/' + $sid + '/' + $uid + '/status').val() && newData.child('time').val() === now"
+        }
+      }
+    },
+
+    // Every check-in attempt. Append only: nobody can edit or delete one.
+    "attempts": {
+      "$sid": {
+        ".read": "auth != null && root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid",
+        "$aid": {
+          ".write": "auth != null && !data.exists() && newData.exists() && newData.child('uid').val() === auth.uid && root.child('roles/' + auth.uid).val() === 'student' && root.child('sessions/' + $sid + '/status').val() === 'open'",
+          ".validate": "newData.hasChildren(['uid', 'time', 'result', 'lat', 'lng'])",
+          // "accepted" only together with the student's attendance record.
+          "result": { ".validate": "newData.val() === 'rejected' || (newData.val() === 'accepted' && newData.parent().parent().parent().parent().child('attendance/' + $sid + '/' + auth.uid).exists())" },
+          "reason": { ".validate": "newData.val() === 'MOCK_LOCATION' || newData.val() === 'OUTSIDE_RADIUS'" },
+          "uid": { ".validate": "newData.val() === auth.uid" },
+          "time": { ".validate": "newData.val() === now" },
+          "distance": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "accuracy": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+          "lat": { ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90" },
+          "lng": { ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    /* ---------------- In-app notifications ---------------- */
+
+    "notifications": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$nid": {
+          // Created by the verified lecturer of the session it is about.
+          ".write": "auth != null && !data.exists() && newData.exists() && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true && newData.parent().parent().parent().child('sessions/' + newData.child('sessionId').val() + '/lecturerUid').val() === auth.uid",
+          ".validate": "newData.hasChildren(['title', 'body', 'sessionId', 'time', 'read'])",
+          "title": { ".validate": "newData.isString() && newData.val().length <= 200" },
+          "body": { ".validate": "newData.isString() && newData.val().length <= 500" },
+          "sessionId": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())" },
+          "time": { ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()" },
+          // The owner may only mark it read.
+          "read": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.isBoolean()"
+          },
+          "$other": { ".validate": false }
+        }
+      }
+    }
+  }
+}
