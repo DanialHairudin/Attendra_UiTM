@@ -27,6 +27,7 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Register screen (CLAUDE.md section 4). One form with a Student | Lecturer toggle.
@@ -240,7 +241,7 @@ public class RegisterFragment extends Fragment {
         Registration r = new Registration();
         r.role = vm.role;
         r.name = text(binding.inputName.getText()).replaceAll("\\s+", " ");
-        r.email = text(binding.inputEmail.getText()).toLowerCase();
+        r.email = text(binding.inputEmail.getText()).toLowerCase(Locale.ROOT);
         String phoneInput = text(binding.inputPhone.getText());
         r.phone = "+60" + Validators.phoneDigits(phoneInput);
         r.password = raw(binding.inputPassword.getText());
@@ -255,7 +256,7 @@ public class RegisterFragment extends Fragment {
             r.studentId = text(binding.inputStudentId.getText());
             firstError = check(binding.layoutStudentId, Validators.studentId(r.studentId), firstError);
         } else {
-            r.staffId = text(binding.inputStaffId.getText()).toUpperCase();
+            r.staffId = text(binding.inputStaffId.getText()).toUpperCase(Locale.ROOT);
             firstError = check(binding.layoutStaffId, Validators.staffId(r.staffId), firstError);
         }
         firstError = check(binding.layoutEmail, Validators.registerEmail(r.email, r.role), firstError);

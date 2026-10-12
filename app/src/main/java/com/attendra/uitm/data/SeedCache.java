@@ -94,6 +94,15 @@ public final class SeedCache {
         return id == null ? null : COURSES.get(id);
     }
 
+    /** The courses of one programme and part, e.g. CS240 Part 5 (unsorted). */
+    public static List<Course> coursesFor(String programme, int part) {
+        List<Course> list = new java.util.ArrayList<>();
+        for (Course c : COURSES.values()) {
+            if (programme != null && programme.equals(c.programme) && c.part == part) list.add(c);
+        }
+        return list;
+    }
+
     @Nullable
     public static Venue venue(@Nullable String id) {
         return id == null ? null : VENUES.get(id);

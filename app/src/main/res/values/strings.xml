@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Every user-facing text is kept here so the wording is easy to change.
          Style: formal, short, polite full sentences; no contractions. -->
 
@@ -44,7 +44,7 @@
     <string name="hint_staff_id">e.g. 123456</string>
     <string name="label_phone">Phone number</string>
     <string name="phone_prefix">+60</string>
-    <string name="hint_phone">12-345 6789</string>
+    <string name="hint_phone" tools:ignore="TypographyDashes">12-345 6789</string>
     <string name="label_programme">Programme</string>
     <string name="hint_programme">Select your programme</string>
     <string name="label_part">Part (semester)</string>
@@ -125,7 +125,6 @@
     <string name="status_scheduled">Scheduled</string>
     <string name="status_live">Live</string>
     <string name="status_closed">Closed</string>
-    <string name="coming_soon">Coming soon</string>
 
     <!-- Lecturer Dashboard Page -->
     <string name="live_now">● Live now</string>
@@ -148,11 +147,10 @@
 
     <!-- Lecturer Classes tab and Class Detail Page -->
     <string name="classes_title">Teaching classes</string>
-    <string name="classes_note">Assigned by the KPPIM academic office. If a class or group is missing, contact the office; lecturers can\'t add classes themselves.</string>
     <string name="clubs_you_advise">Clubs you advise</string>
     <string name="clubs_you_advise_note">Members are students who joined the club in the app.</string>
-    <string name="empty_classes_title">No classes assigned yet</string>
-    <string name="empty_classes_body">Classes assigned to you by the KPPIM academic office will appear here.</string>
+    <string name="empty_classes_title">No teaching classes yet</string>
+    <string name="empty_classes_body">Add them from your faculty timetable.</string>
     <string name="empty_advised_title">No clubs</string>
     <string name="empty_advised_body">You are not an advisor of any club.</string>
     <string name="group_label">Group %1$s</string>
@@ -170,7 +168,6 @@
     <string name="check_in">Check in</string>
     <string name="already_checked_in">✓ Checked in</string>
     <string name="overall_attendance">Overall attendance</string>
-    <string name="overall_detail">This semester · %1$d of %2$d sessions</string>
     <string name="no_attendance_yet">No attendance yet</string>
     <string name="my_courses">My courses</string>
     <string name="see_all">See all</string>
@@ -184,9 +181,7 @@
     <string name="n_late">%1$d late</string>
     <string name="n_absent">%1$d absent</string>
     <string name="of_total">of %1$d</string>
-    <string name="n_of_total_sessions">%1$d of %2$d sessions</string>
     <string name="notifications_title">Notifications</string>
-    <string name="notifications_later">Session alerts will appear here in a later version.</string>
 
     <!-- Settings, Profile and My Clubs -->
     <string name="view_profile">View your profile</string>
@@ -258,7 +253,7 @@
     <string name="who_groups_label">Groups · tick one or more for a combined test</string>
     <string name="who_groups_label_sulam">Your Part 6 classes · tick one or more for a combined activity</string>
     <string name="empty_sulam_title">No SULAM classes</string>
-    <string name="empty_sulam_body">SULAM is for Part 6 classes. None of the classes assigned to you is in Part 6.</string>
+    <string name="empty_sulam_body">SULAM is for Part 6 classes. None of your teaching classes this semester is in Part 6.</string>
     <string name="who_club_label">Club · only clubs you advise</string>
     <string name="who_no_clubs_body">You can only create club sessions for clubs you advise.</string>
     <string name="who_club_note">Only members who added this club in their profile can check in. The report shows who came.</string>
@@ -297,7 +292,6 @@
     <string name="review_geofence_building">%1$s building area · %2$d m</string>
     <string name="review_time">Time</string>
     <string name="review_late">Late after</string>
-    <string name="review_late_value">%1$d minutes (%2$s)</string>
     <string name="start_session">Start session</string>
     <string name="starting_session">Starting…</string>
     <string name="notify_title">New session: %1$s</string>
@@ -527,4 +521,71 @@
     <string name="result_distance_outside">%1$d m (outside %2$d m)</string>
     <string name="result_pinned_place">the pinned location</string>
     <string name="result_accuracy">±%1$d m</string>
+
+    <!-- C5b: lecturers add their own teaching classes -->
+    <string name="register_lecturer_classes_note">You will add your teaching classes after you verify your email.</string>
+    <string name="teach_semester_line">Semester: %1$s · copied from your faculty timetable</string>
+    <string name="teach_add_button">Add teaching class</string>
+    <string name="teach_show_previous">Show previous semesters</string>
+    <string name="teach_hide_previous">Hide previous semesters</string>
+    <string name="teach_edit">Edit</string>
+    <string name="teach_remove">Remove</string>
+    <string name="teach_remove_confirm">Remove %1$s · %2$s from your teaching classes? Past sessions are kept.</string>
+    <string name="teach_add_title">Add teaching class</string>
+    <string name="teach_edit_title">Edit teaching class</string>
+    <string name="teach_setup_title">Set up your teaching classes</string>
+    <string name="teach_body">Copy your classes from the faculty timetable. You can add, edit or remove them later in the Classes tab.</string>
+    <string name="label_semester">Semester</string>
+    <string name="label_course">Course</string>
+    <string name="hint_course">Select a course</string>
+    <string name="label_groups">Groups · tick one or more</string>
+    <string name="teach_groups_pick_part">Choose a programme and part first.</string>
+    <string name="teach_groups_none">No groups found for this part.</string>
+    <string name="teach_save">Save classes</string>
+    <string name="teach_skip">Skip for now</string>
+    <string name="teach_error_course">Choose a course.</string>
+    <string name="teach_error_groups">Tick at least one group.</string>
+    <string name="teach_already_listed">This class is already in your list.</string>
+    <string name="teach_needed">Add your teaching classes first.</string>
+    <string name="teach_needed_body">You have no teaching classes this semester and you advise no club.</string>
+    <string name="profile_teaching_classes">Teaching classes</string>
+    <plurals name="classes_this_semester">
+        <item quantity="one">%d class this semester</item>
+        <item quantity="other">%d classes this semester</item>
+    </plurals>
+
+    <!-- C13: plurals, so the count and the noun always agree -->
+    <plurals name="overall_detail">
+        <item quantity="one">This semester · %1$d of %2$d session</item>
+        <item quantity="other">This semester · %1$d of %2$d sessions</item>
+    </plurals>
+    <plurals name="n_of_total_sessions">
+        <item quantity="one">%1$d of %2$d session</item>
+        <item quantity="other">%1$d of %2$d sessions</item>
+    </plurals>
+    <plurals name="review_late_value">
+        <item quantity="one">%1$d minute (%2$s)</item>
+        <item quantity="other">%1$d minutes (%2$s)</item>
+    </plurals>
+
+    <!-- C13: TalkBack labels for the 6 code boxes on the Verify page -->
+    <string name="code_digit_1">Digit 1 of 6</string>
+    <string name="code_digit_2">Digit 2 of 6</string>
+    <string name="code_digit_3">Digit 3 of 6</string>
+    <string name="code_digit_4">Digit 4 of 6</string>
+    <string name="code_digit_5">Digit 5 of 6</string>
+    <string name="code_digit_6">Digit 6 of 6</string>
+
+    <!-- C8 / C13: student Notifications tab -->
+    <string name="notifications_mark_all">Mark all read</string>
+    <string name="notifications_yesterday">Yesterday</string>
+    <string name="notifications_unread">Unread. %1$s</string>
+    <string name="empty_notifications_title">No notifications yet</string>
+    <string name="empty_notifications_body">When a lecturer opens a session for your class or club, it will appear here.</string>
+    <plurals name="notifications_badge">
+        <item quantity="one">%d unread notification</item>
+        <item quantity="other">%d unread notifications</item>
+    </plurals>
+    <string name="settings_notifications">Session notifications</string>
+    <string name="settings_notifications_note">Show the unread count when a session opens</string>
 </resources>

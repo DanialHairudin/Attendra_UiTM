@@ -12,6 +12,8 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.database.DatabaseError;
 
+import java.util.Locale;
+
 /**
  * Turns Firebase exceptions into short, formal messages for the user.
  * All wording lives in res/values/strings.xml (the error_* strings).
@@ -53,7 +55,7 @@ public final class AuthErrors {
         // Database write failures arrive as a DatabaseException whose message
         // contains "Permission denied" when the security rules refuse them.
         String msg = e.getMessage();
-        if (msg != null && msg.toLowerCase().contains("permission denied")) {
+        if (msg != null && msg.toLowerCase(Locale.ROOT).contains("permission denied")) {
             return str(R.string.error_permission_denied);
         }
         return str(R.string.error_generic);

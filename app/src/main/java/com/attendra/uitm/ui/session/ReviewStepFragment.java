@@ -62,8 +62,8 @@ public class ReviewStepFragment extends BaseStepFragment {
                 : getString(R.string.review_geofence_building, s.building, s.radius));
         addRow(R.string.review_time, SessionText.join(Formats.shortDate(s.start),
                 Formats.timeRange(s.start, s.end)));
-        addRow(R.string.review_late, getString(R.string.review_late_value, vm.lateMinutes,
-                Formats.time(s.lateAfter)));
+        addRow(R.string.review_late, getResources().getQuantityString(R.plurals.review_late_value,
+                vm.lateMinutes, vm.lateMinutes, Formats.time(s.lateAfter)));
 
         binding.txtNotify.setText(getResources().getQuantityString(R.plurals.review_notify,
                 vm.eligibleCount, vm.eligibleCount));

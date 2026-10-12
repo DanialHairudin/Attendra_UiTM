@@ -18,6 +18,8 @@ import com.attendra.uitm.databinding.FragmentForgotBinding;
 import com.attendra.uitm.util.Validators;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.Locale;
+
 /** "Reset password": sends a Firebase password reset link with sendPasswordResetEmail. */
 public class ForgotPasswordFragment extends Fragment {
 
@@ -41,7 +43,7 @@ public class ForgotPasswordFragment extends Fragment {
     }
 
     private void send() {
-        String email = text(binding.inputEmail.getText()).toLowerCase();
+        String email = text(binding.inputEmail.getText()).toLowerCase(Locale.ROOT);
         String error = Validators.email(email);
         binding.layoutEmail.setError(error);
         if (error != null) return;

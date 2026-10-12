@@ -12,11 +12,13 @@ import androidx.annotation.Nullable;
 import com.attendra.uitm.R;
 import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
+import com.attendra.uitm.data.TeachingRepository;
 import com.attendra.uitm.data.UserRepository;
 import com.attendra.uitm.databinding.ActivityPreferredNameBinding;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.ui.BaseActivity;
 import com.attendra.uitm.ui.common.Ui;
+import com.attendra.uitm.ui.lecturer.AddTeachingClassActivity;
 import com.attendra.uitm.util.DropdownAdapter;
 import com.attendra.uitm.util.HomeRouter;
 import com.attendra.uitm.util.NameSuggestions;
@@ -269,10 +271,12 @@ public class PreferredNameActivity extends BaseActivity {
         Db.write(updates, new Callback<Void>() {
             @Override
             public void onSuccess(Void unused) {
-                if (firstTime) {
-                    HomeRouter.openHome(PreferredNameActivity.this, role);
-                } else {
+                if (!firstTime) {
                     finish();
+                } else if (lecturer) {
+                    openLecturerNext();
+                } else {
+                    HomeRouter.openHome(PreferredNameActivity.this, role);
                 }
             }
 
@@ -281,6 +285,30 @@ public class PreferredNameActivity extends BaseActivity {
                 saving = false;
                 binding.btnSave.setEnabled(true);
                 Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    /**
+     * C5b: a new lecturer with no class this semester sets up their teaching
+     * classes next (with "Skip for now"); otherwise the dashboard opens.
+     * If the check fails (e.g. offline), go to the dashboard anyway.
+     */
+    private void openLecturerNext() {
+        TeachingRepository.hasCurrent(uid, new Callback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean hasClasses) {
+                if (hasClasses) {
+                    HomeRouter.openHome(PreferredNameActivity.this, role);
+                } else {
+                    startActivity(AddTeachingClassActivity.setupIntent(PreferredNameActivity.this));
+                    finish();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                HomeRouter.openHome(PreferredNameActivity.this, role);
             }
         });
     }

@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.attendra.uitm.BuildConfig;
 import com.attendra.uitm.R;
@@ -39,6 +40,17 @@ public final class Db {
 
     public static DatabaseReference root() {
         return get().getReference();
+    }
+
+    /**
+     * A value as text, or null if it is missing. Unlike getValue(String.class)
+     * this does not crash when a field was typed in the Firebase console as a
+     * number (e.g. studentId 2025000001 or staffId 2015034 without quotes).
+     */
+    @Nullable
+    public static String text(DataSnapshot snapshot) {
+        Object value = snapshot.getValue();
+        return value == null ? null : String.valueOf(value);
     }
 
     /**

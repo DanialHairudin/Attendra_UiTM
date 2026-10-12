@@ -12,8 +12,10 @@ import androidx.annotation.StringRes;
 
 import com.attendra.uitm.R;
 import com.attendra.uitm.data.Callback;
+import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.data.Subscriptions;
+import com.attendra.uitm.data.TeachingRepository;
 import com.attendra.uitm.data.UserRepository;
 import com.attendra.uitm.databinding.ActivityProfileBinding;
 import com.attendra.uitm.databinding.ItemInfoRowBinding;
@@ -21,6 +23,7 @@ import com.attendra.uitm.model.Club;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.ui.BaseActivity;
 import com.attendra.uitm.ui.common.Ui;
+import com.attendra.uitm.ui.lecturer.LecturerMainActivity;
 import com.attendra.uitm.util.HomeRouter;
 import com.attendra.uitm.util.Names;
 import com.google.android.material.snackbar.Snackbar;
@@ -51,6 +54,8 @@ public class ProfileActivity extends BaseActivity {
     private DataSnapshot profile;
     private List<String> clubIds;
     private boolean seedReady;
+    /** Lecturer only: classes this semester (C5b). Null = not loaded yet. */
+    private Integer classCount;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,6 +109,21 @@ public class ProfileActivity extends BaseActivity {
             }
         });
 
+        if (Registration.ROLE_LECTURER.equals(role)) {
+            subs.listen(TeachingRepository.ref(uid), new Callback<DataSnapshot>() {
+                @Override
+                public void onSuccess(DataSnapshot snapshot) {
+                    classCount = TeachingRepository.current(TeachingRepository.parse(snapshot)).size();
+                    render();
+                }
+
+                @Override
+                public void onError(String message) {
+                    showError(message);
+                }
+            });
+        }
+
         subs.listen(UserRepository.clubsQuery(uid, role), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
@@ -140,6 +160,14 @@ public class ProfileActivity extends BaseActivity {
                 String title = text("title");
                 addEditable(R.string.profile_title_row, title.isEmpty()
                         ? getString(R.string.name_title_none) : title);
+                // C5b: opens the Classes tab, where classes are added or changed.
+                addTappable(R.string.profile_teaching_classes, classCount == null
+                        ? getString(R.string.dash)
+                        : getResources().getQuantityString(R.plurals.classes_this_semester,
+                                classCount, classCount), v -> {
+                    LecturerMainActivity.openClassesTab(this);
+                    finish();
+                });
             }
             addInfo(R.string.profile_email, text("email"));
             addInfo(R.string.profile_phone, text("phone"));
@@ -181,17 +209,23 @@ public class ProfileActivity extends BaseActivity {
 
     /** A row with a chevron that opens the Preferred Name Page. */
     private void addEditable(@StringRes int label, String value) {
+        addTappable(label, value, v -> PreferredNameActivity.openToEdit(this, role));
+    }
+
+    /** A row with a chevron that runs {@code onTap}. */
+    private void addTappable(@StringRes int label, String value, View.OnClickListener onTap) {
         ItemInfoRowBinding row = addInfo(label, value);
         row.infoValue.setTextIsSelectable(false); // so a tap reaches the row
         row.infoChevron.setVisibility(View.VISIBLE);
         TypedValue ripple = new TypedValue();
         getTheme().resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);
         row.getRoot().setBackgroundResource(ripple.resourceId);
-        row.getRoot().setOnClickListener(v -> PreferredNameActivity.openToEdit(this, role));
+        row.getRoot().setOnClickListener(onTap);
     }
 
+    /** A profile field as text; Db.text() also copes with numbers typed in the console. */
     private String text(String key) {
-        String value = profile.child(key).getValue(String.class);
+        String value = Db.text(profile.child(key));
         return value == null ? "" : value;
     }
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Lecturer Classes tab, matching "lClasses" in the prototype. Read-only:
-     classes come from teachingAssignments (set by the faculty office). -->
+<!-- Lecturer Classes tab (wireframe "12. Teaching Classes Page", C5b): the
+     lecturer's own classes from teachingAssignments, copied from the faculty
+     timetable, with Edit / Remove, previous semesters and "+ Add teaching class". -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -35,16 +36,16 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:importantForAccessibility="no"
-                android:src="@drawable/ic_lock"
+                android:src="@drawable/ic_calendar"
                 app:tint="@color/goldText" />
 
             <TextView
+                android:id="@+id/txt_semester"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_weight="1"
                 android:lineSpacingMultiplier="1.2"
-                android:text="@string/classes_note"
                 android:textAppearance="@style/TextAppearance.Attendra.Body.Muted"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -80,6 +81,34 @@
                     android:textAppearance="@style/TextAppearance.Attendra.Caption" />
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_class"
+            style="@style/Widget.Attendra.Button.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="14dp"
+            android:text="@string/teach_add_button"
+            app:icon="@drawable/ic_plus"
+            app:iconGravity="textStart"
+            app:iconTint="@color/ink" />
+
+        <!-- Older semesters: hidden until the toggle is tapped. Remove only. -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_toggle_previous"
+            style="@style/Widget.Attendra.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/teach_show_previous"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/list_previous"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="wrap_content"

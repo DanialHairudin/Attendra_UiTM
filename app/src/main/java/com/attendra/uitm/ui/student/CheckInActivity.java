@@ -232,7 +232,10 @@ public class CheckInActivity extends BaseActivity {
 
     private void renderSession() {
         binding.progressLoad.setVisibility(View.GONE);
-        if (session == null) {
+        // Already over (closed by the lecturer, or past its end time): show
+        // "Session closed" straight away instead of a "Ready" button that can
+        // only fail. Check 1 still runs again when the button is tapped.
+        if (session == null || !session.isOpen() || serverNow() >= session.end) {
             showState(State.CLOSED, null);
             return;
         }

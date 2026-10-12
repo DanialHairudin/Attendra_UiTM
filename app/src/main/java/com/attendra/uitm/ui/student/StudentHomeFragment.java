@@ -332,7 +332,7 @@ public class StudentHomeFragment extends Fragment {
         }
         binding.txtOverallPct.setText(getString(R.string.percent,
                 Formats.percent(attended, total)));
-        binding.txtOverallDetail.setText(getString(R.string.overall_detail, attended, total));
+        binding.txtOverallDetail.setText(getResources().getQuantityString(R.plurals.overall_detail, total, attended, total));
     }
 
     /** One row per course: attended / recorded sessions of that course. Club sessions are left out. */

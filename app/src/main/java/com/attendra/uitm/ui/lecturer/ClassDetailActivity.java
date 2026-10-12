@@ -175,7 +175,7 @@ public class ClassDetailActivity extends BaseActivity {
                         public void onSuccess(DataSnapshot profile) {
                             Student s = new Student();
                             s.name = profile.child("name").getValue(String.class);
-                            s.studentId = profile.child("studentId").getValue(String.class);
+                            s.studentId = Db.text(profile.child("studentId"));
                             roster.put(uid, s);
                             render();
                         }

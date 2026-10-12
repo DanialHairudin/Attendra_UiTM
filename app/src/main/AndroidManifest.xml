@@ -45,6 +45,9 @@
             android:name=".ui.lecturer.ClassDetailActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.lecturer.AddTeachingClassActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.settings.ProfileActivity"
             android:exported="false" />
         <activity
@@ -54,9 +57,6 @@
             android:name=".ui.settings.PreferredNameActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ui.common.ComingSoonActivity"
-            android:exported="false" />
         <activity
             android:name=".ui.session.CreateSessionActivity"
             android:exported="false"

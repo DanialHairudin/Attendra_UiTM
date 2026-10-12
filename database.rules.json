@@ -178,13 +178,22 @@
       }
     },
 
-    // Set by the academic office (Danny, in the console). Read-only to its lecturer.
-    // Key format: {courseId}_{groupId}, e.g. CS240_ICT652_CDCS2406A, so the
-    // sessions rule below can look an assignment up directly.
+    // The lecturer's own teaching classes, copied from the faculty timetable (C5b).
+    // Key format: {courseId}_{groupId}, e.g. CS240_ICT600_CDCS2405A, so the
+    // sessions rule below can look an assignment up directly. The course and
+    // the group must belong to the same programme and part.
     "teachingAssignments": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": false
+        "$aid": {
+          ".write": "auth != null && auth.uid === $uid && root.child('roles/' + $uid).val() === 'lecturer' && root.child('lecturers/' + $uid + '/emailVerified').val() === true",
+          ".validate": "newData.hasChildren(['courseId', 'groupId', 'semester', 'createdAt']) && $aid === newData.child('courseId').val() + '_' + newData.child('groupId').val() && root.child('courses/' + newData.child('courseId').val() + '/programme').val() === root.child('groups/' + newData.child('groupId').val() + '/programme').val() && root.child('courses/' + newData.child('courseId').val() + '/part').val() === root.child('groups/' + newData.child('groupId').val() + '/part').val()",
+          "courseId": { ".validate": "root.child('courses/' + newData.val()).exists()" },
+          "groupId": { ".validate": "root.child('groups/' + newData.val()).exists()" },
+          "semester": { ".validate": "newData.isString() && newData.val().length >= 4 && newData.val().length <= 40" },
+          "createdAt": { ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()" },
+          "$other": { ".validate": false }
+        }
       }
     },
 

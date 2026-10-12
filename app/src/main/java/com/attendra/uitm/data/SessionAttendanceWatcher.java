@@ -182,7 +182,7 @@ public class SessionAttendanceWatcher {
             @Override
             public void onSuccess(DataSnapshot p) {
                 people.put(uid, new Person(p.child("name").getValue(String.class),
-                        p.child("studentId").getValue(String.class),
+                        Db.text(p.child("studentId")),
                         p.child("groupId").getValue(String.class)));
                 listener.onChanged();
             }

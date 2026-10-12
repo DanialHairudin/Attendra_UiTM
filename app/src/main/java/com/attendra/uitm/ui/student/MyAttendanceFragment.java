@@ -223,7 +223,7 @@ public class MyAttendanceFragment extends Fragment {
             card.coursePct.setText(getString(R.string.percent, pct));
             card.courseBar.setProgress(pct);
             card.courseDetail.setText(SessionText.join(
-                    getString(R.string.n_of_total_sessions, c[0], c[1]),
+                    getResources().getQuantityString(R.plurals.n_of_total_sessions, c[1], c[0], c[1]),
                     c[2] > 0 ? getString(R.string.n_late, c[2]) : null));
             card.getRoot().setContentDescription(getString(R.string.course_pct_description,
                     code, pct));

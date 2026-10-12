@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Info note ("Assigned by the KPPIM academic office"): a 10% gold wash over the
+<!-- Info note (e.g. the semester line on the Classes tab): a 10% gold wash over the
      surface colour, with a line border. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>

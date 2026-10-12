@@ -147,6 +147,13 @@
                         android:imeOptions="actionNext"
                         android:inputType="textNoSuggestions|textCapCharacters" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/register_lecturer_classes_note"
+                    android:textAppearance="@style/TextAppearance.Attendra.Caption" />
             </LinearLayout>
 
             <!-- Email (label text changes with the role) -->

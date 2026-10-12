@@ -8,12 +8,14 @@ import androidx.lifecycle.ViewModel;
 import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
+import com.attendra.uitm.data.TeachingRepository;
 import com.attendra.uitm.data.UserRepository;
 import com.attendra.uitm.model.Building;
 import com.attendra.uitm.model.Course;
 import com.attendra.uitm.model.Programme;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.model.Session;
+import com.attendra.uitm.model.TeachingAssignment;
 import com.attendra.uitm.model.Venue;
 import com.google.firebase.database.DataSnapshot;
 
@@ -29,7 +31,7 @@ import java.util.TreeSet;
 /**
  * Everything the Create Session wizard needs, kept across the 5 steps and
  * across screen rotation:
- * - what the lecturer may use: teachingAssignments, advised clubs, buildings
+ * - what the lecturer may use: this semester's teachingAssignments, advised clubs, buildings
  *   (read once when the wizard opens), plus SeedCache for courses and rooms
  * - the draft being built, step by step
  *
@@ -137,18 +139,13 @@ public class CreateSessionViewModel extends ViewModel {
     }
 
     private void loadAssignments() {
-        Db.readOnce(Db.root().child("teachingAssignments").child(uid), new Callback<DataSnapshot>() {
+        Db.readOnce(TeachingRepository.ref(uid), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
-                for (DataSnapshot a : snapshot.getChildren()) {
-                    String c = a.child("courseId").getValue(String.class);
-                    String g = a.child("groupId").getValue(String.class);
-                    if (c != null && g != null) assignments.add(new Assignment(c, g));
+                // Only this semester's classes can have sessions (C5b). parse() sorts them.
+                for (TeachingAssignment a : TeachingRepository.current(TeachingRepository.parse(snapshot))) {
+                    assignments.add(new Assignment(a.courseId, a.groupId));
                 }
-                Collections.sort(assignments, (x, y) -> {
-                    int byCourse = x.courseId.compareTo(y.courseId);
-                    return byCourse != 0 ? byCourse : x.groupId.compareTo(y.groupId);
-                });
                 loadClubs();
             }
 

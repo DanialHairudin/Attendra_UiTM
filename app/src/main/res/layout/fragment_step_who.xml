@@ -30,7 +30,8 @@
             android:id="@+id/txt_title_label"
             style="@style/Widget.Attendra.FieldLabel"
             android:layout_marginTop="16dp"
-            android:labelFor="@id/input_title" />
+            android:labelFor="@id/input_title"
+            android:text="@string/who_session_title" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layout_title"

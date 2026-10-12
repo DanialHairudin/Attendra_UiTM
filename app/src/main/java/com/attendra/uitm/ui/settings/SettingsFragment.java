@@ -18,9 +18,12 @@ import com.attendra.uitm.data.Subscriptions;
 import com.attendra.uitm.data.UserRepository;
 import com.attendra.uitm.databinding.FragmentSettingsBinding;
 import com.attendra.uitm.databinding.ItemSettingRowBinding;
+import com.attendra.uitm.databinding.ItemSwitchRowBinding;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.ui.common.Ui;
+import com.attendra.uitm.ui.student.StudentMainActivity;
 import com.attendra.uitm.util.HomeRouter;
+import com.attendra.uitm.util.NotificationPrefs;
 import com.attendra.uitm.util.Names;
 import com.attendra.uitm.util.TestAccounts;
 import com.attendra.uitm.util.ThemePrefs;
@@ -78,6 +81,9 @@ public class SettingsFragment extends Fragment {
         clubsRow = addRow(binding.listSettings, Registration.ROLE_LECTURER.equals(role)
                 ? R.string.label_clubs_lecturer : R.string.label_clubs_student);
         clubsRow.getRoot().setOnClickListener(v -> MyClubsActivity.open(requireContext(), role));
+
+        // Only students receive notifications.
+        if (Registration.ROLE_STUDENT.equals(role)) addNotificationsRow();
 
         setUpSwitchTestAccount();
 
@@ -203,6 +209,24 @@ public class SettingsFragment extends Fragment {
                         }
                     });
         });
+    }
+
+    /** "Session notifications" on/off (NotificationPrefs). Off hides the unread badge. */
+    private void addNotificationsRow() {
+        ItemSwitchRowBinding row = ItemSwitchRowBinding.inflate(getLayoutInflater(),
+                binding.listSettings, false);
+        row.switchTitle.setText(R.string.settings_notifications);
+        row.switchSubtitle.setText(R.string.settings_notifications_note);
+        row.switchToggle.setContentDescription(getString(R.string.settings_notifications));
+        row.switchToggle.setChecked(NotificationPrefs.isOn(requireContext()));
+        row.switchToggle.setOnCheckedChangeListener((b, on) -> {
+            NotificationPrefs.save(requireContext(), on);
+            if (getActivity() instanceof StudentMainActivity) {
+                ((StudentMainActivity) getActivity()).refreshBadge();
+            }
+        });
+        row.getRoot().setOnClickListener(v -> row.switchToggle.toggle());
+        Ui.addRow(binding.listSettings, row.getRoot());
     }
 
     // ----------------------------------------------------------------- helpers

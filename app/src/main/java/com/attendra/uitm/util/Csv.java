@@ -10,7 +10,7 @@ package com.attendra.uitm.util;
  */
 public final class Csv {
 
-    private static final String BOM = "﻿";
+    private static final String BOM = "\uFEFF";
 
     private final StringBuilder out = new StringBuilder(BOM);
 
