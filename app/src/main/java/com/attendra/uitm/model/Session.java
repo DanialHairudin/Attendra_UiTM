@@ -33,6 +33,8 @@ public class Session {
     public String where;
     public String building;
     public String venueId;
+    /** Pin sessions only: the place picked in search, e.g. "i-City, Seksyen 7, Shah Alam". */
+    public String placeName;
     public double lat;
     public double lng;
     public long radius;
@@ -61,7 +63,7 @@ public class Session {
         return TYPE_CLUB.equals(type);
     }
 
-    /** Group IDs in alphabetical order (CS2405A, CS2405B, ...). */
+    /** Group IDs in alphabetical order (CDCS2405A, CDCS2405B, ...). */
     @Exclude
     public List<String> groupIds() {
         List<String> ids = new ArrayList<>();

@@ -2,8 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Firebase and the SMTP connection for verification codes -->
+    <!-- Firebase, the SMTP connection for verification codes, OpenStreetMap
+         tiles and Photon place search -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- osmdroid checks the network before downloading map tiles -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Foreground location only: read when the student taps Check in, or when
+         the lecturer taps "Use my location". Never background location. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -49,6 +56,22 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.common.ComingSoonActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.session.CreateSessionActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.lecturer.LiveMonitorActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.lecturer.SessionReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.student.CheckInActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.student.CheckInResultActivity"
             android:exported="false" />
     </application>
 

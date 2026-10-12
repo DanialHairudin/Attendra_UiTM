@@ -145,7 +145,7 @@ public class ClassesFragment extends Fragment {
         clubIds = null;
     }
 
-    /** Live count of the children of {prefix}{id}, e.g. studentsByGroup/CS2405A. */
+    /** Live count of the children of {prefix}{id}, e.g. studentsByGroup/CDCS2405A. */
     private void watchCount(String prefix, String id, Map<String, Integer> into) {
         String path = prefix + id;
         if (countHandles.containsKey(path)) return;

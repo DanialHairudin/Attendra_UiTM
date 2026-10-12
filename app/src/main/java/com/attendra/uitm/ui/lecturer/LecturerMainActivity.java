@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment;
 import com.attendra.uitm.R;
 import com.attendra.uitm.databinding.ActivityLecturerMainBinding;
 import com.attendra.uitm.model.Registration;
-import com.attendra.uitm.ui.common.ComingSoonActivity;
+import com.attendra.uitm.ui.session.CreateSessionActivity;
 import com.attendra.uitm.ui.common.MainTabsActivity;
 import com.attendra.uitm.ui.common.PlaceholderTabFragment;
 import com.attendra.uitm.ui.settings.SettingsFragment;
@@ -45,8 +45,8 @@ public class LecturerMainActivity extends MainTabsActivity {
         return new LecturerHomeFragment();
     }
 
-    /** Placeholder until the Create session wizard is built (C6). */
+    /** Opens the Create Session wizard (C6). */
     public void openCreateSession() {
-        ComingSoonActivity.open(this, R.string.create_session, R.string.create_session_later);
+        CreateSessionActivity.open(this);
     }
 }

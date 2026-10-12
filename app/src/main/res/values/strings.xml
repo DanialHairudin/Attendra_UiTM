@@ -138,10 +138,7 @@
     <string name="create_session">Create attendance session</string>
     <string name="empty_today_title">No sessions today</string>
     <string name="empty_today_body">Sessions you create for today will appear here.</string>
-    <string name="create_session_later">Creating attendance sessions will be available in a later version.</string>
-    <string name="live_monitor_later">The live monitor will be available in a later version.</string>
     <string name="session_report">Session report</string>
-    <string name="session_report_later">Session reports will be available in a later version.</string>
     <string name="history_title">Session history</string>
     <string name="history_later">Your past sessions and their reports will appear here in a later version.</string>
 
@@ -168,7 +165,6 @@
     <string name="open_now">● Open now</string>
     <string name="check_in">Check in</string>
     <string name="already_checked_in">✓ Checked in</string>
-    <string name="check_in_later">Check-in will be available in a later version.</string>
     <string name="overall_attendance">Overall attendance</string>
     <string name="overall_detail">This semester · %1$d of %2$d sessions</string>
     <string name="no_attendance_yet">No attendance yet</string>
@@ -223,6 +219,139 @@
     <string name="empty_my_clubs_title">No clubs yet</string>
     <string name="empty_my_clubs_body">Clubs are optional.</string>
     <string name="clubs_edit_later">Joining and leaving clubs will be available in a later version.</string>
+
+    <!-- Create Session wizard (C6) -->
+    <string name="new_session">New session</string>
+    <string name="review_and_start">Review and start</string>
+    <string name="step_of">%1$d of 4</string>
+    <string name="continue_label">Continue</string>
+    <string name="selected">selected</string>
+    <string name="not_selected">not selected</string>
+    <string name="type_question">What are you taking attendance for?</string>
+    <string name="type_class">Normal class</string>
+    <string name="type_class_desc">One group · faculty room</string>
+    <string name="type_test">Test</string>
+    <string name="type_test_desc">One or more groups · faculty room</string>
+    <string name="type_sulam">SULAM / outside</string>
+    <string name="type_sulam_desc">One or more groups · map pin</string>
+    <string name="type_club">Club activity</string>
+    <string name="type_club_desc">Clubs you advise · room or map</string>
+    <string name="title_pattern_class">%1$s class</string>
+    <string name="title_pattern_test">%1$s test</string>
+    <string name="title_pattern_sulam">%1$s SULAM activity</string>
+    <string name="title_pattern_club">%1$s meeting</string>
+    <string name="who_question">Who should attend?</string>
+    <string name="who_session_title">Session title</string>
+    <string name="who_activity_name">Activity name</string>
+    <string name="who_title_required">Please enter a title.</string>
+    <string name="who_class_label">Teaching class · choose one</string>
+    <string name="who_course_label">Course · choose one</string>
+    <string name="who_groups_label">Groups · tick one or more for a combined test</string>
+    <string name="who_groups_label_sulam">Your Part 6 classes · tick one or more for a combined activity</string>
+    <string name="empty_sulam_title">No SULAM classes</string>
+    <string name="empty_sulam_body">SULAM is for Part 6 classes. None of the classes assigned to you is in Part 6.</string>
+    <string name="who_club_label">Club · only clubs you advise</string>
+    <string name="who_no_clubs_body">You can only create club sessions for clubs you advise.</string>
+    <string name="who_club_note">Only members who added this club in their profile can check in. The report shows who came.</string>
+    <string name="where_question">Where is it?</string>
+    <string name="where_inside">Inside faculty</string>
+    <string name="where_outside">Outside</string>
+    <string name="where_building">Building</string>
+    <string name="where_building_hint">Choose a building</string>
+    <string name="where_room">Room</string>
+    <string name="where_room_hint">Choose a room</string>
+    <string name="room_and_floor">%1$s · %2$s</string>
+    <string name="where_no_location_title">Building location not set</string>
+    <string name="where_no_location_body">%1$s has no latitude and longitude yet, so students could not be checked against it. Add them in /buildings/%1$s in the Firebase console.</string>
+    <string name="where_geofence_title">Geofence set automatically</string>
+    <string name="where_geofence_body">Students must be inside the %1$s building area (%2$d m) to check in. Their check-in time decides Present or Late.</string>
+    <string name="where_radius">Geofence radius</string>
+    <string name="where_radius_min">30 m</string>
+    <string name="where_radius_max">150 m</string>
+    <string name="meters">%1$d m</string>
+    <string name="meters_radius">%1$d m radius</string>
+    <string name="when_question">When can students check in?</string>
+    <string name="when_date">Date</string>
+    <string name="when_opens">Opens</string>
+    <string name="when_closes">Closes</string>
+    <string name="when_late_label">Mark as late after</string>
+    <string name="minutes_short">%1$d min</string>
+    <string name="when_note">Check-ins before %1$s count as Present, %1$s–%2$s as Late. After %2$s no new check-ins are accepted.</string>
+    <string name="when_error_order">The closing time must be after the opening time.</string>
+    <string name="when_error_past">The closing time has already passed.</string>
+    <string name="when_error_late">The late mark must be before the session closes.</string>
+    <string name="when_review">Review</string>
+    <string name="review_who">Who</string>
+    <string name="review_where">Where</string>
+    <string name="review_geofence">Geofence</string>
+    <string name="review_geofence_pin">Map pin · %1$d m radius</string>
+    <string name="review_geofence_building">%1$s building area · %2$d m</string>
+    <string name="review_time">Time</string>
+    <string name="review_late">Late after</string>
+    <string name="review_late_value">%1$d minutes (%2$s)</string>
+    <string name="start_session">Start session</string>
+    <string name="starting_session">Starting…</string>
+    <string name="notify_title">New session: %1$s</string>
+    <string name="notify_body_time">Check in %1$s</string>
+    <string name="open_live_monitor_title">Live monitor</string>
+    <plurals name="groups_count">
+        <item quantity="one">%d group</item>
+        <item quantity="other">%d groups</item>
+    </plurals>
+    <plurals name="review_notify">
+        <item quantity="one">%d student will get a notification when you start.</item>
+        <item quantity="other">%d students will get a notification when you start.</item>
+    </plurals>
+
+    <!-- Place search on the map (SULAM / outside club) -->
+    <string name="place_search_button">Search</string>
+    <string name="place_searching">Searching…</string>
+    <string name="place_search_none">No places found. Try another name, or move the pin on the map.</string>
+    <string name="place_search_failed">Search is unavailable. Please check your internet connection, or tap the map instead.</string>
+
+    <!-- Live Monitor, Manual Attendance, Session Report (C7) -->
+    <string name="status_not_yet">Not yet</string>
+    <string name="filter_all">All</string>
+    <string name="countdown_left">left to check in</string>
+    <string name="countdown_opens">check-in opens</string>
+    <string name="countdown_over">check-in time is over</string>
+    <string name="closed_at">closed · ended %1$s</string>
+    <string name="live_mark">Mark</string>
+    <string name="live_more_time">+10 min</string>
+    <string name="live_radius">Radius</string>
+    <string name="live_close">Close</string>
+    <string name="view_report">View report</string>
+    <string name="rejected_attempts">Rejected attempts</string>
+    <string name="live_empty_title">No students to show</string>
+    <string name="live_empty_body">No students are registered in this session\'s groups or club yet.</string>
+    <string name="live_none_title">Nobody here yet</string>
+    <string name="live_none_body">No student matches this filter right now.</string>
+    <string name="meters_away">%1$d m away</string>
+    <string name="reason_mock">Mock location</string>
+    <string name="reason_outside">Outside</string>
+    <string name="manual_meta">Manual: %1$s</string>
+    <string name="manual_title">Mark manually</string>
+    <string name="manual_student">Student</string>
+    <string name="manual_student_hint">Choose a student from Not yet</string>
+    <string name="manual_status">Status</string>
+    <string name="manual_reason">Reason</string>
+    <string name="manual_reason_hint">e.g. Phone GPS not working, seen in class</string>
+    <string name="manual_pick_student">Please choose a student.</string>
+    <string name="manual_reason_required">Please enter a reason.</string>
+    <string name="manual_saved">%1$s has been marked.</string>
+    <string name="manual_nobody">Everyone has already been marked.</string>
+    <string name="more_time_done">Check-in now closes at %1$s.</string>
+    <string name="radius_sheet_body">Students must be within this distance of the session location to check in. The change applies to the next check-ins.</string>
+    <string name="close_title">Close session?</string>
+    <plurals name="close_body">
+        <item quantity="one">Check-in stops now. %d student who has not checked in will be marked Absent.</item>
+        <item quantity="other">Check-in stops now. %d students who have not checked in will be marked Absent.</item>
+    </plurals>
+    <string name="report_attended">attended (%1$d of %2$d)</string>
+    <string name="report_no_absent_title">Nobody was absent</string>
+    <string name="report_no_absent_body">Every student checked in or was marked.</string>
+    <string name="simulate_check_in">Simulate check-in (debug)</string>
+    <string name="simulate_done">Simulated check-in saved as %1$s.</string>
 
     <plurals name="students_count">
         <item quantity="one">%d student</item>
@@ -297,4 +426,77 @@
     <string name="status_late">Late</string>
     <string name="status_absent">Absent</string>
     <string name="status_rejected">Rejected</string>
+
+    <!-- OpenStreetMap: venue pin map (Where step) and live check-in map -->
+    <string name="venue_search_hint">Search a place, e.g. Seksyen 7</string>
+    <string name="venue_map_description">Map with the venue pin and attendance radius</string>
+    <string name="venue_use_my_location">Use my location</string>
+    <string name="venue_pin_hint">Choose a suggestion, then tap the map or long-press and drag the pin to the exact spot.</string>
+    <string name="finding_location">Finding your location…</string>
+    <string name="location_permission_title">Allow location</string>
+    <string name="location_permission_continue">Continue</string>
+    <string name="location_permission_not_now">Not now</string>
+    <string name="location_permission_body_venue">Attendra UiTM reads your location only while this screen is open, to put the pin where you are standing. It is not saved until you create the session, and it is never tracked in the background.</string>
+    <string name="location_permission_denied_venue">Location is off for Attendra UiTM. You can still search for a place or tap the map.</string>
+    <string name="live_map_title">Check-in locations</string>
+    <string name="live_map_show_all">Show all</string>
+    <string name="live_map_description">Map of where students checked in</string>
+    <string name="live_map_legend">Green: Present   Orange: Late   Red: Rejected. Tap a student below to see where they checked in.</string>
+
+    <!-- C9 Check in (CLAUDE.md section 6) -->
+    <string name="check_in_now">Check in now</string>
+    <string name="check_in_privacy_note">Attendra UiTM reads your location once, only when you tap Check in. It is saved with your attendance so your lecturer can see where you checked in.</string>
+    <string name="closes_in">closes in %1$s</string>
+    <string name="opens_at">opens %1$s</string>
+    <string name="check_in_ready_title">Ready to check in</string>
+    <string name="check_in_ready_body">Tap Check in now when you are at the venue.</string>
+    <string name="check_in_busy_body">This can take up to 15 seconds.</string>
+    <string name="check_in_step_session">Checking this session…</string>
+    <string name="check_in_step_location">Getting your location…</string>
+    <string name="check_in_step_saving">Saving…</string>
+    <string name="check_in_failed_title">Check-in not saved</string>
+    <string name="not_now">Not now</string>
+    <string name="try_again">Try again</string>
+    <string name="back_to_home">Back to home</string>
+    <string name="open_settings">Open settings</string>
+    <string name="allow_location">Allow location</string>
+
+    <!-- Check-in states -->
+    <string name="state_offline_title">No internet connection</string>
+    <string name="state_offline_body">Check-in needs the internet to reach the server clock. Connect to Wi-Fi or mobile data and try again.</string>
+    <string name="state_closed_title">This session has closed</string>
+    <string name="state_closed_body">Check-in for %1$s closed at %2$s. If you were there, ask your lecturer to mark you manually.</string>
+    <string name="state_closed_missing">This session no longer exists. Your lecturer may have removed it.</string>
+    <string name="state_not_open_title">Check-in is not open yet</string>
+    <string name="state_not_open_body">Check-in for %1$s opens at %2$s. Please try again then.</string>
+    <string name="state_not_eligible_title">You’re not in this session</string>
+    <string name="state_not_eligible_body">This session is for other groups or club members. If you think this is wrong, ask your lecturer.</string>
+    <string name="state_permission_title">Allow location to check in</string>
+    <string name="state_permission_body">Attendra UiTM reads your location once, only when you tap Check in. It is saved with your attendance so your lecturer can see where you checked in.</string>
+    <string name="state_permission_blocked_body">Location is turned off for Attendra UiTM. Open settings, then Permissions → Location, and choose “Allow only while using the app”.</string>
+    <string name="state_gps_off_title">Turn on location</string>
+    <string name="state_gps_off_body">Your phone’s location is switched off. Turn it on in quick settings, then try again.</string>
+    <string name="state_low_accuracy_title">GPS signal is weak</string>
+    <string name="state_low_accuracy_body">We could only place you within ±%1$d m (we need ±50 m or better). Move near a window or door and try again; your lecturer can also mark you manually.</string>
+    <string name="state_no_fix_body">We couldn’t get a GPS fix within 15 seconds. Move near a window or door, or go outside, and try again.</string>
+
+    <!-- Check-in result -->
+    <string name="result_present_title">You’re checked in</string>
+    <string name="result_present_body">Your attendance for %1$s is saved. Your lecturer can see it now.</string>
+    <string name="result_late_title">Checked in, marked late</string>
+    <string name="result_late_body">You checked in after the %1$d-minute late mark. It still counts as attended.</string>
+    <string name="result_outside_title">You’re outside the venue</string>
+    <string name="result_outside_body">You are %1$d m from %2$s; check-in only works within %3$d m. Move closer and try again.</string>
+    <string name="result_mock_title">Fake location detected</string>
+    <string name="result_mock_body">Your phone is using a mock (fake) location, so you were not checked in. Turn off any fake GPS app and try again. This attempt was recorded.</string>
+    <string name="result_already_title">Already recorded</string>
+    <string name="result_already_body">Your attendance for %1$s was recorded at %2$s.</string>
+    <string name="result_row_session">Session</string>
+    <string name="result_row_time">Time</string>
+    <string name="result_row_distance">Distance</string>
+    <string name="result_row_accuracy">GPS accuracy</string>
+    <string name="result_distance_inside">%1$d m (inside %2$d m)</string>
+    <string name="result_distance_outside">%1$d m (outside %2$d m)</string>
+    <string name="result_pinned_place">the pinned location</string>
+    <string name="result_accuracy">±%1$d m</string>
 </resources>

@@ -158,7 +158,7 @@ public class RegisterViewModel extends ViewModel {
         return programme == null ? 0 : programme.parts;
     }
 
-    /** Groups for the chosen programme and part, e.g. CS2405A, CS2405B, CS2405C. */
+    /** Groups for the chosen programme and part, e.g. CDCS2405A, CDCS2405B, CDCS2405C. */
     public List<Group> groupsForSelection() {
         List<Group> result = new ArrayList<>();
         if (programme == null || part == 0) return result;

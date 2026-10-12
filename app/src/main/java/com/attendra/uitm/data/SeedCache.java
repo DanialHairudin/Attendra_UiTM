@@ -99,6 +99,15 @@ public final class SeedCache {
         return id == null ? null : VENUES.get(id);
     }
 
+    /** Every room in one building (unsorted). */
+    public static List<Venue> venuesIn(String buildingId) {
+        List<Venue> list = new java.util.ArrayList<>();
+        for (Venue v : VENUES.values()) {
+            if (buildingId != null && buildingId.equals(v.building)) list.add(v);
+        }
+        return list;
+    }
+
     @Nullable
     public static Club club(@Nullable String id) {
         return id == null ? null : CLUBS.get(id);

@@ -58,7 +58,7 @@ public final class Formats {
     }
 
     /**
-     * Groups written like the prototype: "CS2405A, B, C". When the IDs share
+     * Groups written like the prototype: "CDCS2405A, B, C". When the IDs share
      * everything except the last letter, only that letter is repeated.
      */
     public static String groups(List<String> ids) {

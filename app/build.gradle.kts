@@ -103,6 +103,11 @@ dependencies {
     // JavaMail for Android: sends the verification code email over SMTP
     implementation(libs.android.mail)
     implementation(libs.android.activation)
+    // OpenStreetMap maps (osmdroid): venue pin map and live check-in map.
+    // No API key and no billing. Place search uses Photon over plain HTTP.
+    implementation(libs.osmdroid.android)
+    // FusedLocationProviderClient: one fresh GPS fix when the student taps Check in
+    implementation(libs.play.services.location)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
 }

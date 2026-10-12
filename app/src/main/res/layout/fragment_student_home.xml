@@ -113,6 +113,17 @@
                     app:iconGravity="textStart"
                     app:iconTint="@color/onGold" />
 
+                <!-- DEBUG builds only: write a check-in without GPS, to test C7 before C9 -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_simulate"
+                    style="@style/Widget.Attendra.Button.Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/simulate_check_in"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
+
                 <TextView
                     android:id="@+id/txt_checked_in"
                     style="@style/Widget.Attendra.Badge.Present"

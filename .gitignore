@@ -21,3 +21,5 @@ design/
 seed/
 app/google-services.json
 STEPS.md
+CLAUDE_CODE_PROMPT_OSM.md
+osm_pack/

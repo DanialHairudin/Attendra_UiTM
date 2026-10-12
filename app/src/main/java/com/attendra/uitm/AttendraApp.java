@@ -4,6 +4,7 @@ import android.app.Application;
 
 import androidx.annotation.StringRes;
 
+import com.attendra.uitm.map.OsmSetup;
 import com.attendra.uitm.util.ThemePrefs;
 
 /**
@@ -19,6 +20,8 @@ public class AttendraApp extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
+        // OpenStreetMap setup (User-Agent, tile cache folder) before any map is shown.
+        OsmSetup.init(this);
         ThemePrefs.apply(ThemePrefs.get(this));
     }
 

@@ -96,4 +96,13 @@
         <item name="trackColor">@color/raised</item>
         <item name="indicatorColor">@color/gold</item>
     </style>
+    <!-- Geofence radius slider: gold thumb and track on a raised track -->
+    <style name="Widget.Attendra.Slider" parent="Widget.Material3.Slider">
+        <item name="thumbColor">@color/gold</item>
+        <item name="trackColorActive">@color/gold</item>
+        <item name="trackColorInactive">@color/raised</item>
+        <item name="haloColor">@color/gold_tint</item>
+        <item name="tickVisible">false</item>
+        <item name="labelBehavior">gone</item>
+    </style>
 </resources>

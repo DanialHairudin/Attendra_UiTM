@@ -11,7 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.attendra.uitm.BuildConfig;
 import com.attendra.uitm.R;
+import com.attendra.uitm.data.AttendanceRepository;
 import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
@@ -24,7 +26,6 @@ import com.attendra.uitm.model.Attendance;
 import com.attendra.uitm.model.Course;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.model.Session;
-import com.attendra.uitm.ui.common.ComingSoonActivity;
 import com.attendra.uitm.ui.common.MainTabsActivity;
 import com.attendra.uitm.ui.common.SessionText;
 import com.attendra.uitm.ui.common.Ui;
@@ -78,6 +79,8 @@ public class StudentHomeFragment extends Fragment {
     private boolean seedReady;
     private Map<String, Session> mySessions = new HashMap<>();
     private String watchedGroup;
+    /** The session shown on the open-session card (for Simulate check-in). */
+    private Session openSession;
     /** sessionId → status ("present", "late", "absent"); null = not loaded yet. */
     private Map<String, String> myAttendance;
     /** sessionId → courseId ("" for club sessions), read once per session. */
@@ -101,8 +104,10 @@ public class StudentHomeFragment extends Fragment {
                 ProfileActivity.open(requireContext(), Registration.ROLE_STUDENT));
         binding.btnSeeAll.setOnClickListener(v ->
                 ((MainTabsActivity) requireActivity()).selectTab(R.id.nav_attendance));
-        binding.btnCheckIn.setOnClickListener(v -> ComingSoonActivity.open(requireContext(),
-                R.string.check_in, R.string.check_in_later));
+        binding.btnCheckIn.setOnClickListener(v -> {
+            if (openSession != null) CheckInActivity.open(requireContext(), openSession.id);
+        });
+        binding.btnSimulate.setOnClickListener(v -> simulateCheckIn());
     }
 
     @Override
@@ -275,6 +280,38 @@ public class StudentHomeFragment extends Fragment {
         boolean done = myAttendance != null && Attendance.attended(myAttendance.get(open.id));
         binding.btnCheckIn.setVisibility(done ? View.GONE : View.VISIBLE);
         binding.txtCheckedIn.setVisibility(done ? View.VISIBLE : View.GONE);
+        openSession = open;
+        binding.btnSimulate.setVisibility(BuildConfig.DEBUG && !done ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * DEBUG only: writes a present/late record (method "debug") for the open
+     * session, as a real check-in would, so the Live Monitor can be tested
+     * before the GPS check-in (C9) exists. The button is never shown in release.
+     */
+    private void simulateCheckIn() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (!BuildConfig.DEBUG || openSession == null || user == null) return;
+        binding.btnSimulate.setEnabled(false);
+        new AttendanceRepository().simulateCheckIn(openSession, user.getUid(),
+                new Callback<String>() {
+                    @Override
+                    public void onSuccess(String status) {
+                        if (binding == null) return;
+                        binding.btnSimulate.setEnabled(true);
+                        Snackbar.make(binding.getRoot(), getString(R.string.simulate_done,
+                                getString(Attendance.LATE.equals(status)
+                                        ? R.string.status_late : R.string.status_present)),
+                                Snackbar.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        if (binding == null) return;
+                        binding.btnSimulate.setEnabled(true);
+                        showError(message);
+                    }
+                });
     }
 
     private void renderOverall() {

@@ -9,6 +9,11 @@ public class Programme {
     public String name;
     public int parts;
     public String faculty;
+    /**
+     * The part in which this programme's students do SULAM (community service
+     * learning). 0 = not set: Part 6 is used (CreateSessionViewModel.DEFAULT_SULAM_PART).
+     */
+    public int sulamPart;
 
     public Programme() {
     }

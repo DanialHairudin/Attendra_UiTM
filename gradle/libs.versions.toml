@@ -8,6 +8,8 @@ material = "1.10.0"
 activityKtx = "1.8.0"
 constraintlayout = "2.1.4"
 javamail = "1.6.7"
+osmdroid = "6.1.20"
+playServicesLocation = "21.4.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -19,6 +21,8 @@ activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 android-mail = { group = "com.sun.mail", name = "android-mail", version.ref = "javamail" }
 android-activation = { group = "com.sun.mail", name = "android-activation", version.ref = "javamail" }
+osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

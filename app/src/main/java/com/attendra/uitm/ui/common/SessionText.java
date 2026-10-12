@@ -33,17 +33,22 @@ public final class SessionText {
         return course.hasRealCode() ? course.code : course.name;
     }
 
-    /** "CS2405A, B, C" (empty for club sessions). */
+    /** "CDCS2405A, B, C" (empty for club sessions). */
     public static String groups(Session s) {
         return Formats.groups(s.groupIds());
     }
 
     /**
-     * Where it happens: "DK1, CS1 1st floor" for a room, or "Pinned location"
-     * for a SULAM/outside session. The room is a label only; GPS checks the building.
+     * Where it happens: "DK1, CS1 1st floor" for a room. For a SULAM/outside
+     * session, the place picked in search ("i-City, Seksyen 7, Shah Alam"), or
+     * "Pinned location" if none was picked. The room is a label only; GPS
+     * checks the building.
      */
     public static String room(Context c, Session s) {
-        if ("pin".equals(s.where)) return c.getString(R.string.room_pin);
+        if ("pin".equals(s.where)) {
+            return s.placeName != null && !s.placeName.isEmpty()
+                    ? s.placeName : c.getString(R.string.room_pin);
+        }
         Venue v = SeedCache.venue(s.venueId);
         if (v == null) return nullToEmpty(s.building);
         String place = v.floor == null || v.floor.isEmpty()
@@ -72,10 +77,12 @@ public final class SessionText {
 
     /**
      * Status chip for a list row:
-     * closed → "Closed" (grey), not started → "Scheduled" (gold), otherwise "Live" (green).
+     * closed, or past its end time → "Closed" (grey), not started → "Scheduled"
+     * (gold), otherwise "Live" (green). A session past its end counts as closed
+     * even before its status is updated (CLAUDE.md section 6).
      */
     public static void statusChip(TextView chip, Session s, long now) {
-        if (!s.isOpen()) {
+        if (!s.isOpen() || now >= s.end) {
             chip.setText(R.string.status_closed);
             Ui.tintBadge(chip, R.color.absent, R.color.absent_tint);
         } else if (now < s.start) {

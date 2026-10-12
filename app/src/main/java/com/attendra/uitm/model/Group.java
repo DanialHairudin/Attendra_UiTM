@@ -1,7 +1,7 @@
 package com.attendra.uitm.model;
 
 /**
- * One row of /groups (seed data). The id is the node key, e.g. "CS2405A"
+ * One row of /groups (seed data). The id is the node key, e.g. "CDCS2405A"
  * = programme CS240, part 5, letter A.
  */
 public class Group {

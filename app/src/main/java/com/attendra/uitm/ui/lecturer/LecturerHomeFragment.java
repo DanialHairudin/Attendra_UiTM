@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.attendra.uitm.R;
+import com.attendra.uitm.data.AttendanceRepository;
 import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
@@ -23,7 +24,7 @@ import com.attendra.uitm.databinding.ItemSessionRowBinding;
 import com.attendra.uitm.model.Attendance;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.model.Session;
-import com.attendra.uitm.ui.common.ComingSoonActivity;
+
 import com.attendra.uitm.ui.common.SessionText;
 import com.attendra.uitm.ui.common.Ui;
 import com.attendra.uitm.ui.settings.ProfileActivity;
@@ -64,6 +65,9 @@ public class LecturerHomeFragment extends Fragment {
     private FragmentLecturerHomeBinding binding;
     private final Subscriptions subs = new Subscriptions();
     private final Subscriptions liveSubs = new Subscriptions();
+    private final AttendanceRepository attendance = new AttendanceRepository();
+    /** Sessions being auto-closed right now, so each is closed only once. */
+    private final Set<String> closing = new HashSet<>();
     private SessionWatcher watcher;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable tick = new Runnable() {
@@ -102,8 +106,9 @@ public class LecturerHomeFragment extends Fragment {
                 ProfileActivity.open(requireContext(), Registration.ROLE_LECTURER));
         binding.btnSeeHistory.setOnClickListener(v -> host().selectTab(R.id.nav_history));
         binding.btnCreateSession.setOnClickListener(v -> host().openCreateSession());
-        binding.btnLiveMonitor.setOnClickListener(v -> ComingSoonActivity.open(requireContext(),
-                R.string.open_live_monitor, R.string.live_monitor_later));
+        binding.btnLiveMonitor.setOnClickListener(v -> {
+            if (liveId != null) LiveMonitorActivity.open(requireContext(), liveId);
+        });
         binding.txtDate.setText(Formats.dateLine(now()));
     }
 
@@ -177,9 +182,34 @@ public class LecturerHomeFragment extends Fragment {
         if (binding == null) return;
         long now = now();
         binding.txtDate.setText(Formats.dateLine(now));
+        autoCloseOverdue(now);
         if (!seedReady) return; // course and room names are needed for every row
         renderLive(now);
         renderToday(now);
+    }
+
+    /**
+     * Auto-close (CLAUDE.md section 5): a session still "open" after its end
+     * time is closed the same way as the Close button, so no-shows get Absent.
+     * Runs whenever the sessions change and on the 30 s tick.
+     */
+    private void autoCloseOverdue(long now) {
+        for (Session s : sessions.values()) {
+            if (s.isOpen() && now >= s.end && closing.add(s.id)) {
+                attendance.close(s, new Callback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer absent) {
+                        closing.remove(s.id);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        closing.remove(s.id); // try again on the next tick
+                        showError(message);
+                    }
+                });
+            }
+        }
     }
 
     /** The open session that closes first, or null. */
@@ -326,11 +356,9 @@ public class LecturerHomeFragment extends Fragment {
             SessionText.statusChip(row.rowChip, s, now);
             row.getRoot().setOnClickListener(v -> {
                 if (s.isOpen()) {
-                    ComingSoonActivity.open(requireContext(), R.string.open_live_monitor,
-                            R.string.live_monitor_later);
+                    LiveMonitorActivity.open(requireContext(), s.id);
                 } else {
-                    ComingSoonActivity.open(requireContext(), R.string.session_report,
-                            R.string.session_report_later);
+                    SessionReportActivity.open(requireContext(), s.id);
                 }
             });
             Ui.addRow(binding.listToday, row.getRoot());
