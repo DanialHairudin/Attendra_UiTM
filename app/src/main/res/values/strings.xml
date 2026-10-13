@@ -174,12 +174,12 @@
     <string name="empty_courses_title">No attendance yet</string>
     <string name="empty_courses_body">Your courses and their attendance appear here after your first session.</string>
     <!-- Read aloud by TalkBack for a course row -->
-    <string name="course_pct_description">%1$s, %2$d percent attendance</string>
+    <string name="course_pct_description" tools:ignore="PluralsCandidate">%1$s, %2$d percent attendance</string>
     <string name="my_attendance_title">My attendance</string>
     <string name="my_history_title">History</string>
-    <string name="n_present">%1$d present</string>
-    <string name="n_late">%1$d late</string>
-    <string name="n_absent">%1$d absent</string>
+    <string name="n_present" tools:ignore="PluralsCandidate">%1$d present</string>
+    <string name="n_late" tools:ignore="PluralsCandidate">%1$d late</string>
+    <string name="n_absent" tools:ignore="PluralsCandidate">%1$d absent</string>
     <string name="of_total">of %1$d</string>
     <string name="notifications_title">Notifications</string>
 
@@ -231,6 +231,19 @@
     <string name="club_left">Left %1$s</string>
     <string name="club_advising">You now advise %1$s</string>
     <string name="club_not_advising">You no longer advise %1$s</string>
+    <string name="text_size">Text size</string>
+    <string name="text_size_small">Small</string>
+    <string name="text_size_default">Default</string>
+    <string name="text_size_large">Large</string>
+    <string name="text_size_extra_large">Extra large</string>
+    <string name="text_size_preview_title">Good morning</string>
+    <string name="text_size_preview_body">Software Engineering · CDCS2405A
+CS2 · Makmal 3 · closes 10:00 AM</string>
+    <string name="text_size_note">Your phone’s own text size setting still applies on top of this.</string>
+    <string name="text_size_sample" translatable="false">A</string>
+    <string name="text_size_apply">Apply</string>
+    <string name="text_size_smaller">Smaller text</string>
+    <string name="text_size_larger">Larger text</string>
     <string name="phone_edit_title">Phone number</string>
     <string name="phone_saved">Phone number saved</string>
 

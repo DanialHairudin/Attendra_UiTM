@@ -1,5 +1,6 @@
 package com.attendra.uitm.ui;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
@@ -10,6 +11,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.attendra.uitm.util.TextSizePrefs;
+
 /**
  * Parent of every Activity in the app.
  *
@@ -17,8 +20,15 @@ import androidx.core.view.WindowInsetsCompat;
  * navigation bar). EdgeToEdge.enable() does the same on older phones and sets
  * dark or light system bar icons to match the theme. padForSystemBars() then
  * pushes the screen content out from under those bars.
+ *
+ * It also applies the Text size chosen in Settings (TextSizePrefs) to every screen.
  */
 public abstract class BaseActivity extends AppCompatActivity {
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(TextSizePrefs.wrap(base));
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

@@ -100,11 +100,6 @@
         <item name="android:backgroundTint">@color/absent_tint</item>
     </style>
 
-    <style name="Widget.Attendra.Badge.Rejected">
-        <item name="android:textColor">@color/rejected</item>
-        <item name="android:backgroundTint">@color/rejected_tint</item>
-    </style>
-
     <!-- List row: at least 56dp tall -->
     <style name="Widget.Attendra.ListRow" parent="">
         <item name="android:minHeight">@dimen/list_row_min_height</item>

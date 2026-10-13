@@ -1,5 +1,6 @@
 package com.attendra.uitm.map;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,8 @@ public class PlaceSuggestionAdapter extends RecyclerView.Adapter<PlaceSuggestion
 
     public PlaceSuggestionAdapter(OnPick onPick) { this.onPick = onPick; }
 
+    /** Replaces the whole list (every search returns new results), so a full refresh is right. */
+    @SuppressLint("NotifyDataSetChanged")
     public void submit(List<PlaceResult> list) {
         items.clear();
         items.addAll(list);

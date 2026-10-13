@@ -31,7 +31,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:autofillHints="phoneNational"
-            android:contentDescription="@string/label_phone"
             android:hint="@string/hint_phone"
             android:imeOptions="actionDone"
             android:inputType="phone" />
