@@ -11,7 +11,7 @@ public class Programme {
     /** The course code that is this programme's SULAM course, e.g. "ICT652" for CS240. */
     public String sulamCourse;
 
-    /** True when sulamCourse holds a real, confirmed course code. */
+    /** True when sulamCourse names a course (its code, or its ID if the code is TBC). */
     public boolean hasSulamCourse() {
         return sulamCourse != null && !sulamCourse.isEmpty() && !"TBC".equalsIgnoreCase(sulamCourse);
     }

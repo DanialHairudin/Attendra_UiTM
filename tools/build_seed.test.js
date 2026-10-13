@@ -15,6 +15,11 @@ const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'attendra-seed-test-'));
 const seedTextBefore = fs.readFileSync(SEED, 'utf8');
 const seed = JSON.parse(seedTextBefore);
 const csvText = fs.readFileSync(CSV, 'utf8');
+// Expected counts come from the CSV itself, so the tests keep passing as it gets filled in.
+const csvRows = parseCsv(csvText).slice(1).filter(r => r.some(v => v));
+const tbcCount = csvRows.filter(r => (r[2] || '').trim().toUpperCase() === 'TBC').length;
+const sulamProgs = new Set(csvRows.filter(r => (r[4] || '').trim().toUpperCase() === 'TRUE').map(r => r[0]));
+const noSulam = Object.keys(seed.programmes).filter(p => !sulamProgs.has(p));
 
 let pass = 0;
 let fail = 0;
@@ -46,7 +51,7 @@ const written = dir => fs.existsSync(path.join(dir, 'import_courses.json'));
 function completeCsv() {
   const rows = parseCsv(csvText).filter(r => r.some(v => v));
   let k = 100;
-  const sulamDone = new Set(['CS240']);
+  const sulamDone = new Set(sulamProgs);
   return rows.map((r, i) => {
     if (i === 0) return r;
     const [prog, part] = r;
@@ -64,8 +69,9 @@ check('slug rule matches the seed', slug('Fundamentals of Database Design and De
 // ---------------------------------------------------------------- the current CSV
 let r = run(csvText);
 check('current CSV, strict: stops (TBC codes, missing SULAM)', r.code === 1 && !written(r.dir));
-check('current CSV, strict: reports 157 TBC codes', (r.out.match(/still TBC/g) || []).length === 157);
-check('current CSV, strict: reports 5 programmes without SULAM', (r.out.match(/no course is marked isSulam/g) || []).length === 5);
+check(`current CSV, strict: reports ${tbcCount} TBC codes`, (r.out.match(/still TBC/g) || []).length === tbcCount);
+check(`current CSV, strict: reports ${noSulam.length} programmes without SULAM`,
+  (r.out.match(/no course is marked isSulam/g) || []).length === noSulam.length);
 
 r = run(csvText, ['--draft']);
 const courses = read(r.dir, 'import_courses.json');
@@ -76,7 +82,16 @@ check('current CSV, draft: writes the files', r.code === 0 && written(r.dir));
 check('round trip: courses identical to the seed (IDs and values)', JSON.stringify(courses) === JSON.stringify(seed.courses));
 check('round trip: groups identical to the seed (A-C everywhere)', JSON.stringify(groups) === JSON.stringify(seed.groups));
 check('CS240: sulamCourse ICT652, sulamPart 6', programmes.CS240.sulamCourse === 'ICT652' && programmes.CS240.sulamPart === 6);
-check('other programmes: sulamCourse TBC', ['CS230', 'CS255', 'CS259', 'CS264', 'CS266'].every(p => programmes[p].sulamCourse === 'TBC'));
+check('programmes with no SULAM row: sulamCourse TBC', noSulam.every(p => programmes[p].sulamCourse === 'TBC'));
+check('programmes with a SULAM row: sulamCourse is a code or a course ID',
+  [...sulamProgs].every(p => programmes[p].sulamCourse !== 'TBC'
+    && (/^[A-Z]{3}\d{3}$/.test(programmes[p].sulamCourse) || courses[programmes[p].sulamCourse])));
+
+// A SULAM course whose code is still TBC: sulamCourse is its course ID.
+const espi = 'CS255,6,TBC,"Ethical, Social and Professional Issues in ICT",';
+r = run(csvText.replace(espi + 'FALSE', espi + 'TRUE'), ['--draft']);
+check('SULAM course with TBC code: sulamCourse is its course ID',
+  read(r.dir, 'import_programmes.json').CS255.sulamCourse === 'CS255_P6_' + slug('Ethical, Social and Professional Issues in ICT'));
 check('buildings, venues and clubs copied unchanged',
   ['buildings', 'venues', 'clubs'].every(k => JSON.stringify(whole[k]) === JSON.stringify(seed[k])));
 

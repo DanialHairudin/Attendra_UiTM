@@ -147,7 +147,10 @@ public final class SeedCache {
         Course course = course(courseId);
         if (course == null) return false;
         Programme p = programme(course.programme);
-        if (p != null && p.hasSulamCourse()) return p.sulamCourse.equalsIgnoreCase(course.code);
+        if (p != null && p.hasSulamCourse()) {
+            // A course code, or the course ID while the code is still TBC.
+            return p.sulamCourse.equalsIgnoreCase(course.code) || p.sulamCourse.equals(course.id);
+        }
         int part = p != null && p.sulamPart > 0 ? p.sulamPart : DEFAULT_SULAM_PART;
         return course.part == part;
     }

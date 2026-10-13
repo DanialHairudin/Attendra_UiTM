@@ -128,7 +128,7 @@ function build(seed, rows, errors, warnings) {
     usedIds.add(cid);
     courses[cid] = { programme: prog, part, name, code };
 
-    if (flag === 'TRUE') (sulam[prog] = sulam[prog] || []).push({ code, part, line });
+    if (flag === 'TRUE') (sulam[prog] = sulam[prog] || []).push({ code, cid, part, line });
   }
 
   for (const [cid, c] of Object.entries(oldCourses)) {
@@ -141,7 +141,8 @@ function build(seed, rows, errors, warnings) {
     const p = { ...p0 };
     const marked = sulam[prog] || [];
     if (marked.length === 1) {
-      p.sulamCourse = marked[0].code;
+      // The course code, or its ID while the code is still TBC.
+      p.sulamCourse = marked[0].code !== 'TBC' ? marked[0].code : marked[0].cid;
       p.sulamPart = marked[0].part;
     } else {
       p.sulamCourse = 'TBC';
