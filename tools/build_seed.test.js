@@ -1,0 +1,142 @@
+#!/usr/bin/env node
+/* Tests for tools/build_seed.js. */
+'use strict';
+
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { execFileSync } = require('child_process');
+const { parseCsv, slug } = require('./build_seed');
+
+const ROOT = path.resolve(__dirname, '..');
+const SEED = path.join(ROOT, 'seed', 'attendra_seed.json');
+const CSV = path.join(ROOT, 'seed', 'programme_structure.csv');
+const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'attendra-seed-test-'));
+const seedTextBefore = fs.readFileSync(SEED, 'utf8');
+const seed = JSON.parse(seedTextBefore);
+const csvText = fs.readFileSync(CSV, 'utf8');
+
+let pass = 0;
+let fail = 0;
+function check(name, ok, detail) {
+  if (ok) { pass++; console.log(`PASS  ${name}`); }
+  else { fail++; console.log(`FAIL  ${name}${detail ? ': ' + detail : ''}`); }
+}
+
+/** Runs the builder on a CSV text; returns {code, out, dir}. */
+let n = 0;
+function run(csv, extra = []) {
+  const dir = path.join(TMP, `case${++n}`);
+  fs.mkdirSync(dir);
+  const csvFile = path.join(dir, 'in.csv');
+  fs.writeFileSync(csvFile, csv);
+  try {
+    const out = execFileSync(process.execPath,
+      [path.join(__dirname, 'build_seed.js'), '--csv', csvFile, '--seed', SEED, '--out', dir, ...extra],
+      { encoding: 'utf8' });
+    return { code: 0, out, dir };
+  } catch (e) {
+    return { code: e.status, out: e.stdout, dir };
+  }
+}
+const read = (dir, f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+const written = dir => fs.existsSync(path.join(dir, 'import_courses.json'));
+
+/** The real CSV with every TBC replaced by a made-up code and one SULAM row per programme. */
+function completeCsv() {
+  const rows = parseCsv(csvText).filter(r => r.some(v => v));
+  let k = 100;
+  const sulamDone = new Set(['CS240']);
+  return rows.map((r, i) => {
+    if (i === 0) return r;
+    const [prog, part] = r;
+    if (r[2] === 'TBC') r[2] = `ZZT${k++}`;
+    if (!sulamDone.has(prog) && part === '6') { r[4] = 'TRUE'; sulamDone.add(prog); }
+    return r;
+  }).map(r => r.map(v => /[",]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v).join(',')).join('\r\n') + '\r\n';
+}
+
+// ---------------------------------------------------------------- the CSV reader
+const parsed = parseCsv('﻿a,b\r\n"x, y","say ""hi"""\r\n');
+check('CSV: BOM, CRLF, quoted comma and "" quotes', parsed[1][0] === 'x, y' && parsed[1][1] === 'say "hi"' && parsed[0][0] === 'a');
+check('slug rule matches the seed', slug('Fundamentals of Database Design and Development') === 'FUNDAMENTALS_OF_DATABASE_DESIGN_AND_DEVE');
+
+// ---------------------------------------------------------------- the current CSV
+let r = run(csvText);
+check('current CSV, strict: stops (TBC codes, missing SULAM)', r.code === 1 && !written(r.dir));
+check('current CSV, strict: reports 157 TBC codes', (r.out.match(/still TBC/g) || []).length === 157);
+check('current CSV, strict: reports 5 programmes without SULAM', (r.out.match(/no course is marked isSulam/g) || []).length === 5);
+
+r = run(csvText, ['--draft']);
+const courses = read(r.dir, 'import_courses.json');
+const groups = read(r.dir, 'import_groups.json');
+const programmes = read(r.dir, 'import_programmes.json');
+const whole = read(r.dir, 'attendra_seed.built.json');
+check('current CSV, draft: writes the files', r.code === 0 && written(r.dir));
+check('round trip: courses identical to the seed (IDs and values)', JSON.stringify(courses) === JSON.stringify(seed.courses));
+check('round trip: groups identical to the seed (A-C everywhere)', JSON.stringify(groups) === JSON.stringify(seed.groups));
+check('CS240: sulamCourse ICT652, sulamPart 6', programmes.CS240.sulamCourse === 'ICT652' && programmes.CS240.sulamPart === 6);
+check('other programmes: sulamCourse TBC', ['CS230', 'CS255', 'CS259', 'CS264', 'CS266'].every(p => programmes[p].sulamCourse === 'TBC'));
+check('buildings, venues and clubs copied unchanged',
+  ['buildings', 'venues', 'clubs'].every(k => JSON.stringify(whole[k]) === JSON.stringify(seed[k])));
+
+// ---------------------------------------------------------------- filling in a code
+const algo = 'CS230,1,TBC,Algorithms and Problem Solving,FALSE';
+r = run(csvText.replace(algo, 'CS230,1,CSC402,Algorithms and Problem Solving,FALSE'), ['--draft']);
+let c = read(r.dir, 'import_courses.json');
+check('TBC code filled in: the course keeps its old ID',
+  c.CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING && c.CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING.code === 'CSC402' && !c.CS230_CSC402);
+
+r = run(csvText.replace(algo, 'CS230,1,CSC402,Algorithm and Problem Solving,FALSE'), ['--draft']);
+c = read(r.dir, 'import_courses.json');
+check('code AND name changed: new ID {programme}_{code} + warning',
+  c.CS230_CSC402 && !c.CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING && /CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING .*no longer in the CSV/.test(r.out));
+
+// ---------------------------------------------------------------- errors
+const ict600 = 'CS240,5,ICT600,Web Technology and Application,FALSE';
+r = run(csvText.replace(ict600, 'CS240,5,ICT600,Web Technology and Application,TRUE'));
+check('two SULAM courses in one programme: ERROR', r.code === 1 && /CS240: 2 courses are marked isSulam/.test(r.out));
+r = run(csvText.replace(ict600, 'CS240,5,ICT602,Web Technology and Application,FALSE'));
+check('duplicate code in one programme: ERROR', /code ICT602 already used on line/.test(r.out));
+r = run(csvText.replace(ict600, 'CS240,9,ICT600,Web Technology and Application,FALSE'));
+check('part outside 1-6: ERROR', /part 9 is outside 1-6/.test(r.out));
+r = run(csvText.replace(ict600, 'CS999,5,ICT600,Web Technology and Application,FALSE'));
+check('unknown programme: ERROR', /programme "CS999" is not in seed programmes/.test(r.out));
+r = run(csvText.replace(ict600, 'CS240,5,ICT600,Web Technology and Application,yes'));
+check('isSulam not TRUE/FALSE: ERROR', /isSulam must be TRUE or FALSE/.test(r.out));
+r = run(csvText.replace(ict600, 'CS240,5,ICT600,,FALSE'));
+check('empty course name: ERROR', /courseName is empty/.test(r.out));
+r = run(csvText.replace(ict600, 'CS240,5,IT-600,Web Technology and Application,FALSE'), ['--draft']);
+check('odd-looking code: WARNING only', r.code === 0 && /code "IT-600" does not look like ABC123/.test(r.out));
+r = run('programme,part,courseCode\nCS240,1,CSC415\n');
+check('missing column: clear error', r.code === 1);
+
+// ---------------------------------------------------------------- a complete CSV
+const full = completeCsv();
+r = run(full);
+check('complete CSV, strict: passes and writes', r.code === 0 && written(r.dir), r.out.split('\n').slice(-3).join(' '));
+if (written(r.dir)) {
+  const p = read(r.dir, 'import_programmes.json');
+  check('complete CSV: every programme has a sulamCourse', Object.values(p).every(x => x.sulamCourse && x.sulamCourse !== 'TBC'));
+}
+
+// ---------------------------------------------------------------- --backup check
+const backup = path.join(TMP, 'backup.json');
+fs.writeFileSync(backup, JSON.stringify({
+  teachingAssignments: { zzLec: {
+    CS240_ICT652_CDCS2406C: { courseId: 'CS240_ICT652', groupId: 'CDCS2406C' },
+    CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING_CDCS2301A: { courseId: 'CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING', groupId: 'CDCS2301A' },
+  } },
+  sessions: { zzS1: { courseId: 'CS240_ICT652', groups: { CDCS2406A: true } } },
+  students: { zzStu: { groupId: 'CDCS2406B' } },
+}));
+r = run(full, ['--backup', backup]);
+check('backup: nothing broken → passes', r.code === 0, r.out.split('\n').filter(l => l.startsWith('ERROR')).join(' | '));
+r = run(full.replace('CS230,1,ZZT', 'CS230,1,ZZX').replace('Algorithms and Problem Solving', 'Algorithm Solving'), ['--backup', backup]);
+check('backup: renamed course used by a teaching class → ERROR',
+  r.code === 1 && /teachingAssignments\/zzLec\/CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING_CDCS2301A: course .* would no longer exist/.test(r.out));
+
+check('the real seed file was not changed', fs.readFileSync(SEED, 'utf8') === seedTextBefore);
+fs.rmSync(TMP, { recursive: true, force: true });
+console.log(`----\n${pass} passed, ${fail} failed`);
+process.exitCode = fail ? 1 : 0;
