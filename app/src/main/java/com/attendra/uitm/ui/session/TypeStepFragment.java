@@ -55,11 +55,11 @@ public class TypeStepFragment extends BaseStepFragment {
         });
     }
 
-    /** The chosen card gets a 2dp gold border (prototype ".typecard.on"). */
+    /** The chosen card gets a 2dp gold border. */
     private void showSelection() {
         for (Map.Entry<String, ItemTypeCardBinding> e : cards.entrySet()) {
             boolean on = vm().isType(e.getKey());
-            e.getValue().getRoot().setSelected(on); // read by TalkBack as "selected"
+            e.getValue().getRoot().setSelected(on); // Read by TalkBack as "selected"
             e.getValue().getRoot().setStrokeColor(requireContext().getColor(
                     on ? R.color.gold : R.color.line));
             e.getValue().getRoot().setStrokeWidth(Ui.dp(requireContext(), on ? 2 : 1));

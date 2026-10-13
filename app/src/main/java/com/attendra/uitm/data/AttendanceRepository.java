@@ -11,17 +11,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Writes made from the Live Monitor (CLAUDE.md sections 5 and 7): manual marks,
- * more time, a new radius, and closing a session. Every write that touches
- * more than one path uses ONE updateChildren, so attendance and the
- * studentAttendance mirror never disagree.
+ * Writes made from the Live Monitor: manual marks, more time, a new radius, and closing a session.
  */
 public class AttendanceRepository {
 
     /**
-     * Manual attendance for one student (Manual Attendance Page):
-     *   attendance/{sid}/{uid}        {status, time, method: "manual", reason, markedBy}
-     *   studentAttendance/{uid}/{sid} {status, time}
+     * Manual attendance for one student (Manual Attendance Page): attendance/{sid}/{uid} {status,
+     * time, method: "manual", reason, markedBy} studentAttendance/{uid}/{sid} {status, time}
      */
     public void markManual(String sessionId, String studentUid, String status, String reason,
                            String lecturerUid, Callback<Void> callback) {
@@ -35,9 +31,8 @@ public class AttendanceRepository {
     }
 
     /**
-     * DEBUG only ("Simulate check-in" on the Student Dashboard): writes the
-     * record a real GPS check-in would, without the location checks (C9).
-     * Late if now is after lateAfter.
+     * DEBUG only ("Simulate check-in" on the Student Dashboard): writes the record a real GPS
+     * check-in would, without the location checks.
      */
     public void simulateCheckIn(Session s, String studentUid, Callback<String> callback) {
         String status = System.currentTimeMillis() > s.lateAfter
@@ -74,16 +69,7 @@ public class AttendanceRepository {
         Db.write(updates, callback);
     }
 
-    /**
-     * Closes a session (the Close button, or auto-close when the end time has
-     * passed). In ONE updateChildren:
-     *   sessions/{sid}/status = "closed", sessions/{sid}/closedAt = server time
-     *   for every eligible student WITHOUT a record:
-     *     attendance/{sid}/{uid}        {status: "absent", time, method: "auto"}
-     *     studentAttendance/{uid}/{sid} {status: "absent", time}
-     * The eligible list and the existing records are read fresh first.
-     * onSuccess receives how many students were marked absent.
-     */
+    /** Closes a session (the Close button, or auto-close when the end time has passed). */
     public void close(Session s, Callback<Integer> callback) {
         SessionRepository.eligibleStudents(s, new Callback<Set<String>>() {
             @Override

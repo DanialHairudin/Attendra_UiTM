@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Files other apps may open through our FileProvider: only the CSV reports
-     written to the app's cache (Session Report → Share CSV, C11). -->
+<!-- Files other apps may open through our FileProvider: only the CSV reports written to the app's
+     cache (Session Report → Share CSV). -->
 <paths>
     <cache-path
         name="reports"

@@ -5,7 +5,7 @@ import androidx.annotation.StringRes;
 import com.attendra.uitm.R;
 import com.attendra.uitm.model.Session;
 
-/** Display names for the four session types (CLAUDE.md section 5). */
+/** Display names for the four session types. */
 public final class SessionTypes {
 
     private SessionTypes() {

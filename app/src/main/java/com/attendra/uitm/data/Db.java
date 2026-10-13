@@ -19,11 +19,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Map;
 
-/**
- * Single place that opens the Realtime Database. The URL is passed explicitly
- * (BuildConfig.DATABASE_URL) so the app does not depend on google-services.json
- * containing it.
- */
+/** Single place that opens the Realtime Database. */
 public final class Db {
 
     /** How long a one-time read may take before we report an error. */
@@ -42,25 +38,14 @@ public final class Db {
         return get().getReference();
     }
 
-    /**
-     * A value as text, or null if it is missing. Unlike getValue(String.class)
-     * this does not crash when a field was typed in the Firebase console as a
-     * number (e.g. studentId 2025000001 or staffId 2015034 without quotes).
-     */
+    /** A value as text, or null if it is missing. */
     @Nullable
     public static String text(DataSnapshot snapshot) {
         Object value = snapshot.getValue();
         return value == null ? null : String.valueOf(value);
     }
 
-    /**
-     * Reads a path once, with a timeout.
-     *
-     * The Realtime Database SDK never says "can't connect" (offline, or a wrong
-     * database URL). It just waits forever, which would leave a screen stuck on
-     * "Loading…". So after READ_TIMEOUT_MS we stop listening and call onError.
-     * The `done` flag makes sure the callback runs only once, whichever comes first.
-     */
+    /** Reads a path once, with a timeout. */
     public static void readOnce(Query query, Callback<DataSnapshot> callback) {
         final boolean[] done = {false};
         final ValueEventListener listener = new ValueEventListener() {
@@ -87,13 +72,7 @@ public final class Db {
         query.addListenerForSingleValueEvent(listener);
     }
 
-    /**
-     * Multi-path write (updateChildren) with the same timeout as readOnce.
-     *
-     * Offline, Firebase keeps a write queued and only finishes it once the server
-     * answers. On timeout we call purgeOutstandingWrites() so the queued write is
-     * thrown away and can't sneak in later, after we've told the user it failed.
-     */
+    /** Multi-path write (updateChildren) with the same timeout as readOnce. */
     public static void write(Map<String, Object> updates, Callback<Void> callback) {
         final boolean[] done = {false};
         MAIN.postDelayed(() -> {

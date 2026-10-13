@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One student on the Live Monitor / Session Report: initials, name, a small
-     line (student ID, time, distance or reason) and a status chip. -->
+<!-- One student on the Live Monitor / Session Report: initials, name, a small line (student ID,
+     time, distance or reason) and a status chip. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Widget.Attendra.ListRow"
     android:layout_width="match_parent"

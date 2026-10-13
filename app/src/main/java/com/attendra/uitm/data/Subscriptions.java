@@ -11,16 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Keeps track of live database listeners (ValueEventListeners) so a screen can
- * remove all of them at once.
- *
- * A ValueEventListener stays attached until it is removed, and keeps calling
- * back (and using data) even after the screen is gone. So screens add their
- * listeners in onStart() and call clear() in onStop() (CLAUDE.md 12.5).
+ * Keeps track of live database listeners (ValueEventListeners) so a screen can remove all of them
+ * at once.
  */
 public class Subscriptions {
 
-    /** One attached listener. remove() detaches just this one. */
+    /** One attached listener. */
     public final class Handle {
         private final Query query;
         private final ValueEventListener listener;
@@ -39,8 +35,7 @@ public class Subscriptions {
     private final List<Handle> handles = new ArrayList<>();
 
     /**
-     * Calls onSuccess with the current value straight away, then again every
-     * time the data changes. onError gets a short message (e.g. permission denied).
+     * Calls onSuccess with the current value straight away, then again every time the data changes.
      */
     public Handle listen(Query query, Callback<DataSnapshot> callback) {
         ValueEventListener listener = new ValueEventListener() {

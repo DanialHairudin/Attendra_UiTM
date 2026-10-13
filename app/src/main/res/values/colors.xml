@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Attendra palette, light mode. values-night/colors.xml has the same names
-     with the dark values. Layouts must use these names, never raw hex. -->
+<!-- Attendra palette, light mode. -->
 <resources>
     <color name="bg">#FAF7F0</color>
     <color name="surface">#FFFFFF</color>
@@ -17,4 +16,6 @@
     <color name="late">#B45309</color>
     <color name="absent">#6A6152</color>
     <color name="rejected">#B42318</color>
+    <!-- Blue "you are here" dot on the student check-in map -->
+    <color name="my_location">#1A73E8</color>
 </resources>

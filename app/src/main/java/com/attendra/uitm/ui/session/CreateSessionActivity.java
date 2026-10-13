@@ -19,15 +19,7 @@ import com.attendra.uitm.util.HomeRouter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-/**
- * Create Session wizard (CLAUDE.md section 5):
- *   1 Session Type → 2 Participants → 3 Venue → 4 Time → Review → Start.
- *
- * Each page is a Fragment that implements WizardStep. They all share one
- * CreateSessionViewModel, which holds the draft. Moving forward adds the next
- * page to the back stack, so Back (app bar or system) returns to the previous
- * page with its choices kept. Back on the first page closes the wizard.
- */
+/** Create Session wizard: 1 Session Type → 2 Participants → 3 Venue → 4 Time → Review → Start. */
 public class CreateSessionActivity extends BaseActivity {
 
     public static void open(Context from) {
@@ -116,8 +108,8 @@ public class CreateSessionActivity extends BaseActivity {
     }
 
     /**
-     * Each page calls this from onResume (also when Back returns to it):
-     * "New session · 2 of 4" with 2 gold segments, or "Review and start" with no bar.
+     * Each page calls this from onResume (also when Back returns to it): "New session · 2 of 4"
+     * with 2 gold segments, or "Review and start" with no bar.
      */
     public void onStepShown(WizardStep step) {
         int n = step.stepNumber();

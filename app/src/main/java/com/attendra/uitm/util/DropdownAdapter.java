@@ -14,18 +14,7 @@ import com.attendra.uitm.R;
 
 import java.util.List;
 
-/**
- * Adapter for the exposed dropdown menus (Programme, Part, Group).
- *
- * It holds the real objects (e.g. Programme), not just their text, so the click
- * listener can read the chosen object straight from the clicked row with
- * parent.getItemAtPosition(position). The screen never has to look it up again
- * by position in some other list, which could point at the wrong item.
- *
- * The filter does nothing (non-filtering). A normal ArrayAdapter filters its items
- * by the text in the field, so after a choice (or a screen rotation) the list
- * would shrink to the chosen item only, and the positions would shift.
- */
+/** Adapter for the exposed dropdown menus (Programme, Part, Group). */
 public class DropdownAdapter<T> extends ArrayAdapter<T> {
 
     /** Turns an item into the text shown in the list and in the field. */
@@ -73,8 +62,7 @@ public class DropdownAdapter<T> extends ArrayAdapter<T> {
                 notifyDataSetChanged();
             }
 
-            // The field shows this text after a choice, so it uses the same
-            // label as the list rows.
+            // The field shows this text after a choice, so it uses the same label as the list rows.
             @SuppressWarnings("unchecked")
             @Override
             public CharSequence convertResultToString(Object resultValue) {

@@ -17,21 +17,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * 6-digit email verification codes (CLAUDE.md 12.3).
- *
- *   verificationCodes/{uid}  {codeHash, expiresAt, sentAt, attempts}
- *
- * Only a SHA-256 hash of the code is stored, never the code itself. Someone who
- * can read the database still can't see the code. Checking works by hashing what
- * the user typed in the same way and comparing the two hashes.
- *
- * The uid is part of what gets hashed ("uid:code"), so the same code gives a
- * different hash for every user.
- *
- * Times are the phone's clock in milliseconds. Prototype only: a server
- * (Cloud Functions) would create and check the codes in production.
- */
+/** 6-digit email verification codes. */
 public class VerificationRepository {
 
     public static final int MAX_ATTEMPTS = 5;
@@ -67,14 +53,7 @@ public class VerificationRepository {
         return "verificationCodes/" + uid;
     }
 
-    /**
-     * Creates a NEW code, saves its hash and emails it.
-     * Saving overwrites verificationCodes/{uid}, so any older code stops working.
-     * onSuccess receives the new expiresAt time.
-     *
-     * The order is: read the name/email → save the hash → send the email. If the
-     * email fails, the saved code is simply never used; Resend makes a new one.
-     */
+    /** Creates a NEW code, saves its hash and emails it. */
     public void sendNewCode(String uid, String role, Callback<Long> callback) {
         Db.readOnce(Db.root().child(UserRepository.profileNode(role)).child(uid),
                 new Callback<DataSnapshot>() {
@@ -86,8 +65,8 @@ public class VerificationRepository {
                             callback.onError(str(R.string.error_no_profile));
                             return;
                         }
-                        // {{NAME}} is the first name suggestion ("Danial"): no
-                        // preferred name exists yet at this point (CLAUDE.md 12.6).
+                        // {{NAME}} is the first name suggestion ("Danial"): no preferred name
+                        // exists yet at this point.
                         saveAndSend(uid, role, NameSuggestions.first(name), email, callback);
                     }
 
@@ -136,7 +115,7 @@ public class VerificationRepository {
         });
     }
 
-    /** Reads the waiting code (for the countdown). onSuccess(null) if there is none. */
+    /** Reads the waiting code (for the countdown). */
     public void loadPending(String uid, Callback<Pending> callback) {
         Db.readOnce(Db.root().child(codePath(uid)), new Callback<DataSnapshot>() {
             @Override
@@ -151,14 +130,7 @@ public class VerificationRepository {
         });
     }
 
-    /**
-     * Checks a typed code, in this order:
-     * 1. no code saved, or the time is up → EXPIRED
-     * 2. already 5 wrong tries → TOO_MANY
-     * 3. hash doesn't match → attempts + 1, then WRONG (or TOO_MANY on the 5th)
-     * 4. match → emailVerified = true and the code is deleted, in ONE
-     *    updateChildren, so a used code can never be used again → OK
-     */
+    /** Checks a typed code, in this order. */
     public void verify(String uid, String role, String code, Callback<Result> callback) {
         Db.readOnce(Db.root().child(codePath(uid)), new Callback<DataSnapshot>() {
             @Override
@@ -179,7 +151,7 @@ public class VerificationRepository {
                 final Result result;
                 if (savedHash.equals(hash(uid, code))) {
                     updates.put(UserRepository.profileNode(role) + "/" + uid + "/emailVerified", true);
-                    updates.put(codePath(uid), null); // null deletes the node
+                    updates.put(codePath(uid), null); // Null deletes the node
                     result = Result.OK;
                 } else {
                     int attempts = pending.attempts + 1;

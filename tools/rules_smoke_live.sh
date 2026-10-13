@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
-# READ-ONLY smoke test of the LIVE attendra-uitm database, run after publishing
-# database.rules.json. It only sends GET requests to the database: it never
-# sends PUT, PATCH, POST or DELETE there, so it cannot change any data.
-# (The one POST below is the sign-in to Firebase Authentication, not the database.)
-# Write tests belong in tools/rules_test.sh, which runs on the emulator only.
-#
-# Usage (Git Bash, from the project folder): bash tools/rules_smoke_live.sh .
+# READ-ONLY smoke test of the LIVE attendra-uitm database, run after publishing database.rules.json.
 P="${1:-.}"
 DB=https://attendra-uitm-default-rtdb.asia-southeast1.firebasedatabase.app
 KEY=$(grep -o '"current_key": *"[^"]*"' "$P/app/google-services.json" | head -1 | sed 's/.*: *"\(.*\)"/\1/')
@@ -24,7 +18,7 @@ LT=$(echo "$L_JSON" | field idToken); LU=$(echo "$L_JSON" | field localId)
 { [ -z "$ST" ] || [ -z "$LT" ]; } && { echo "sign-in failed"; exit 1; }
 
 pass=0; fail=0
-# check <name> <expect allow|deny> <path> [token]   (GET only, by design)
+# check <name> <expect allow|deny> <path> [token] (GET only, by design)
 check() {
   local name=$1 expect=$2 path=$3 tok=$4 url code
   url="$DB/$path.json?shallow=true"; [ -n "$tok" ] && url="$url&auth=$tok"

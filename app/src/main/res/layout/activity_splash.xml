@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Splash, matching the "Splash" screen in design/Attendra_App_Preview.html.
-     Logo, eyebrow, title and tagline sit at the top; the two buttons sit at the bottom. -->
+<!-- Splash screen. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/splash_root"
@@ -14,8 +13,7 @@
     android:paddingBottom="40dp"
     tools:context=".ui.splash.SplashActivity">
 
-    <!-- Full Attendra logo. The PNG has a little transparent margin around the gold
-         square, so a negative start margin lines the square up with the text below. -->
+    <!-- Full Attendra logo. -->
     <ImageView
         android:layout_width="120dp"
         android:layout_height="120dp"

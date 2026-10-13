@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Lecturer bottom nav. The middle item is an empty, disabled slot: the gold (+)
-     button in activity_lecturer_main.xml sits on top of it. -->
+<!-- Lecturer bottom nav. -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_home"

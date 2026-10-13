@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One box of the 6-digit code on the Verify screen. The focused box gets a gold border. -->
+<!-- One box of the 6-digit code on the Verify screen. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
         <shape android:shape="rectangle">

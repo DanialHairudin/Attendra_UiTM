@@ -10,14 +10,7 @@ import java.util.regex.Pattern;
 
 /**
  * UiTM academic sessions (semesters), as the labels saved in
- * teachingAssignments/{uid}/{key}/semester (CLAUDE.md 4, C5b).
- *
- * UiTM runs two main sessions a year:
- * - first:  March–August            → "March–August 2026"
- * - second: September – February    → "September 2026 – February 2027"
- * January and February belong to the session that started the September before.
- *
- * Every month rule is in this one class, so the months can be changed here later.
+ * teachingAssignments/{uid}/{key}/semester.
  */
 public final class SemesterUtil {
 
@@ -44,11 +37,7 @@ public final class SemesterUtil {
         return list;
     }
 
-    /**
-     * True if this assignment counts as the current semester. Assignments saved
-     * before C5b have no semester at all; they are treated as current, so they
-     * don't disappear from the lecturer's list.
-     */
+    /** True if this assignment counts as the current semester. */
     public static boolean isCurrent(@Nullable String semester) {
         return semester == null || semester.equals(currentSemester());
     }
@@ -59,9 +48,8 @@ public final class SemesterUtil {
         return index >= 0 && index < indexOf(Calendar.getInstance());
     }
 
-    // ------------------------------------------------------------------
-    // Each session gets a number, so sessions can be compared and counted:
-    // year * 2 for March–August, year * 2 + 1 for September–February.
+    // Each session gets a number, so sessions can be compared and counted: year * 2 for
+    // March–August, year * 2 + 1 for September–February.
 
     private static int indexOf(Calendar day) {
         int year = day.get(Calendar.YEAR);

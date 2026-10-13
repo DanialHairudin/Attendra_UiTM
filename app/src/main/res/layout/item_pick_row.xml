@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A choosable row on the Participants Page: a radio (pick one) or a check box
-     (tick several), a title, a small line, and an optional gold badge.
-     The whole row is the touch target; the radio / check box only shows the state. -->
+<!-- A choosable row on the Participants Page: a radio (pick one) or a check box (tick several), a
+     title, a small line, and an optional gold badge. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/Widget.Attendra.ListRow"

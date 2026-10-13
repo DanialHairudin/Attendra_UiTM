@@ -1,11 +1,8 @@
 package com.attendra.uitm.model;
 
-/**
- * One check-in attempt in attempts/{sessionId}/{pushId} (CLAUDE.md section 6).
- * Every tap on Check in is logged, accepted or not.
- */
+/** One check-in attempt in attempts/{sessionId}/{pushId}. */
 public class Attempt {
-    /** reason values for rejected attempts (CLAUDE.md section 6). */
+    /** Reason values for rejected attempts. */
     public static final String REASON_MOCK = "MOCK_LOCATION";
     public static final String REASON_OUTSIDE = "OUTSIDE_RADIUS";
 
@@ -16,7 +13,7 @@ public class Attempt {
     public String reason;
     public Double distance;
     public Double accuracy;
-    /** Where the check-in fix was (5 decimals, about 1 m). GPS attempts only. */
+    /** Where the check-in fix was (5 decimals, about 1 m). */
     public Double lat;
     public Double lng;
 

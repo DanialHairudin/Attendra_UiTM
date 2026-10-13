@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Lecturer History tab ("history" in the prototype): type filter pills, then
-     every session, newest first. Tap a session for its report. -->
+<!-- Lecturer History tab: type filter pills, then every session, newest first. -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"

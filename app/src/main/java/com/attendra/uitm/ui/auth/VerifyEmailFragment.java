@@ -33,23 +33,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Locale;
 
-/**
- * Email Verification Page (CLAUDE.md 12.3).
- *
- * The user types the 6-digit code from the email into six boxes. The boxes:
- * - move to the next box after each digit (auto-advance),
- * - go back one box on Backspace in an empty box,
- * - fill all six when a 6-digit code is pasted into any box.
- *
- * "Code expires in 0:59" counts down; at 0 Verify is disabled. Resend code is
- * disabled for 30 s after each send. All the logic about codes lives in
- * VerifyViewModel / VerificationRepository; this class only draws the state.
- *
- * The unverified user stays signed in ONLY while this screen is open, because
- * saving the code and setting emailVerified need the signed-in user. Leaving the
- * screen (Back, "Return to log in", "Change email") signs them out. SplashActivity
- * also signs out any unverified user it finds, e.g. if the app was closed here.
- */
+/** Email Verification Page. */
 public class VerifyEmailFragment extends Fragment {
 
     private static final String ARG_EMAIL = "email";
@@ -74,11 +58,6 @@ public class VerifyEmailFragment extends Fragment {
         }
     };
 
-    /**
-     * @param sendNow true straight after registering (the first code is sent when
-     *                the screen opens); false when coming from Login (no code is
-     *                sent until the user taps Resend code).
-     */
     public static VerifyEmailFragment newInstance(String email, boolean sendNow) {
         Bundle args = new Bundle();
         args.putString(ARG_EMAIL, email);
@@ -126,8 +105,8 @@ public class VerifyEmailFragment extends Fragment {
                 });
 
         vm.getState().observe(getViewLifecycleOwner(), s -> render());
-        // Code accepted: a new account has no preferred name yet, so this opens
-        // the Preferred Name Page ("What should we call you?") once (CLAUDE.md 12.6).
+        // Code accepted: a new account has no preferred name yet, so this opens the Preferred Name
+        // Page ("What should we call you?") once.
         vm.getVerifiedRole().observe(getViewLifecycleOwner(), role -> {
             if (role != null) {
                 Intent intent = PreferredNameActivity.firstTimeIntent(requireContext(), role);
@@ -149,8 +128,8 @@ public class VerifyEmailFragment extends Fragment {
             }
         });
 
-        // After a process restart the screen is rebuilt from savedInstanceState;
-        // don't send another code in that case.
+        // After a process restart the screen is rebuilt from savedInstanceState; don't send another
+        // code in that case.
         vm.start(requireArguments().getBoolean(ARG_SEND_NOW) && savedInstanceState == null);
         if (savedInstanceState == null) boxes[0].requestFocus();
     }
@@ -210,15 +189,11 @@ public class VerifyEmailFragment extends Fragment {
         }
     }
 
-    /**
-     * One box changed. Normally it holds one digit, and focus moves on.
-     * If it holds more than one digit, a code was pasted: the digits are spread
-     * over the boxes (a full 6-digit code always starts at the first box).
-     */
+    /** One box changed. */
     private void onBoxChanged(int index, String text) {
         String digits = text.replaceAll("[^0-9]", "");
         if (digits.length() <= 1) {
-            if (!digits.equals(text)) setBox(index, digits); // drop non-digits
+            if (!digits.equals(text)) setBox(index, digits); // Drop non-digits
             if (digits.length() == 1 && index < CODE_LENGTH - 1) focusBox(index + 1);
         } else {
             int start = digits.length() >= CODE_LENGTH ? 0 : index;
@@ -340,7 +315,7 @@ public class VerifyEmailFragment extends Fragment {
         host().showLogin();
     }
 
-    /** The body text with the email address in bold ink, like the prototype. */
+    /** The body text with the email address in bold ink. */
     private CharSequence bodyWithBoldEmail(String email) {
         String full = getString(R.string.verify_body, email);
         SpannableString s = new SpannableString(full);

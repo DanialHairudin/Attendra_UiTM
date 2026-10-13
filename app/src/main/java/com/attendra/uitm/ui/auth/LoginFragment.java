@@ -26,13 +26,7 @@ import com.attendra.uitm.util.Validators;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 
-/**
- * Log in with email + password (CLAUDE.md section 4):
- * - email not verified → Verify email screen
- * - verified → read roles/{uid} → LecturerMain or StudentMain
- *
- * DEBUG builds also have the hidden "Tester access" panel (CLAUDE.md 12.4).
- */
+/** Log in with email + password. */
 public class LoginFragment extends Fragment {
 
     /** How long the logo must be held to open the tester panel. */
@@ -62,8 +56,7 @@ public class LoginFragment extends Fragment {
         binding.btnForgot.setOnClickListener(v -> host().showForgotPassword());
         binding.btnToRegister.setOnClickListener(v -> host().showRegister());
 
-        // Hidden tester panel. In a release build this line is skipped, so the
-        // logo has no touch handling at all and nothing hints that it exists.
+        // Hidden tester panel.
         if (TestAccounts.enabled()) setUpTesterPanel();
     }
 
@@ -72,13 +65,8 @@ public class LoginFragment extends Fragment {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable openTesterPanel = this::showTesterPanel;
 
-    /**
-     * Holding the logo for TESTER_HOLD_MS opens "Tester access". Android's normal
-     * long-press fires after about half a second, which is too easy to trigger
-     * by accident, so the 2 s timer is done by hand: start it when the finger
-     * goes down, cancel it when the finger lifts (or the screen scrolls).
-     */
-    @SuppressLint("ClickableViewAccessibility") // hidden debug-only gesture, not a real control
+    /** Holding the logo for TESTER_HOLD_MS opens "Tester access". */
+    @SuppressLint("ClickableViewAccessibility") // Hidden debug-only gesture, not a real control
     private void setUpTesterPanel() {
         binding.imgLogo.setOnTouchListener((v, event) -> {
             switch (event.getActionMasked()) {
@@ -136,15 +124,15 @@ public class LoginFragment extends Fragment {
     }
 
     /**
-     * Signs in and routes: Verify screen if unverified, the Preferred Name Page if
-     * no name was picked yet, otherwise the role's dashboard.
+     * Signs in and routes: Verify screen if unverified, the Preferred Name Page if no name was
+     * picked yet, otherwise the role's dashboard.
      */
     private void login(String email, String password) {
         setLoading(true);
         auth.login(email, password, new Callback<AuthRepository.Route>() {
             @Override
             public void onSuccess(AuthRepository.Route route) {
-                if (binding == null) return; // screen was closed meanwhile
+                if (binding == null) return; // Screen was closed meanwhile
                 if (route.unverified) {
                     host().showVerify(email, false);
                 } else {

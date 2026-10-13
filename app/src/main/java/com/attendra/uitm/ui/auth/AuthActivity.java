@@ -10,15 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.attendra.uitm.R;
 import com.attendra.uitm.ui.BaseActivity;
 
-/**
- * Hosts the four Auth screens as Fragments:
- * Login, Register, Verify email and Forgot password.
- *
- * Back stack:
- * - Login → Register and Login → Forgot are pushed, so Back returns to Login.
- * - Verify always replaces everything, because Back from Verify must sign the
- *   unverified user out (VerifyEmailFragment handles that itself).
- */
+/** Hosts the four Auth screens as Fragments: Login, Register, Verify email and Forgot password. */
 public class AuthActivity extends BaseActivity {
 
     public static final String EXTRA_MODE = "mode";
@@ -51,11 +43,6 @@ public class AuthActivity extends BaseActivity {
         show(new ForgotPasswordFragment(), true);
     }
 
-    /**
-     * @param sendNow true straight after registering: the Verify screen creates
-     *                and emails the first code. false from Login: no code is sent
-     *                until the user taps Resend code (CLAUDE.md 12.3).
-     */
     public void showVerify(String email, boolean sendNow) {
         clearBackStack();
         show(VerifyEmailFragment.newInstance(email, sendNow), false);

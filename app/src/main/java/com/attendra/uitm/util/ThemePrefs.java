@@ -5,13 +5,7 @@ import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
-/**
- * Saves and applies the Light / Dark / System theme choice.
- *
- * The choice is kept in SharedPreferences under "theme_mode" so it survives
- * app restarts. AttendraApp calls apply() once at start-up; the Settings
- * screen (step C4) will call save() and then apply().
- */
+/** Saves and applies the Light / Dark / System theme choice. */
 public final class ThemePrefs {
 
     public static final String MODE_LIGHT = "light";
@@ -33,7 +27,7 @@ public final class ThemePrefs {
         prefs(context).edit().putString(KEY_THEME_MODE, mode).apply();
     }
 
-    /** Tells AppCompat which night mode to use. Every Activity follows it. */
+    /** Tells AppCompat which night mode to use. */
     public static void apply(String mode) {
         AppCompatDelegate.setDefaultNightMode(toNightMode(mode));
     }

@@ -9,11 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reads the static seed lists (programmes, groups, clubs) that Danny imported
- * from seed/attendra_seed.json. Each list is read once; the data rarely changes.
- *
- * These three nodes are read on the Register screen, before the user has an
- * account, so the database rules must allow reading them without sign-in.
+ * Reads the static seed lists (programmes, groups, clubs) that the admin imported from
+ * seed/attendra_seed.json.
  */
 public class SeedRepository {
 

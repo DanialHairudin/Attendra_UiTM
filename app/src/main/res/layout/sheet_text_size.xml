@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- "Text size" bottom sheet in Settings: a live preview, a 4-step slider
-     (Small, Default, Large, Extra large) and Apply. -->
+<!-- "Text size" bottom sheet in Settings: a live preview, a 4-step slider (Small, Default, Large,
+     Extra large) and Apply. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

@@ -1,6 +1,6 @@
 package com.attendra.uitm.map;
 
-/** Where one student checked in (or tried to). Shown as a dot on the lecturer's live map. */
+/** Where one student checked in (or tried to). */
 public class CheckInPoint {
     public final String uid;
     public final String name;

@@ -3,10 +3,7 @@ package com.attendra.uitm.model;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Everything the Register form collects, already validated.
- * Student-only and lecturer-only fields are left null for the other role.
- */
+/** Everything the Register form collects, already validated. */
 public class Registration {
     public static final String ROLE_STUDENT = "student";
     public static final String ROLE_LECTURER = "lecturer";

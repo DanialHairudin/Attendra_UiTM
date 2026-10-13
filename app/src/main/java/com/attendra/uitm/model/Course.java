@@ -2,9 +2,9 @@ package com.attendra.uitm.model;
 
 /** One row of /courses (seed data), e.g. CS240_ICT602. */
 public class Course {
-    /** Node key, e.g. "CS240_ICT602". Filled in after reading. */
+    /** Node key, e.g. "CS240_ICT602". */
     public String id;
-    /** e.g. "ICT602". Some programmes still have "TBC" (CLAUDE.md section 11). */
+    /** e.g. "ICT602". Some programmes still have "TBC". */
     public String code;
     public String name;
     public String programme;

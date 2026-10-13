@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Email Verification Page (CLAUDE.md 12.3): 6 code boxes, countdown, Verify,
-     Resend code. Same header style as the prototype's "Verify email" screen. -->
+<!-- Email Verification Page: 6 code boxes, countdown, Verify, Resend code. -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -45,7 +44,7 @@
             android:lineSpacingMultiplier="1.2"
             android:textAppearance="@style/TextAppearance.Attendra.Body.Muted" />
 
-        <!-- The six boxes. -4dp margins cancel each box's outer 4dp margin. -->
+        <!-- The six boxes. -->
         <LinearLayout
             android:id="@+id/code_boxes"
             android:layout_width="match_parent"

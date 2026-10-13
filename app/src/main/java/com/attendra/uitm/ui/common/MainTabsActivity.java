@@ -17,12 +17,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 /**
- * Parent of LecturerMainActivity and StudentMainActivity: a Fragment area on
- * top and a BottomNavigationView below. Tapping a tab replaces the Fragment.
- *
- * replace() (rather than hide/show) means only the visible tab is started, so
- * only its database listeners are attached. Each tab adds its listeners in
- * onStart() and removes them in onStop().
+ * Parent of LecturerMainActivity and StudentMainActivity: a Fragment area on top and a
+ * BottomNavigationView below.
  */
 public abstract class MainTabsActivity extends BaseActivity {
 
@@ -54,8 +50,8 @@ public abstract class MainTabsActivity extends BaseActivity {
         nav.setOnItemReselectedListener(item -> {
             // Already on this tab: nothing to do.
         });
-        // After rotation or a theme change the FragmentManager and the nav
-        // restore the open tab by themselves.
+        // After rotation or a theme change the FragmentManager and the nav restore the open tab by
+        // themselves.
         if (savedInstanceState == null) showTab(R.id.nav_home);
     }
 
@@ -71,10 +67,7 @@ public abstract class MainTabsActivity extends BaseActivity {
                 .commit();
     }
 
-    /**
-     * Pads the tab area below the status bar. The bottom nav pads itself above
-     * the system navigation bar, so the insets are passed on, not consumed.
-     */
+    /** Pads the tab area below the status bar. */
     private void padTopForStatusBar(View content) {
         ViewCompat.setOnApplyWindowInsetsListener(content, (v, windowInsets) -> {
             Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()

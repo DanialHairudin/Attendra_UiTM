@@ -13,16 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.attendra.uitm.util.TextSizePrefs;
 
-/**
- * Parent of every Activity in the app.
- *
- * Android 15+ always draws apps edge-to-edge (behind the status bar and the
- * navigation bar). EdgeToEdge.enable() does the same on older phones and sets
- * dark or light system bar icons to match the theme. padForSystemBars() then
- * pushes the screen content out from under those bars.
- *
- * It also applies the Text size chosen in Settings (TextSizePrefs) to every screen.
- */
+/** Parent of every Activity in the app. */
 public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
@@ -36,12 +27,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
     }
 
-    /**
-     * Adds the status bar / nav bar height to the view's own padding.
-     * The keyboard (ime) is included too: in edge-to-edge mode adjustResize no
-     * longer shrinks the window, so without this the keyboard would cover the
-     * bottom of forms.
-     */
+    /** Adds the status bar / nav bar height to the view's own padding. */
     protected void padForSystemBars(View root) {
         final int left = root.getPaddingLeft();
         final int top = root.getPaddingTop();

@@ -32,16 +32,13 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Realtime Database URL. Set here because google-services.json was downloaded
-        // before the database existed, so it has no firebase_url in it.
+        // Realtime Database URL.
         buildConfigField(
             "String", "DATABASE_URL",
             "\"https://attendra-uitm-default-rtdb.asia-southeast1.firebasedatabase.app\""
         )
 
-        // Gmail account that sends the 6-digit verification codes (CLAUDE.md 12.3).
-        // Prototype only: in production a server would send them, so the app
-        // would never hold an SMTP password.
+        // Gmail account that sends the 6-digit verification codes.
         buildConfigField("String", "SMTP_USER", localString("SMTP_USER"))
         buildConfigField("String", "SMTP_PASS", localString("SMTP_PASS"))
     }
@@ -53,12 +50,10 @@ android {
 
     buildTypes {
         debug {
-            // How long a verification code stays valid. Short in debug so the
-            // "expired" state is quick to test.
+            // How long a verification code stays valid.
             buildConfigField("int", "CODE_TTL_MINUTES", "1")
 
-            // Test account logins for the hidden tester panel (CLAUDE.md 12.4).
-            // Only the debug build gets the real values.
+            // Test account logins for the hidden tester panel.
             buildConfigField("String", "TEST_LECTURER_EMAIL", localString("TEST_LECTURER_EMAIL"))
             buildConfigField("String", "TEST_LECTURER_PASS", localString("TEST_LECTURER_PASS"))
             buildConfigField("String", "TEST_STUDENT_EMAIL", localString("TEST_STUDENT_EMAIL"))
@@ -80,8 +75,8 @@ android {
     }
     packaging {
         resources {
-            // android-mail and android-activation both ship these licence files,
-            // and an APK can only hold one copy of each path.
+            // Android-mail and android-activation both ship these licence files, and an APK can
+            // only hold one copy of each path.
             excludes += setOf("META-INF/NOTICE.md", "META-INF/LICENSE.md")
         }
     }
@@ -104,7 +99,6 @@ dependencies {
     implementation(libs.android.mail)
     implementation(libs.android.activation)
     // OpenStreetMap maps (osmdroid): venue pin map and live check-in map.
-    // No API key and no billing. Place search uses Photon over plain HTTP.
     implementation(libs.osmdroid.android)
     // FusedLocationProviderClient: one fresh GPS fix when the student taps Check in
     implementation(libs.play.services.location)

@@ -37,13 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Class Detail Page: one assigned class (course + group).
- * - Sessions: the lecturer's sessions for this course and group (often none yet).
- * - Students: everyone in studentsByGroup/{groupId}, with name and student ID
- *   from students/{uid}.
- * Listeners are added in onStart and removed in onStop.
- */
+/** Class Detail Page: one assigned class (course + group). */
 public class ClassDetailActivity extends BaseActivity {
 
     private static final String EXTRA_COURSE = "courseId";
@@ -71,7 +65,7 @@ public class ClassDetailActivity extends BaseActivity {
 
     private Map<String, Session> sessions = new HashMap<>();
     private boolean sessionsReady;
-    /** uid → student; a null value means that student's profile is still loading. */
+    /** Uid → student; a null value means that student's profile is still loading. */
     private final Map<String, Student> roster = new LinkedHashMap<>();
     private boolean rosterLoaded;
     private boolean seedReady;
@@ -233,7 +227,7 @@ public class ClassDetailActivity extends BaseActivity {
         }
         Ui.showListState(Ui.ListState.CONTENT, binding.txtSessionsLoading, binding.emptySessions,
                 binding.listSessions);
-        Collections.sort(mine, (a, b) -> Long.compare(b.start, a.start)); // newest first
+        Collections.sort(mine, (a, b) -> Long.compare(b.start, a.start)); // Newest first
         long now = System.currentTimeMillis();
         for (Session s : mine) {
             ItemSessionRowBinding row = ItemSessionRowBinding.inflate(getLayoutInflater(),

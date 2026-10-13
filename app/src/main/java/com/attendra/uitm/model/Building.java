@@ -1,9 +1,6 @@
 package com.attendra.uitm.model;
 
-/**
- * One row of /buildings (CS1, CS2). Its lat/lng is the geofence centre for
- * Class and Test sessions. Seeded as 0,0 until Danny fills in the real values.
- */
+/** One row of /buildings (CS1, CS2). */
 public class Building {
     public String id;
     public String name;

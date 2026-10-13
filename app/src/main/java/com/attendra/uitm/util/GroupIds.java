@@ -3,11 +3,8 @@ package com.attendra.uitm.util;
 import java.util.Locale;
 
 /**
- * Class group IDs in the official UiTM format: "CD" + programme + part + letter,
- * e.g. programme CS240, part 5, group A → "CDCS2405A".
- *
- * Programme codes (CS240) and course IDs (CS240_ICT602) keep their own format;
- * only group IDs use the CD prefix.
+ * Class group IDs in the official UiTM format: "CD" + programme + part + letter, e.g. programme
+ * CS240, part 5, group A → "CDCS2405A".
  */
 public final class GroupIds {
 
@@ -24,7 +21,7 @@ public final class GroupIds {
         return id != null && id.matches("CS\\d{4}[A-Z]");
     }
 
-    /** "CS2405A" → "CDCS2405A". IDs already in the new format are returned unchanged. */
+    /** "CS2405A" → "CDCS2405A". */
     public static String toCdcs(String id) {
         return isOldFormat(id) ? "CD" + id : id;
     }

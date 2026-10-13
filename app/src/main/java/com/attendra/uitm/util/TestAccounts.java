@@ -3,18 +3,13 @@ package com.attendra.uitm.util;
 import com.attendra.uitm.BuildConfig;
 import com.attendra.uitm.model.Registration;
 
-/**
- * The two tester accounts (CLAUDE.md 12.4). Their emails and passwords come from
- * local.properties through BuildConfig, and only the DEBUG build type gets them.
- * In release every value is "", so available() is false and the tester panel
- * on the Login Page never appears.
- */
+/** The two tester accounts. */
 public final class TestAccounts {
 
     private TestAccounts() {
     }
 
-    /** True only in a debug build. Callers check this before showing anything. */
+    /** True only in a debug build. */
     public static boolean enabled() {
         return BuildConfig.DEBUG;
     }

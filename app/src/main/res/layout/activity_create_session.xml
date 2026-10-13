@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Create Session wizard (CLAUDE.md section 5), matching cType → cWho → cWhere →
-     cWhen → cReview in the prototype. The steps are Fragments in step_container. -->
+
+<!-- Create Session wizard: Type, Who, Where, When, Review. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/wizard_root"

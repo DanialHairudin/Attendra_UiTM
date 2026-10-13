@@ -14,16 +14,9 @@
 .cxx
 local.properties
 # local only
-CLAUDE.md
-CLAUDE.local.md
-.claude/
 design/
 seed/
 app/google-services.json
-STEPS.md
-CLAUDE_CODE_PROMPT_OSM.md
-osm_pack/
-CLAUDE_CODE_Fix_Rules_Test_and_Teaching_Classes.md
 
 # Firebase emulator logs
 firebase-debug.log

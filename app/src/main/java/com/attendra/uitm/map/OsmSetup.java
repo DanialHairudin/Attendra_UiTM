@@ -15,14 +15,10 @@ import org.osmdroid.views.overlay.CopyrightOverlay;
 
 import java.io.File;
 
-/**
- * One place for all OpenStreetMap (osmdroid) setup.
- * - init() is called once from the Application class.
- * - styleMap() is called for every MapView we show.
- */
+/** One place for all OpenStreetMap (osmdroid) setup. */
 public final class OsmSetup {
 
-    /** UiTM Shah Alam (approximate). Used as the starting point of the map and to bias place search. */
+    /** UiTM Shah Alam (approximate). */
     public static final double UITM_LAT = 3.0698;
     public static final double UITM_LNG = 101.5037;
 
@@ -34,7 +30,8 @@ public final class OsmSetup {
         c.load(appContext, appContext.getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
         // The OpenStreetMap tile servers require an identifying User-Agent.
         c.setUserAgentValue(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME);
-        // Keep the tile cache inside the app's own cache folder, so no storage permission is needed.
+        // Keep the tile cache inside the app's own cache folder, so no storage permission is
+        // needed.
         File base = new File(appContext.getCacheDir(), "osmdroid");
         c.setOsmdroidBasePath(base);
         c.setOsmdroidTileCache(new File(base, "tiles"));
@@ -44,8 +41,8 @@ public final class OsmSetup {
     @SuppressLint("ClickableViewAccessibility")
     public static void styleMap(MapView map) {
         map.setTileSource(TileSourceFactory.MAPNIK);
-        map.setMultiTouchControls(true);            // pinch to zoom
-        map.setTilesScaledToDpi(true);              // readable street names on high-density screens
+        map.setMultiTouchControls(true);            // Pinch to zoom
+        map.setTilesScaledToDpi(true);              // Readable street names on high-density screens
         map.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.NEVER);
         map.setMinZoomLevel(5.0);
         map.setMaxZoomLevel(19.0);

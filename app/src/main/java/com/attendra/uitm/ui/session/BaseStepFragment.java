@@ -14,7 +14,7 @@ public abstract class BaseStepFragment extends Fragment implements WizardStep {
         return (CreateSessionActivity) requireActivity();
     }
 
-    /** Is the bottom button allowed right now? Called on resume and after each change. */
+    /** Is the bottom button allowed right now? */
     protected abstract boolean canContinue();
 
     protected void refreshContinue() {

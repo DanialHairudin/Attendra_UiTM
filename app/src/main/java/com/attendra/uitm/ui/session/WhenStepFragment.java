@@ -27,10 +27,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * Step 4, Session Time Page: date, opening time, closing time, and the
- * "Mark as late after" chips (5, 10, 15, 30 min).
- * Rules: the closing time must be after the opening time and still in the
- * future, and the late mark must come before closing.
+ * Step 4, Session Time Page: date, opening time, closing time, and the "Mark as late after" chips
+ * (5, 10, 15, 30 min).
  */
 public class WhenStepFragment extends BaseStepFragment {
 
@@ -56,7 +54,7 @@ public class WhenStepFragment extends BaseStepFragment {
             Chip chip = new Chip(requireContext()); // Widget.Attendra.Pill from the theme
             chip.setText(getString(R.string.minutes_short, minutes));
             chip.setCheckable(true);
-            chip.setSaveEnabled(false); // the ViewModel keeps the choice
+            chip.setSaveEnabled(false); // The ViewModel keeps the choice
             chip.setChecked(vm().lateMinutes == minutes);
             chip.setOnCheckedChangeListener((b, checked) -> {
                 if (checked) {
@@ -73,8 +71,8 @@ public class WhenStepFragment extends BaseStepFragment {
 
     private void pickDate() {
         if (getParentFragmentManager().findFragmentByTag("date") != null) return;
-        // MaterialDatePicker works in UTC: convert our local midnight to the same
-        // calendar date at UTC midnight, and back again when a date is chosen.
+        // MaterialDatePicker works in UTC: convert our local midnight to the same calendar date at
+        // UTC midnight, and back again when a date is chosen.
         Calendar local = Calendar.getInstance();
         local.setTimeInMillis(vm().day);
         Calendar utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -173,7 +171,7 @@ public class WhenStepFragment extends BaseStepFragment {
 
     @Override
     public void onContinue() {
-        render(); // time may have passed while the page was open
+        render(); // Time may have passed while the page was open
         if (canContinue()) host().showStep(new ReviewStepFragment());
     }
 

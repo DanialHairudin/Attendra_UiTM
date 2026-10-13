@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Profile Page, matching "profile" in the prototype. Read-only for now. -->
+<!-- Profile Page. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/profile_root"
     android:layout_width="match_parent"

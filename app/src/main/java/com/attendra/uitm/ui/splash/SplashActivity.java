@@ -15,15 +15,7 @@ import com.attendra.uitm.util.HomeRouter;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseUser;
 
-/**
- * First screen (launcher).
- *
- * - Already signed in and verified (see AuthRepository.resolveHome) → skip
- *   straight to the right home screen.
- * - Signed in but NOT verified (e.g. the app was closed on the Verify screen)
- *   → sign out, so only verified users are ever kept signed in.
- * - Otherwise show the logo with "Get started" (Log in) and "Create an account".
- */
+/** First screen (launcher). */
 public class SplashActivity extends BaseActivity {
 
     private final AuthRepository auth = new AuthRepository();
@@ -49,7 +41,7 @@ public class SplashActivity extends BaseActivity {
         auth.resolveHome(user, new Callback<AuthRepository.Route>() {
             @Override
             public void onSuccess(AuthRepository.Route route) {
-                if (isFinishing()) return; // user left the splash meanwhile
+                if (isFinishing()) return; // User left the splash meanwhile
                 if (route.unverified) {
                     auth.signOut();
                     setButtonsVisible(true);

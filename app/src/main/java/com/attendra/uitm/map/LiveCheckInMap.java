@@ -19,12 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Small map on the lecturer's Live Monitor page.
- * Shows the venue circle and one dot per student at the place where they checked in:
- * green = present, orange = late, red = rejected (for example outside the radius).
- * Tapping a student in the list calls focusStudent(uid) to fly the map to that dot.
- */
+/** Small map on the lecturer's Live Monitor page. */
 public class LiveCheckInMap {
 
     private final MapView map;
@@ -56,7 +51,7 @@ public class LiveCheckInMap {
         map.invalidate();
     }
 
-    /** Replace all dots. Call every time the attendance or attempts listener fires. */
+    /** Replace all dots. */
     public void setPoints(List<CheckInPoint> points) {
         for (Marker m : markers.values()) { m.closeInfoWindow(); map.getOverlays().remove(m); }
         markers.clear();
@@ -77,10 +72,7 @@ public class LiveCheckInMap {
         map.invalidate();
     }
 
-    /**
-     * Fly to one student's check-in location and open the name bubble.
-     * Returns false if this student has no location (not checked in yet, or marked manually).
-     */
+    /** Fly to one student's check-in location and open the name bubble. */
     public boolean focusStudent(String uid) {
         Marker m = markers.get(uid);
         if (m == null) return false;
@@ -99,7 +91,7 @@ public class LiveCheckInMap {
         map.post(() -> map.zoomToBoundingBox(box, true));
     }
 
-    // ---- lifecycle ----
+    // ---- lifecycle
     public void onResume() { map.onResume(); }
     public void onPause() { map.onPause(); }
     public void onDestroyView() { map.onDetach(); }
@@ -110,21 +102,13 @@ public class LiveCheckInMap {
         return R.string.status_rejected;
     }
 
-    /**
-     * Builds the dots from Firebase.
-     * attendance = snapshot of /attendance/{sessionId}
-     * attempts   = snapshot of /attempts/{sessionId}
-     * names      = uid -> display name (from the eligible student list the screen already loads)
-     *
-     * Rules: a GPS check-in shows its saved lat/lng. A manual record has no location, so it has no dot.
-     * A student who only has rejected attempts shows the latest rejected attempt as a red dot.
-     */
+    /** Builds the dots from Firebase. */
     public static List<CheckInPoint> fromSnapshots(DataSnapshot attendance, DataSnapshot attempts, Map<String, String> names) {
         Map<String, CheckInPoint> byUid = new HashMap<>();
         for (DataSnapshot s : attendance.getChildren()) {
             Double lat = s.child("lat").getValue(Double.class);
             Double lng = s.child("lng").getValue(Double.class);
-            if (lat == null || lng == null) continue;                       // manual or absent: no location
+            if (lat == null || lng == null) continue;                       // Manual or absent: no location
             String status = s.child("status").getValue(String.class);
             if (!"present".equals(status) && !"late".equals(status)) continue;
             byUid.put(s.getKey(), new CheckInPoint(s.getKey(), nameOf(names, s.getKey()), status, lat, lng,
@@ -139,7 +123,8 @@ public class LiveCheckInMap {
             if ("present".equals(result) || "late".equals(result) || "accepted".equals(result)) continue;
             CheckInPoint existing = byUid.get(uid);
             long t = longOf(a.child("time"));
-            // Only show a rejected dot if the student has no accepted check-in, and keep the newest attempt.
+            // Only show a rejected dot if the student has no accepted check-in, and keep the newest
+            // attempt.
             if (existing == null || ("rejected".equals(existing.status) && t > existing.time)) {
                 byUid.put(uid, new CheckInPoint(uid, nameOf(names, uid), "rejected", lat, lng, num(a.child("distance")), t));
             }

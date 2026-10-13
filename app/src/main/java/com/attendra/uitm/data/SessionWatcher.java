@@ -12,24 +12,12 @@ import java.util.Set;
 
 /**
  * Keeps a live list of sessions found through one or more index nodes, e.g.
- *   sessionsByLecturer/{uid}            (lecturer dashboard)
- *   sessionsByGroup/{groupId}           (student dashboard)
- *   sessionsByClub/{clubId}             (student dashboard, one per club)
- *
- * The index nodes only hold session IDs ({sessionId: true}). For each ID, this
- * class listens to sessions/{sessionId}, so a session that opens or closes
- * updates the screen straight away. IDs that leave every index stop being
- * listened to.
+ * sessionsByLecturer/{uid} (lecturer dashboard) sessionsByGroup/{groupId} (student dashboard)
+ * sessionsByClub/{clubId} (student dashboard, one per club)
  */
 public class SessionWatcher {
 
     public interface Listener {
-        /**
-         * @param sessions every known session, by ID
-         * @param ready    false until every index and every session has loaded
-         *                 once, so the screen can show "Loading…" instead of an
-         *                 empty state that is not true yet
-         */
         void onSessions(Map<String, Session> sessions, boolean ready);
 
         void onError(String message);
@@ -40,7 +28,7 @@ public class SessionWatcher {
 
     /** Index name → listener on that index. */
     private final Map<String, Subscriptions.Handle> indexHandles = new HashMap<>();
-    /** Index name → session IDs it lists. null = not loaded yet. */
+    /** Index name → session IDs it lists. */
     private final Map<String, Set<String>> idsByIndex = new HashMap<>();
     /** Session ID → listener on sessions/{id}. */
     private final Map<String, Subscriptions.Handle> sessionHandles = new HashMap<>();
@@ -52,7 +40,7 @@ public class SessionWatcher {
         this.listener = listener;
     }
 
-    /** Starts following an index node. name must be unique, e.g. "club:ITEC". */
+    /** Starts following an index node. */
     public void watchIndex(String name, Query index) {
         if (indexHandles.containsKey(name)) return;
         idsByIndex.put(name, null);
@@ -88,7 +76,7 @@ public class SessionWatcher {
         return new HashSet<>(indexHandles.keySet());
     }
 
-    /** Removes every listener. Call from onStop(). */
+    /** Removes every listener. */
     public void stop() {
         subs.clear();
         indexHandles.clear();
@@ -127,7 +115,7 @@ public class SessionWatcher {
                             s.id = id;
                             sessions.put(id, s);
                         } else {
-                            sessions.remove(id); // index points at a deleted session
+                            sessions.remove(id); // Index points at a deleted session
                         }
                         loaded.add(id);
                         publish();

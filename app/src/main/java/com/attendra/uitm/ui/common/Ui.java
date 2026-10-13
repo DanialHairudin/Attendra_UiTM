@@ -26,10 +26,7 @@ public final class Ui {
     /** The three states of a list card. */
     public enum ListState { LOADING, EMPTY, CONTENT }
 
-    /**
-     * Shows one of: the "Loading…" text, the empty-state message, or the list.
-     * Each list card in the layouts has these three children.
-     */
+    /** Shows one of: the "Loading…" text, the empty-state message, or the list. */
     public static void showListState(ListState state, View loading, ViewEmptyBinding empty,
                                      View list) {
         loading.setVisibility(state == ListState.LOADING ? View.VISIBLE : View.GONE);
@@ -45,10 +42,7 @@ public final class Ui {
         empty.emptyBody.setText(body);
     }
 
-    /**
-     * Adds a row to a list card. Every row except the first gets a 1dp line
-     * above it, like the prototype's ".li + .li" border.
-     */
+    /** Adds a row to a list card. */
     public static void addRow(LinearLayout list, View row) {
         if (list.getChildCount() > 0) {
             View line = new View(list.getContext());

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Styles added in C3 for forms: field labels, dropdowns, the role toggle and the
-     square back button. Shared component styles from C2 live in styles.xml. -->
+<!-- Styles added in for forms: field labels, dropdowns, the role toggle and the square back button. -->
 <resources>
 
-    <!-- Label above a field ("Full name"), 13sp SemiBold like the prototype -->
+    <!-- Label above a field ("Full name"), 13sp SemiBold -->
     <style name="TextAppearance.Attendra.Label" parent="TextAppearance.Attendra.Caption">
         <item name="fontFamily">@font/manrope_semibold</item>
         <item name="android:fontFamily">@font/manrope_semibold</item>
@@ -29,8 +28,7 @@
         <item name="endIconTint">@color/muted</item>
     </style>
 
-    <!-- Role toggle (Student | Lecturer): one segment of the pill-shaped control.
-         Checked = surface fill + ink text, unchecked = transparent + muted text. -->
+    <!-- Role toggle (Student | Lecturer): one segment of the pill-shaped control. -->
     <style name="Widget.Attendra.Segment" parent="Widget.Material3.Button.TextButton">
         <item name="android:checkable">true</item>
         <item name="android:minHeight">40dp</item>
@@ -43,7 +41,7 @@
         <item name="rippleColor">@color/gold_tint</item>
     </style>
 
-    <!-- 44dp square outlined back button, like the prototype's .iconbtn -->
+    <!-- 44dp square outlined back button -->
     <style name="Widget.Attendra.IconButton" parent="Widget.Attendra.Button.Secondary">
         <item name="android:layout_width">44dp</item>
         <item name="android:layout_height">44dp</item>
@@ -56,7 +54,7 @@
         <item name="iconTint">@color/ink</item>
     </style>
 
-    <!-- One box of the 6-digit code (Verify screen). Big tabular digits, like other numbers. -->
+    <!-- One box of the 6-digit code (Verify screen). -->
     <style name="Widget.Attendra.CodeBox" parent="">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">58dp</item>

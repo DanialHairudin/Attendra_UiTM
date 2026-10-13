@@ -11,11 +11,7 @@ import com.attendra.uitm.model.Registration;
 
 import java.util.Locale;
 
-/**
- * Form checks for the Auth screens. Each method returns null when the value is
- * fine, or a short message to show under the field. The wording lives in
- * res/values/strings.xml (the error_* strings).
- */
+/** Form checks for the Auth screens. */
 public final class Validators {
 
     public static final int MIN_PASSWORD = 8;
@@ -40,13 +36,7 @@ public final class Validators {
         return null;
     }
 
-    /**
-     * Email check on Register (CLAUDE.md 12.2, always on in every build):
-     * - students must use @student.uitm.edu.my
-     * - lecturers must use @uitm.edu.my, and a student address is not accepted.
-     *   ("x@student.uitm.edu.my" does not end with "@uitm.edu.my" anyway, but the
-     *   explicit check makes the rule obvious.)
-     */
+    /** Email check on Register (always on in every build). */
     @Nullable
     public static String registerEmail(String s, String role) {
         String basic = email(s);
@@ -62,10 +52,7 @@ public final class Validators {
         return null;
     }
 
-    /**
-     * Turns what the user typed after "+60" into digits only. A leading 0 is
-     * dropped, so "012-345 6789" and "12-345 6789" both become "123456789".
-     */
+    /** Turns what the user typed after "+60" into digits only. */
     public static String phoneDigits(String s) {
         String digits = s.replaceAll("[^0-9]", "");
         if (digits.startsWith("0")) digits = digits.substring(1);

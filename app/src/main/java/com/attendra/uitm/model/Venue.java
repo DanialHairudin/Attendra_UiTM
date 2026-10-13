@@ -1,6 +1,6 @@
 package com.attendra.uitm.model;
 
-/** One room of /venues (seed data). GPS can't tell rooms apart, so it is a label only. */
+/** One room of /venues (seed data). */
 public class Venue {
     public String id;
     public String name;

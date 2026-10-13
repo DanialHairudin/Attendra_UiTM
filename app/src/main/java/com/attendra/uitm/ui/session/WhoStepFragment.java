@@ -2,6 +2,7 @@ package com.attendra.uitm.ui.session;
 
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,24 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Step 2, Session Participants Page (CLAUDE.md section 5):
- * - Class: pick ONE assigned class (course + group).
- * - Test: pick one course, then tick ONE OR MORE of its assigned groups.
- * - SULAM: tick ONE OR MORE of the lecturer's Part 6 classes (one course).
- *   Part 5 and below are never offered (programmes/{code}/sulamPart can change
- *   the part for a programme).
- * - Club: pick ONE club the lecturer advises.
- * Only teachingAssignments / clubAdvisors are offered, so a lecturer can't make
- * a session for someone else's class. Student counts are live
- * (studentsByGroup/{group} and clubMembers/{club}), added in onStart and
- * removed in onStop.
- */
+/** Step 2, Session Participants Page. */
 public class WhoStepFragment extends BaseStepFragment {
 
     private FragmentStepWhoBinding binding;
     private final Subscriptions subs = new Subscriptions();
-    /** groupId or clubId → number of students. Missing = still loading. */
+    /** groupId or clubId → number of students. */
     private final Map<String, Integer> counts = new HashMap<>();
 
     @Nullable
@@ -149,6 +138,7 @@ public class WhoStepFragment extends BaseStepFragment {
         binding.listPick.removeAllViews();
         binding.listGroups.removeAllViews();
         binding.groupGroups.setVisibility(View.GONE);
+        binding.txtSulamHint.setVisibility(View.GONE);
 
         if (vm.isType(Session.TYPE_CLUB)) {
             renderClubs();
@@ -185,10 +175,8 @@ public class WhoStepFragment extends BaseStepFragment {
     }
 
     /**
-     * SULAM: every Part 6 class the lecturer teaches, as one tick list
-     * (e.g. ICT652 · CDCS2406A and ICT652 · CDCS2406B, if those are the classes
-     * assigned). Tick one or more for a combined activity. A session belongs to
-     * ONE course, so ticking a class of another course starts a new selection.
+     * SULAM: every Part 6 class the lecturer teaches, as one tick list (e.g. ICT652 · CDCS2406A and
+     * ICT652 · CDCS2406B, if those are the classes assigned).
      */
     private void renderSulam() {
         CreateSessionViewModel vm = vm();
@@ -230,6 +218,22 @@ public class WhoStepFragment extends BaseStepFragment {
                 render();
             });
         }
+        showMissingSulamGroups(classes);
+    }
+
+    /**
+     * SULAM groups of the same part that are not in the lecturer's Teaching Classes cannot be
+     * picked (the rules only allow assigned groups), so say how to include them: "Add CDCS2406C in
+     * Teaching Classes to include it." Uses the chosen course, or the first SULAM course when none
+     * is chosen.
+     */
+    private void showMissingSulamGroups(List<CreateSessionViewModel.Assignment> classes) {
+        String course = vm().courseId != null ? vm().courseId : classes.get(0).courseId;
+        List<String> missing = vm().missingGroupsFor(course);
+        if (missing.isEmpty()) return;
+        binding.txtSulamHint.setText(getResources().getQuantityString(R.plurals.sulam_missing_groups,
+                missing.size(), TextUtils.join(", ", missing)));
+        binding.txtSulamHint.setVisibility(View.VISIBLE);
     }
 
     /** Test: one row per course (choose one), then that course's groups (tick several). */
@@ -249,8 +253,8 @@ public class WhoStepFragment extends BaseStepFragment {
                 if (!c.equals(vm().courseId)) {
                     vm().courseId = c;
                     vm().groups.clear();
-                    // Start with every group ticked: a combined test or a combined
-                    // SULAM activity (CDCS2406A, B and C together) is the common case.
+                    // Start with every group ticked: a combined test or a combined SULAM activity
+                    // (CDCS2406A, B and C together) is the common case.
                     vm().groups.addAll(vm().groupsFor(c));
                 }
                 suggestTitle(courseCode(c));
@@ -355,7 +359,7 @@ public class WhoStepFragment extends BaseStepFragment {
         String suggestion = getString(SessionTypes.titlePattern(vm().type), what);
         vm().title = suggestion;
         binding.inputTitle.setText(suggestion);
-        vm().titleEdited = false; // still a suggestion, not the lecturer's own text
+        vm().titleEdited = false; // Still a suggestion, not the lecturer's own text
     }
 
     private String studentsText(String groupId) {

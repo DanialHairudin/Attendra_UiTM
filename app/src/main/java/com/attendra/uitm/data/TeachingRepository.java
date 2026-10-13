@@ -15,12 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * A lecturer's teaching classes in teachingAssignments/{uid} (C5b).
- * Every change is ONE updateChildren, so adding several groups, or an edit
- * (old key removed + new key written), either fully happens or not at all.
- * Past sessions are never touched: they keep their own courseId and groups.
- */
+/** A lecturer's teaching classes in teachingAssignments/{uid}. */
 public final class TeachingRepository {
 
     private TeachingRepository() {
@@ -59,11 +54,8 @@ public final class TeachingRepository {
     }
 
     /**
-     * Saves one class per group, and removes {@code oldKey} in the same update
-     * (an edit; null when adding). The key contains the group, so changing the
-     * course or group means a new key.
-     *
-     * @param keepCreatedAt createdAt of the edited class, when its key does not change
+     * Saves one class per group, and removes {@code oldKey} in the same update (an edit; null when
+     * adding).
      */
     public static void save(String uid, String semester, String courseId,
                             Collection<String> groupIds, @Nullable String oldKey,
@@ -77,8 +69,8 @@ public final class TeachingRepository {
             value.put("courseId", courseId);
             value.put("groupId", groupId);
             value.put("semester", semester);
-            // The rules allow createdAt = now only for a new key; an unchanged
-            // key must keep its first value.
+            // The rules allow createdAt = now only for a new key; an unchanged key must keep its
+            // first value.
             boolean sameKey = key.equals(oldKey) && keepCreatedAt != null;
             value.put("createdAt", sameKey ? keepCreatedAt : ServerValue.TIMESTAMP);
             updates.put(base + key, value);

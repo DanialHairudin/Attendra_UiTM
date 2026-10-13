@@ -3,12 +3,8 @@ package com.attendra.uitm.util;
 import android.content.Context;
 
 /**
- * The "Session notifications" switch in Settings (CLAUDE.md section 9),
- * kept in the same SharedPreferences file as the theme.
- *
- * Notifications are in-app only (no push on the Spark plan), so "off" means
- * the unread badge on the Notifications tab is hidden. The list itself is
- * still there when the student opens the tab.
+ * The "Session notifications" switch in Settings, kept in the same SharedPreferences file as the
+ * theme.
  */
 public final class NotificationPrefs {
 

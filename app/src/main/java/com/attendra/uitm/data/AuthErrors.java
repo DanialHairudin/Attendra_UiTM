@@ -14,13 +14,7 @@ import com.google.firebase.database.DatabaseError;
 
 import java.util.Locale;
 
-/**
- * Turns Firebase exceptions into short, formal messages for the user.
- * All wording lives in res/values/strings.xml (the error_* strings).
- *
- * The order matters: the specific exception types are subclasses of
- * FirebaseAuthException, so they are checked first.
- */
+/** Turns Firebase exceptions into short, formal messages for the user. */
 public final class AuthErrors {
 
     private AuthErrors() {
@@ -44,16 +38,16 @@ public final class AuthErrors {
             return str(R.string.error_account_unavailable);
         }
         if (e instanceof FirebaseAuthInvalidCredentialsException) {
-            // Firebase gives the same error for a wrong email and a wrong password
-            // (email enumeration protection), so we can't say which one it was.
+            // Firebase gives the same error for a wrong email and a wrong password (email
+            // enumeration protection), so we can't say which one it was.
             return str(R.string.error_wrong_credentials);
         }
         if (e instanceof FirebaseAuthException
                 && "ERROR_OPERATION_NOT_ALLOWED".equals(((FirebaseAuthException) e).getErrorCode())) {
             return str(R.string.error_sign_in_disabled);
         }
-        // Database write failures arrive as a DatabaseException whose message
-        // contains "Permission denied" when the security rules refuse them.
+        // Database write failures arrive as a DatabaseException whose message contains "Permission
+        // denied" when the security rules refuse them.
         String msg = e.getMessage();
         if (msg != null && msg.toLowerCase(Locale.ROOT).contains("permission denied")) {
             return str(R.string.error_permission_denied);

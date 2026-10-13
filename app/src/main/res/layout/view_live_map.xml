@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Live Monitor: check-in locations card (map/LiveCheckInMap). Included under
-     the counts row. Read-only map: venue circle + one dot per student. -->
+<!-- Live Monitor: check-in locations card (map/LiveCheckInMap). -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/Widget.Attendra.Card"

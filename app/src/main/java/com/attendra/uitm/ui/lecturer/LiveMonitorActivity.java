@@ -44,18 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Live Monitor Page (CLAUDE.md section 5). Everything is live
- * (SessionAttendanceWatcher: the session, attendance/{sid}, attempts/{sid}
- * and the eligible students), so a check-in appears here within a second.
- *
- * - Header: title, course · groups, room or map pin · radius, and a countdown.
- * - Tiles: Present · Late · Not yet · Rejected.
- * - Check-in map (step M4): where each student checked in; tap a row to fly there.
- * - Filter chips: All · Present · Late · Not yet, then the student list.
- * - "Rejected attempts" with the reason (Outside / Mock location).
- * - Buttons: Mark (Manual Attendance sheet), +10 min, Radius (sheet), Close.
- */
+/** Live Monitor Page. */
 public class LiveMonitorActivity extends BaseActivity {
 
     private static final String EXTRA_SESSION = "sessionId";
@@ -267,10 +256,8 @@ public class LiveMonitorActivity extends BaseActivity {
     }
 
     /**
-     * Check-in map (step M4): the venue circle, and one dot per student where
-     * they checked in (green present, orange late, red rejected). Only redrawn
-     * when the session's centre/radius, attendance, attempts or names change,
-     * so an open name bubble is not closed by an unrelated update.
+     * Check-in map (step M4): the venue circle, and one dot per student where they checked in
+     * (green present, orange late, red rejected).
      */
     private void renderMap(Session s) {
         String venue = s.lat + "," + s.lng + "," + s.radius;

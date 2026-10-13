@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Rounded pill behind status badges. The real colour comes from
-     android:backgroundTint in the Widget.Attendra.Badge.* styles. -->
+<!-- Rounded pill behind status badges. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <corners android:radius="999dp" />
     <solid android:color="@android:color/white" />

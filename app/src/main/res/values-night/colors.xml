@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Attendra palette, dark mode. Same names as values/colors.xml. -->
+<!-- Attendra palette, dark mode. -->
 <resources>
     <color name="bg">#0D0C0A</color>
     <color name="surface">#17150F</color>
@@ -16,4 +16,6 @@
     <color name="late">#F29A48</color>
     <color name="absent">#ABA290</color>
     <color name="rejected">#F2685F</color>
+    <!-- Blue "you are here" dot on the student check-in map -->
+    <color name="my_location">#8AB4F8</color>
 </resources>

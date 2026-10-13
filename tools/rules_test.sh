@@ -1,15 +1,6 @@
 #!/usr/bin/env bash
-# Security-rules tests for database.rules.json, run ONLY against the
-# Firebase Local Emulator Suite (Realtime Database emulator on port 9000).
-#
-# It never talks to the live attendra-uitm database: it uses no real account,
-# no API key and no token. The emulator is wiped and re-seeded at the start
-# of every run, from seed/attendra_seed.json plus fake zzTest_ users.
-#
-# Usage (Git Bash, from the project folder):
-#   1. Terminal 1:  firebase emulators:start --only database
-#   2. Terminal 2:  bash tools/rules_test.sh
-# Every case prints PASS/FAIL against what database.rules.json should allow.
+# Security-rules tests for database.rules.json, run ONLY against the Firebase Local Emulator Suite
+# (Realtime Database emulator on port 9000).
 
 # ---------------------------------------------------------------- safety guard
 HOST="${FIREBASE_DATABASE_EMULATOR_HOST:-127.0.0.1:9000}"
@@ -32,8 +23,7 @@ curl -s -o /dev/null --max-time 3 "$DB/.json?ns=$NS&shallow=true" \
   || { echo "ERROR: emulator not running at $DB. Start it with: firebase emulators:start --only database" >&2; exit 1; }
 
 # -------------------------------------------------------------------- helpers
-# The emulator accepts unsigned tokens ("alg":"none"), so fake users need no
-# real sign-in. The payload only has to name the uid.
+# The emulator accepts unsigned tokens ("alg":"none"), so fake users need no real sign-in.
 b64url() { base64 | tr -d '=\n' | tr '/+' '_-'; }
 token() {
   local now; now=$(date +%s)
@@ -50,10 +40,12 @@ owner() {
 }
 
 pass=0; fail=0
+# Extra query string for the next check only (e.g. orderBy/equalTo), then cleared.
+QS=""
 # check <name> <expect allow|deny> <method> <path> [token] [body]
 check() {
   local name=$1 expect=$2 method=$3 path=$4 tok=$5 body=$6 url code
-  url="$DB/$path.json?ns=$NS"; [ -n "$tok" ] && url="$url&auth=$tok"
+  url="$DB/$path.json?ns=$NS$QS"; [ -n "$tok" ] && url="$url&auth=$tok"; QS=""
   if [ -n "$body" ]; then
     code=$(curl -s -o /dev/null -w '%{http_code}' -X "$method" "$url" --data-binary "$body")
   else
@@ -72,9 +64,11 @@ ST=$(token $SU); ST2=$(token $SU2); LT=$(token $LU); LT2=$(token $LU2)
 TSU=zzTest_tstu; TLU=zzTest_tlec; TST=$(token $TSU); TLT=$(token $TLU)
 TSID=zzTest_ts1
 SID=zzTest_s1
+# Closed sessions for the delete / hide tests: CSID and CSID3 are LU's, CSID2 is LU2's.
+CSID=zzTest_c1; CSID2=zzTest_c2; CSID3=zzTest_c3
 NOW=$(( $(date +%s) * 1000 ))
 START=$((NOW - 600000)); LATE=$((NOW + 1800000)); END=$((NOW + 3600000))
-LAT=3.0695; LNG=101.5   # fake CS1 position, emulator only
+LAT=3.0695; LNG=101.5   # Fake CS1 position, emulator only
 
 echo "Seeding the emulator at $DB ..."
 [ "$(owner PUT '' "@$SEED")" = 200 ] || { echo "ERROR: could not load $SEED into the emulator" >&2; exit 1; }
@@ -102,7 +96,26 @@ FIXTURE=$(cat <<EOF
   "sessions/$SID": {"lecturerUid":"$LU","type":"class","title":"zzTest class","courseId":"CS240_ICT600",
                     "groups":{"CDCS2405A":true},"where":"building","building":"CS1","lat":$LAT,"lng":$LNG,"radius":60,
                     "start":$START,"end":$END,"lateAfter":$LATE,"status":"open","createdAt":$NOW},
-  "sessionsByLecturer/$LU/$SID": true, "sessionsByGroup/CDCS2405A/$SID": true
+  "sessionsByLecturer/$LU/$SID": true, "sessionsByGroup/CDCS2405A/$SID": true,
+  "sessions/$CSID": {"lecturerUid":"$LU","type":"class","title":"zzTest closed","courseId":"CS240_ICT600",
+                    "groups":{"CDCS2405A":true},"where":"building","building":"CS1","lat":$LAT,"lng":$LNG,"radius":60,
+                    "start":$START,"end":$END,"lateAfter":$LATE,"status":"closed","createdAt":$NOW},
+  "sessionsByLecturer/$LU/$CSID": true, "sessionsByGroup/CDCS2405A/$CSID": true,
+  "attendance/$CSID/$SU": {"status":"present","time":$NOW,"method":"gps","distance":10,"accuracy":8,"lat":3.0695,"lng":101.5},
+  "studentAttendance/$SU/$CSID": {"status":"present","time":$NOW},
+  "attempts/$CSID/zzTest_ca1": {"uid":"$SU","time":$NOW,"result":"accepted","lat":3.0695,"lng":101.5},
+  "notifications/$SU/zzTest_n1": {"title":"zzTest","body":"zzTest","sessionId":"$CSID","time":$NOW,"read":false},
+  "notifications/$SU/zzTest_n2": {"title":"zzTest","body":"zzTest","sessionId":"$SID","time":$NOW,"read":false},
+  "notifications/$SU2/zzTest_n3": {"title":"zzTest","body":"zzTest","sessionId":"$SID","time":$NOW,"read":false},
+  "sessions/$CSID2": {"lecturerUid":"$LU2","type":"class","title":"zzTest other closed","courseId":"CS240_ICT600",
+                    "groups":{"CDCS2405A":true},"where":"building","building":"CS1","lat":$LAT,"lng":$LNG,"radius":60,
+                    "start":$START,"end":$END,"lateAfter":$LATE,"status":"closed","createdAt":$NOW},
+  "sessionsByLecturer/$LU2/$CSID2": true, "sessionsByGroup/CDCS2405A/$CSID2": true,
+  "sessions/$CSID3": {"lecturerUid":"$LU","type":"class","title":"zzTest closed to hide","courseId":"CS240_ICT600",
+                    "groups":{"CDCS2405A":true},"where":"building","building":"CS1","lat":$LAT,"lng":$LNG,"radius":60,
+                    "start":$START,"end":$END,"lateAfter":$LATE,"status":"closed","createdAt":$NOW},
+  "attendance/$CSID3/$SU": {"status":"absent","time":$NOW,"method":"auto"},
+  "studentAttendance/$SU/$CSID3": {"status":"absent","time":$NOW}
 }
 EOF
 )
@@ -112,7 +125,6 @@ echo "----"
 
 TS='{".sv":"timestamp"}'
 # A new Class session (plus its indexes) for <group>, as one multi-path update.
-# new_session <id> <group> [lecturer uid] [extra session JSON, e.g. ,"isTest":true]
 new_session() {
   local lu=${3:-$LU}
   echo '{"sessions/'$1'":{"lecturerUid":"'$lu'","type":"class","title":"zzTest new","courseId":"CS240_ICT600",
@@ -120,7 +132,7 @@ new_session() {
     "start":'$START',"end":'$END',"lateAfter":'$LATE',"status":"open","createdAt":'$TS$4'},
     "sessionsByLecturer/'$lu'/'$1'":true,"sessionsByGroup/'$2'/'$1'":true}'
 }
-# check-in update for <student uid> <session id>
+# Check-in update for <student uid> <session id>
 checkin() {
   echo '{"attendance/'$2'/'$1'":{"status":"present","time":'$TS',"method":"gps","distance":10,"accuracy":8,"lat":3.0695,"lng":101.5},
     "studentAttendance/'$1'/'$2'":{"status":"present","time":'$TS'}}'
@@ -149,7 +161,7 @@ check "student reads all students"         deny  GET students "$ST"
 check "lecturer reads own assignments"     allow GET "teachingAssignments/$LU" "$LT"
 check "student reads teachingAssignments"  deny  GET "teachingAssignments/$LU" "$ST"
 
-# Teaching classes added by the lecturer (C5b). <course> <group> [extra JSON]
+# Teaching classes added by the lecturer.
 assignment() { echo '{"courseId":"'$1'","groupId":"'$2'","semester":"September 2026 – February 2027","createdAt":'"$TS$3"'}'; }
 check "lecturer adds own class"            allow PUT "teachingAssignments/$LU/CS240_ICT602_CDCS2405B" "$LT" "$(assignment CS240_ICT602 CDCS2405B)"
 check "lecturer writes another lecturer's node" deny PUT "teachingAssignments/$LU2/CS240_ICT602_CDCS2405B" "$LT" "$(assignment CS240_ICT602 CDCS2405B)"
@@ -165,7 +177,7 @@ check "extra field"                        deny  PUT "teachingAssignments/$LU/CS
 check "lecturer removes own class"         allow DELETE "teachingAssignments/$LU/CS240_ICT602_CDCS2405B" "$LT"
 check "lecturer reads clubAdvisors"        allow GET clubAdvisors "$LT"
 check "student reads clubAdvisors"         deny  GET clubAdvisors "$ST"
-# My Clubs (C4): both student indexes change together; advisors only themselves
+# My Clubs: both student indexes change together; advisors only themselves
 check "student joins a club (both indexes)" allow PATCH "" "$ST" '{"studentClubs/'$SU'/CSCLUB":true,"clubMembers/CSCLUB/'$SU'":true}'
 check "student joins, studentClubs only"   deny  PATCH "" "$ST" '{"studentClubs/'$SU'/NETS":true}'
 check "student leaves a club (both indexes)" allow PATCH "" "$ST" '{"studentClubs/'$SU'/CSCLUB":null,"clubMembers/CSCLUB/'$SU'":null}'
@@ -215,11 +227,39 @@ check "real student checks in to test session" deny PATCH "" "$ST" "$(checkin $S
 check "real lecturer marks tester manually"   deny  PATCH "" "$LT" '{"attendance/'$SID'/'$TSU'":{"status":"present","time":'$TS',"method":"manual","reason":"zzTest","markedBy":"'$LU'"}}'
 check "tester checks in to test session"      allow PATCH "" "$TST" "$(checkin $TSU $TSID)"
 check "student reads own mirror"           allow GET "studentAttendance/$SU" "$ST"
-# studentAttendance must carry a status that matches an attendance record written
-# in the same update (zzTest_none is a session id that does not exist).
+# studentAttendance must carry a status that matches an attendance record written in the same update
+# (zzTest_none is a session id that does not exist).
 check "mirror with no status"              deny  PUT "studentAttendance/$SU/zzTest_none" "$ST" '{"time":'$TS'}'
 check "mirror without a matching record"   deny  PUT "studentAttendance/$SU/zzTest_none" "$ST" '{"status":"present","time":'$TS'}'
 check "mirror for someone else"            deny  PUT "studentAttendance/$LU/zzTest_none" "$ST" '{"status":"present","time":'$TS'}'
+
+
+# Delete closed sessions (lecturer) and hide sessions (student).
+delete_paths() {
+  local s='{"sessions/'$1'":null,"sessionsByLecturer/'$2'/'$1'":null,"sessionsByGroup/CDCS2405A/'$1'":null,"attendance/'$1'":null,"attempts/'$1'":null'
+  [ -n "$3" ] && s=$s',"studentAttendance/'$3'/'$1'":null'
+  [ -n "$4" ] && s=$s',"notifications/'$3'/'$4'":null'
+  echo "$s}"
+}
+q_session() { QS="&orderBy=%22sessionId%22&equalTo=%22$1%22"; }
+q_session $CSID
+check "lecturer queries notifications of own session" allow GET "notifications/$SU" "$LT"
+q_session $CSID2
+check "lecturer queries notifications of other's session" deny GET "notifications/$SU" "$LT"
+check "lecturer deletes own OPEN session"         deny  PATCH "" "$LT" "$(delete_paths $SID $LU $SU zzTest_n2)"
+check "lecturer deletes attempts of open session" deny  DELETE "attempts/$SID" "$LT"
+check "lecturer deletes another lecturer's session" deny PATCH "" "$LT" "$(delete_paths $CSID2 $LU2)"
+check "student deletes a closed session"          deny  DELETE "sessions/$CSID3" "$ST"
+check "student deletes attendance"                deny  DELETE "attendance/$CSID3" "$ST"
+check "student deletes own attendance mirror"     deny  DELETE "studentAttendance/$SU/$CSID3" "$ST"
+check "lecturer deletes own closed session"       allow PATCH "" "$LT" "$(delete_paths $CSID $LU $SU zzTest_n1)"
+check "student hides closed session"              allow PUT "hiddenSessions/$SU/$CSID3" "$ST" 'true'
+check "student hides open session"                deny  PUT "hiddenSessions/$SU/$SID" "$ST" 'true'
+check "student hides with a value other than true" deny PUT "hiddenSessions/$SU/$CSID3" "$ST" '"yes"'
+check "student reads another student's hidden list" deny GET "hiddenSessions/$SU" "$ST2"
+check "student un-hides a session"                allow DELETE "hiddenSessions/$SU/$CSID3" "$ST"
+check "student deletes own notification"          allow DELETE "notifications/$SU/zzTest_n2" "$ST"
+check "student deletes another's notification"    deny  DELETE "notifications/$SU2/zzTest_n3" "$ST"
 
 echo "----"; echo "$pass passed, $fail failed"
 [ "$fail" = 0 ]

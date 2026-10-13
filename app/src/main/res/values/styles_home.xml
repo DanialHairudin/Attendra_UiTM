@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Styles for the dashboards, Classes, Settings and Profile screens
-     (CLAUDE.md 12.5, matching design/Attendra_App_Preview.html). -->
+<!-- Styles for the dashboards, Classes, Settings and Profile screens ( -->
 <resources>
 
-    <!-- Prototype ".h3": Manrope Bold 16sp, used for section titles ("Today") -->
+    <!-- Manrope Bold 16sp, for section titles ("Today") -->
     <style name="TextAppearance.Attendra.H3" parent="TextAppearance.Attendra.Body">
         <item name="fontFamily">@font/manrope_bold</item>
         <item name="android:fontFamily">@font/manrope_bold</item>
@@ -17,13 +16,13 @@
         <item name="android:textSize">15sp</item>
     </style>
 
-    <!-- Big percentage on the attendance card (prototype 44px) -->
+    <!-- Big percentage on the attendance card -->
     <style name="TextAppearance.Attendra.Number.Big">
         <item name="android:textSize">44sp</item>
         <item name="android:textColor">@color/goldText</item>
     </style>
 
-    <!-- Bottom nav labels: Manrope SemiBold 11sp (prototype .tab) -->
+    <!-- Bottom nav labels: Manrope SemiBold 11sp -->
     <style name="TextAppearance.Attendra.NavLabel" parent="TextAppearance.Material3.LabelMedium">
         <item name="fontFamily">@font/manrope_semibold</item>
         <item name="android:fontFamily">@font/manrope_semibold</item>

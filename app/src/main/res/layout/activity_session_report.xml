@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Session Report Page, matching "report" in the prototype. -->
+<!-- Session Report Page. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/report_root"
@@ -38,6 +38,15 @@
         <TextView
             android:id="@+id/txt_status"
             style="@style/Widget.Attendra.Badge.Absent" />
+
+        <!-- Overflow menu ("Delete session"), shown only for a closed session -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_more"
+            style="@style/Widget.Attendra.IconButton"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/more_options"
+            android:visibility="gone"
+            app:icon="@drawable/ic_more_vert" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -191,7 +200,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- C11: share the full list as a CSV file (email, Drive, WhatsApp...) -->
+    <!-- Share the full list as a CSV file (email, Drive, WhatsApp...) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_share_csv"
         style="@style/Widget.Attendra.Button.Primary"

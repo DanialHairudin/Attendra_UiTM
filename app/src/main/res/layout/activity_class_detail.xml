@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Class Detail Page, matching "lClassDetail" in the prototype:
-     course, group, sessions held, sessions list and the student roster. -->
+<!-- Class Detail Page: course, group, sessions held, sessions list and the student roster. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/detail_root"
     android:layout_width="match_parent"

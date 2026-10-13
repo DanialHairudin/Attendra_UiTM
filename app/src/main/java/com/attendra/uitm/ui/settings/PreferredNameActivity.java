@@ -33,18 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Preferred Name Page, "What should we call you?" (CLAUDE.md 12.6).
- *
- * Two ways in:
- * - first time: after the email code is verified, or at login when
- *   preferredName is missing. Saving opens the dashboard.
- * - edit: from the Profile Page. Saving goes back to the profile.
- *
- * The chips are suggestions from NameSuggestions plus "Other", which shows a
- * text field (2–20 letters and spaces). Lecturers also pick a title. The card
- * at the bottom previews the dashboard greeting as the choice changes.
- */
+/** Preferred Name Page, "What should we call you?". */
 public class PreferredNameActivity extends BaseActivity {
 
     private static final String EXTRA_ROLE = "role";
@@ -98,7 +87,7 @@ public class PreferredNameActivity extends BaseActivity {
         setContentView(binding.getRoot());
         padForSystemBars(binding.nameRoot);
 
-        // First time: no app bar (there is nowhere to go back to). Edit: back arrow.
+        // First time: no app bar (there is nowhere to go back to).
         binding.appbar.getRoot().setVisibility(firstTime ? View.GONE : View.VISIBLE);
         binding.appbar.txtAppbarTitle.setText(R.string.profile_preferred_name);
         binding.appbar.btnBack.setOnClickListener(v -> finish());
@@ -197,10 +186,10 @@ public class PreferredNameActivity extends BaseActivity {
     }
 
     private Chip addChip(String text) {
-        Chip chip = new Chip(this); // picks up Widget.Attendra.Pill from the theme
+        Chip chip = new Chip(this); // Picks up Widget.Attendra.Pill from the theme
         chip.setText(text);
         chip.setCheckable(true);
-        chip.setSaveEnabled(false); // this screen restores the choice itself
+        chip.setSaveEnabled(false); // This screen restores the choice itself
         binding.chipsNames.addView(chip);
         return chip;
     }
@@ -267,7 +256,7 @@ public class PreferredNameActivity extends BaseActivity {
         String base = UserRepository.profileNode(role) + "/" + uid + "/";
         Map<String, Object> updates = new HashMap<>();
         updates.put(base + "preferredName", name);
-        if (lecturer) updates.put(base + "title", title.isEmpty() ? null : title); // null = None
+        if (lecturer) updates.put(base + "title", title.isEmpty() ? null : title); // Null = None
         Db.write(updates, new Callback<Void>() {
             @Override
             public void onSuccess(Void unused) {
@@ -290,9 +279,8 @@ public class PreferredNameActivity extends BaseActivity {
     }
 
     /**
-     * C5b: a new lecturer with no class this semester sets up their teaching
-     * classes next (with "Skip for now"); otherwise the dashboard opens.
-     * If the check fails (e.g. offline), go to the dashboard anyway.
+     * A new lecturer with no class this semester sets up their teaching classes next (with "Skip
+     * for now"); otherwise the dashboard opens.
      */
     private void openLecturerNext() {
         TeachingRepository.hasCurrent(uid, new Callback<Boolean>() {

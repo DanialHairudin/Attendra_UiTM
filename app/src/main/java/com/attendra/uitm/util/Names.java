@@ -10,16 +10,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-/**
- * Names for greetings and avatars (CLAUDE.md 12.6).
- *
- * Greetings use the preferred name the user picked ("Danial"), with the title
- * in front for lecturers ("Dr. Aina"). Until one is picked, the first suggestion
- * from NameSuggestions is used.
- */
+/** Names for greetings and avatars. */
 public final class Names {
 
-    /** Titles a lecturer can choose. "" means None. */
+    /** Titles a lecturer can choose. */
     public static final List<String> LECTURER_TITLES = Collections.unmodifiableList(
             Arrays.asList("Dr.", "Prof. Madya", "Prof.", "Encik", "Puan", "Cik", ""));
 
@@ -35,10 +29,7 @@ public final class Names {
     private Names() {
     }
 
-    /**
-     * The name to greet someone with: "{title} {preferredName}", e.g. "Dr. Aina".
-     * Falls back to the first suggestion from the full name.
-     */
+    /** The name to greet someone with: "{title} {preferredName}", e.g. "Dr. Aina". */
     public static String greetingName(String fullName, String preferredName, String title) {
         String name = preferredName == null || preferredName.trim().isEmpty()
                 ? NameSuggestions.first(fullName) : preferredName.trim();

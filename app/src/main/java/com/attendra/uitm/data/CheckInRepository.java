@@ -10,31 +10,10 @@ import com.google.firebase.database.ServerValue;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Database side of the student's GPS check-in (CLAUDE.md section 6).
- *
- * The location checks themselves (mock, accuracy, distance) run in
- * CheckInActivity. This class only reads what those checks need and writes
- * the result:
- * - accepted:  ONE updateChildren with
- *     attendance/{sid}/{uid}         {status, time, distance, accuracy, method: "gps", lat, lng}
- *     studentAttendance/{uid}/{sid}  {status, time}
- *     attempts/{sid}/{pushId}        {uid, time, result: "accepted", distance, accuracy, lat, lng}
- * - rejected (mock location, outside the radius): only the attempts entry,
- *   with result "rejected" and the reason.
- *
- * lat/lng are the one fix read when the student tapped Check in (step M3), so
- * the lecturer can see where they checked in. They are rounded to 5 decimals
- * (about 1 m). There is no tracking: nothing is read before or after the tap.
- */
+/** Database side of the student's GPS check-in. */
 public class CheckInRepository {
 
-    /**
-     * Is this student allowed into this session? Class/Test/SULAM: the
-     * student's group is one of the session's groups. Club: they are in
-     * clubMembers/{clubId}. And the session is in the student's world: real
-     * students never join a Test Lecturer session, and the reverse (TestWorld).
-     */
+    /** Is this student allowed into this session? */
     public void isEligible(Session s, String uid, Callback<Boolean> callback) {
         TestWorld.mine(Registration.ROLE_STUDENT, new Callback<Boolean>() {
             @Override
@@ -102,12 +81,7 @@ public class CheckInRepository {
                 });
     }
 
-    /**
-     * Accepted check-in. status (present/late) is worked out by the caller
-     * from the server clock; time is the server's own timestamp. The C12
-     * rules re-check both against the session's start, end and lateAfter.
-     * onSuccess receives the saved server time, read back after the write.
-     */
+    /** Accepted check-in. */
     public void writeAccepted(Session s, String uid, String status, double lat, double lng,
                               double distance, double accuracy, Callback<Long> callback) {
         Map<String, Object> record = new HashMap<>();
@@ -154,9 +128,8 @@ public class CheckInRepository {
     }
 
     /**
-     * Rejected attempt (MOCK_LOCATION or OUTSIDE_RADIUS): logged in attempts
-     * only, so the lecturer sees it on the Live Monitor. distance is null for
-     * a mock location (it would mean nothing).
+     * Rejected attempt (MOCK_LOCATION or OUTSIDE_RADIUS): logged in attempts only, so the lecturer
+     * sees it on the Live Monitor.
      */
     public void logRejected(Session s, String uid, String reason, double lat, double lng,
                             Double distance, double accuracy, Callback<Void> callback) {

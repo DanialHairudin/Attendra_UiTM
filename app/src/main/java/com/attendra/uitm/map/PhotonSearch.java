@@ -21,11 +21,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Search-as-you-type place search using Photon (https://photon.komoot.io),
- * a free geocoder built on OpenStreetMap data. No API key and no billing.
- *
- * Fair use: we wait until the lecturer stops typing for 450 ms and need at least 3 letters,
- * so only a few requests are sent per search.
+ * Search-as-you-type place search using Photon (https://photon.komoot.io), a free geocoder built on
+ * OpenStreetMap data.
  */
 public class PhotonSearch {
 
@@ -42,18 +39,18 @@ public class PhotonSearch {
     private final Handler main = new Handler(Looper.getMainLooper());
     private final String userAgent;
     private Runnable pending;
-    private int latestRequest = 0; // only touched on the main thread
+    private int latestRequest = 0; // Only touched on the main thread
 
     public PhotonSearch(String userAgent) {
         this.userAgent = userAgent;
     }
 
-    /** Call from a TextWatcher on every change. Results arrive on the main thread. */
+    /** Call from a TextWatcher on every change. */
     public void searchDebounced(String query, Callback cb) {
         if (pending != null) main.removeCallbacks(pending);
         final String q = query == null ? "" : query.trim();
         if (q.length() < MIN_CHARS) {
-            latestRequest++;                       // cancel any older answer
+            latestRequest++;                       // Cancel any older answer
             cb.onResults(Collections.emptyList());
             return;
         }
@@ -99,7 +96,7 @@ public class PhotonSearch {
         }
     }
 
-    /** Photon returns GeoJSON. Coordinates are [longitude, latitude]. */
+    /** Photon returns GeoJSON. */
     static List<PlaceResult> parse(String json) throws Exception {
         List<PlaceResult> out = new ArrayList<>();
         JSONArray features = new JSONObject(json).optJSONArray("features");

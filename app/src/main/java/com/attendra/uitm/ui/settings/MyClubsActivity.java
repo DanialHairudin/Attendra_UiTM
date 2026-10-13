@@ -30,10 +30,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * My Clubs Page: the clubs a student joins (studentClubs/{uid}) or a lecturer
- * advises (clubAdvisors). Every club is listed with a switch: on = joined /
- * advising. Turning one off asks first. Each change is one multi-path write
- * (UserRepository.setClub), so studentClubs and clubMembers stay in sync.
+ * My Clubs Page: the clubs a student joins (studentClubs/{uid}) or a lecturer advises
+ * (clubAdvisors).
  */
 public class MyClubsActivity extends BaseActivity {
 
@@ -187,7 +185,7 @@ public class MyClubsActivity extends BaseActivity {
             public void onError(String message) {
                 saving.remove(club.id);
                 showError(message);
-                render(); // the switch goes back to what the database says
+                render(); // The switch goes back to what the database says
             }
         });
     }

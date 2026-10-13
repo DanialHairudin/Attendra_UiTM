@@ -1,6 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Every user-facing text is kept here so the wording is easy to change.
-         Style: formal, short, polite full sentences; no contractions. -->
+    <!-- Every user-facing text is kept here so the wording is easy to change. -->
 
     <string name="app_name">Attendra UiTM</string>
     <string name="logo_description">Attendra UiTM logo</string>
@@ -75,14 +74,13 @@
     <string name="verify_loading">Loading…</string>
     <string name="verify_sent">A new code has been sent to your email.</string>
     <string name="verify_digit_description">Digit %1$d of 6</string>
-    <!-- Messages from CLAUDE.md 12.3 (keep the wording) -->
+    <!-- Verification code messages (keep the wording) -->
     <string name="code_expires_in">Code expires in %1$s</string>
     <string name="code_expired">This code has expired. Tap Resend code to get a new one.</string>
     <string name="code_incorrect">The code is incorrect. Please try again.</string>
     <string name="code_too_many">Too many attempts. Please request a new code.</string>
     <string name="code_send_failed">We could not send the email. Please check your internet connection and tap Resend code.</string>
-    <!-- Plain-text version of res/raw/verification_email.html.
-         %1$s name, %2$s code, %3$s minutes, %4$s role, %5$s email, %6$s year -->
+    <!-- Plain-text version of res/raw/verification_email.html. -->
     <string name="code_email_text">Hi %1$s,\n\nYour Attendra UiTM verification code is: %2$s\n\nEnter this code in the Attendra UiTM app to finish creating your %4$s account for %5$s. This code expires in %3$s minute(s).\n\nIf the code has expired, tap Resend code in the app to get a new one. Only the newest code will work.\n\nDid not request this? You can ignore this email. Never share this code with anyone, including lecturers or staff.\n\nAttendra UiTM · Final Year Project, KPPIM, UiTM Shah Alam · %6$s</string>
     <string name="verify_wrong_email">Incorrect email address?</string>
     <string name="verify_change_it">Change email</string>
@@ -99,7 +97,7 @@
     <string name="home_role_lecturer">Lecturer</string>
     <string name="home_role_student">Student</string>
 
-    <!-- Bottom navigation (CLAUDE.md 12.5) -->
+    <!-- Bottom navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_classes">Classes</string>
     <string name="nav_history">History</string>
@@ -203,7 +201,7 @@
     <string name="profile_title_row">Title</string>
     <string name="profile_not_set">Not set</string>
 
-    <!-- Preferred Name Page (CLAUDE.md 12.6) -->
+    <!-- Preferred Name Page -->
     <string name="name_eyebrow">Almost done</string>
     <string name="name_title">What should we call you?</string>
     <string name="name_body">Pick the name you would like to see in Attendra. You can change it any time in your profile.</string>
@@ -247,7 +245,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="phone_edit_title">Phone number</string>
     <string name="phone_saved">Phone number saved</string>
 
-    <!-- Create Session wizard (C6) -->
+    <!-- Create Session wizard -->
     <string name="new_session">New session</string>
     <string name="review_and_start">Review and start</string>
     <string name="step_of">%1$d of 4</string>
@@ -335,7 +333,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="place_search_none">No places found. Try another name, or move the pin on the map.</string>
     <string name="place_search_failed">Search is unavailable. Please check your internet connection, or tap the map instead.</string>
 
-    <!-- Live Monitor, Manual Attendance, Session Report (C7) -->
+    <!-- Live Monitor, Manual Attendance, Session Report -->
     <string name="status_not_yet">Not yet</string>
     <string name="filter_all">All</string>
     <string name="filter_class">Class</string>
@@ -413,7 +411,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
         <item quantity="other">%d clubs</item>
     </plurals>
 
-    <!-- Tester access (DEBUG builds only, CLAUDE.md 12.4) -->
+    <!-- Tester access (DEBUG builds only) -->
     <string name="tester_title">Tester access</string>
     <string name="tester_body">Debug build only. Signs in with the test accounts from local.properties.</string>
     <string name="tester_login_lecturer">Log in as Test Lecturer</string>
@@ -484,9 +482,15 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="live_map_no_location">No location for this student (not checked in yet or marked manually).</string>
     <string name="live_map_legend">Green: Present   Orange: Late   Red: Rejected. Tap a student below to see where they checked in.</string>
 
-    <!-- C9 Check in (CLAUDE.md section 6) -->
+    <!-- Check in -->
     <string name="check_in_now">Check in now</string>
-    <string name="check_in_privacy_note">Attendra UiTM reads your location once, only when you tap Check in. It is saved with your attendance so your lecturer can see where you checked in.</string>
+    <string name="check_in_privacy_note">Your location is shown on the map only when you tap Show my location, and it is saved only when you tap Check in now. Your lecturer can then see where you checked in.</string>
+    <!-- Read-only venue map on the Check-In Page -->
+    <string name="check_in_map_description">Map with the session venue and the check-in area</string>
+    <string name="map_show_my_location">Show my location</string>
+    <string name="map_directions">Directions</string>
+    <string name="map_my_distance">You are about %1$d m from the venue</string>
+    <string name="map_no_maps_app">No maps app is installed to show directions.</string>
     <string name="closes_in">closes in %1$s</string>
     <string name="opens_at">opens %1$s</string>
     <string name="check_in_ready_title">Ready to check in</string>
@@ -513,7 +517,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="state_not_eligible_title">You’re not in this session</string>
     <string name="state_not_eligible_body">This session is for other groups or club members. If you think this is wrong, ask your lecturer.</string>
     <string name="state_permission_title">Allow location to check in</string>
-    <string name="state_permission_body">Attendra UiTM reads your location once, only when you tap Check in. It is saved with your attendance so your lecturer can see where you checked in.</string>
+    <string name="state_permission_body">Your location is shown on the map only when you tap Show my location, and it is saved only when you tap Check in now. Your lecturer can then see where you checked in.</string>
     <string name="state_permission_blocked_body">Location is turned off for Attendra UiTM. Open settings, then Permissions → Location, and choose “Allow only while using the app”.</string>
     <string name="state_gps_off_title">Turn on location</string>
     <string name="state_gps_off_body">Your phone’s location is switched off. Turn it on in quick settings, then try again.</string>
@@ -541,7 +545,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="result_pinned_place">the pinned location</string>
     <string name="result_accuracy">±%1$d m</string>
 
-    <!-- C5b: lecturers add their own teaching classes -->
+    <!-- Lecturers add their own teaching classes -->
     <string name="register_lecturer_classes_note">You will add your teaching classes after you verify your email.</string>
     <string name="teach_semester_line">Semester: %1$s · copied from your faculty timetable</string>
     <string name="teach_add_button">Add teaching class</string>
@@ -573,7 +577,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
         <item quantity="other">%d classes this semester</item>
     </plurals>
 
-    <!-- C13: plurals, so the count and the noun always agree -->
+    <!-- plurals, so the count and the noun always agree -->
     <plurals name="overall_detail">
         <item quantity="one">This semester · %1$d of %2$d session</item>
         <item quantity="other">This semester · %1$d of %2$d sessions</item>
@@ -587,7 +591,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
         <item quantity="other">%1$d minutes (%2$s)</item>
     </plurals>
 
-    <!-- C13: TalkBack labels for the 6 code boxes on the Verify page -->
+    <!-- TalkBack labels for the 6 code boxes on the Verify page -->
     <string name="code_digit_1">Digit 1 of 6</string>
     <string name="code_digit_2">Digit 2 of 6</string>
     <string name="code_digit_3">Digit 3 of 6</string>
@@ -595,7 +599,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="code_digit_5">Digit 5 of 6</string>
     <string name="code_digit_6">Digit 6 of 6</string>
 
-    <!-- C8 / C13: student Notifications tab -->
+    <!-- Student Notifications tab -->
     <string name="notifications_mark_all">Mark all read</string>
     <string name="notifications_yesterday">Yesterday</string>
     <string name="notifications_unread">Unread. %1$s</string>
@@ -607,4 +611,35 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     </plurals>
     <string name="settings_notifications">Session notifications</string>
     <string name="settings_notifications_note">Show the unread count when a session opens</string>
+
+    <!-- Lecturer deletes a closed session; student hides one -->
+    <string name="more_options">More options</string>
+    <string name="delete_session">Delete session</string>
+    <!-- %1$s e.g. "Test 1 · ICT600 (13 Oct)" -->
+    <string name="delete_session_body">Delete %1$s? This removes the session and its attendance records for all students. Share the CSV first if you need a copy.</string>
+    <string name="delete_session_confirm">Delete</string>
+    <string name="delete_share_first">Share CSV first</string>
+    <string name="session_deleted">Session deleted</string>
+    <string name="delete_open_refused">An open session cannot be deleted. Close it first.</string>
+    <string name="hide_session">Hide</string>
+    <string name="hide_session_title">Hide this session?</string>
+    <string name="hide_session_body">It will no longer appear in your history or notifications. It still counts in your attendance percentage.</string>
+    <string name="hide_open_refused">Only closed sessions can be hidden.</string>
+    <string name="session_hidden">Session hidden</string>
+    <string name="unhide_session">Show again</string>
+    <string name="unhide_session_body">Show this session in your history and notifications again?</string>
+    <string name="hidden_label">Hidden</string>
+    <string name="show_hidden">Show hidden sessions</string>
+    <plurals name="hidden_count">
+        <item quantity="one">%d session hidden · still counted in your percentage</item>
+        <item quantity="other">%d sessions hidden · still counted in your percentage</item>
+    </plurals>
+    <!-- SULAM course from programmes/{code}/sulamCourse -->
+    <string name="sulam_course_chip">SULAM course</string>
+    <plurals name="sulam_missing_groups">
+        <item quantity="one">Add %1$s in Teaching Classes to include it.</item>
+        <item quantity="other">Add %1$s in Teaching Classes to include them.</item>
+    </plurals>
+    <string name="delete_notification">Delete notification</string>
+    <string name="notification_deleted">Notification deleted</string>
 </resources>

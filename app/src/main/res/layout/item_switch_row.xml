@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Settings row with an on/off switch: title, small subtitle, switch.
-     Tapping anywhere on the row flips the switch. -->
+<!-- Settings row with an on/off switch: title, small subtitle, switch. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Widget.Attendra.ListRow"
     android:layout_width="match_parent"

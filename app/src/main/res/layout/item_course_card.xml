@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- My attendance: one course. "ICT602 / Mobile Technology ... 95%", a bar,
-     and "19 of 20 sessions · 1 late". -->
+<!-- My attendance: one course. -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Widget.Attendra.Card"
     android:layout_width="match_parent"

@@ -38,23 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Step 3, Session Venue Page (CLAUDE.md section 5). The map is OpenStreetMap
- * (osmdroid) through map/VenuePinMap, and place search is Photon.
- *
- * - Building mode (Class, Test, Club "Inside"): building dropdown, then a room
- *   dropdown (venues of that building, sorted by order). The geofence centre is
- *   the BUILDING's lat/lng: GPS can't tell rooms or floors apart, so the room
- *   is a label only. A building still at 0,0 shows "Building location not set"
- *   and blocks Continue. Otherwise the map previews the building's geofence and
- *   cannot be edited.
- * - Map pin mode (SULAM, Club "Outside"): search a place by name, tap the map,
- *   long-press and drag the pin, or "Use my location".
- * - Every type: radius slider 30–150 m; the map circle follows it.
- *
- * The map is only a picker. Check-in never uses it: the geofence check is
- * Location.distanceBetween against the saved lat/lng and radius (section 6).
- */
+/** Step 3, Session Venue Page. */
 public class WhereStepFragment extends BaseStepFragment {
 
     private FragmentStepWhereBinding binding;
@@ -89,14 +73,13 @@ public class WhereStepFragment extends BaseStepFragment {
         binding.btnInside.setOnClickListener(v -> setInside(true));
         binding.btnOutside.setOnClickListener(v -> setInside(false));
 
-        // The map starts at the last pin, else at UiTM Shah Alam. showMode()
-        // moves it to the building in building mode.
+        // The map starts at the last pin, else at UiTM Shah Alam.
         double startLat = vm.pinLat != null ? vm.pinLat : OsmSetup.UITM_LAT;
         double startLng = vm.pinLng != null ? vm.pinLng : OsmSetup.UITM_LNG;
         venueMap = new VenuePinMap(pinViews.mapVenue, startLat, startLng, vm.radius);
         venueMap.setListener((lat, lng) -> {
-            // Building mode also moves the pin (to the building); only a
-            // pin-mode move is the lecturer's chosen location.
+            // Building mode also moves the pin (to the building); only a pin-mode move is the
+            // lecturer's chosen location.
             if (binding == null || !vm().usesPin()) return;
             vm().pinLat = lat;
             vm().pinLng = lng;
@@ -180,9 +163,8 @@ public class WhereStepFragment extends BaseStepFragment {
     }
 
     /**
-     * Building mode: a read-only map centred on the building, so the lecturer
-     * sees the geofence circle. Search, suggestions, "Use my location" and the
-     * pin hint are hidden. Hidden until a building with a location is chosen.
+     * Building mode: a read-only map centred on the building, so the lecturer sees the geofence
+     * circle.
      */
     private void showBuildingMap(@Nullable Building b) {
         boolean show = b != null && b.hasLocation();
@@ -241,11 +223,7 @@ public class WhereStepFragment extends BaseStepFragment {
 
     // ------------------------------------------------------------ place search
 
-    /**
-     * Suggestions appear while typing. PhotonSearch waits until the lecturer
-     * stops typing and needs at least 3 letters, so only a few requests are
-     * sent (fair use of the free Photon server).
-     */
+    /** Suggestions appear while typing. */
     private void bindSearch() {
         photon = new PhotonSearch(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_NAME);
         suggestions = new PlaceSuggestionAdapter(this::pickPlace);
@@ -425,8 +403,7 @@ public class WhereStepFragment extends BaseStepFragment {
     @Override
     public void onContinue() {
         if (!canContinue()) return;
-        // Save what the map shows. In building mode the centre comes from the
-        // building when the session is built, so only the radius is taken.
+        // Save what the map shows.
         CreateSessionViewModel vm = vm();
         if (vm.usesPin()) {
             vm.pinLat = venueMap.getLat();

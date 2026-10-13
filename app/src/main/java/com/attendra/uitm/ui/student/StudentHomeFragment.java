@@ -47,18 +47,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-/**
- * Student Dashboard Page (CLAUDE.md 12.5).
- *
- * Data, all live (ValueEventListeners added in onStart, removed in onStop):
- * - students/{uid}                 → greeting, avatar and the student's group
- * - studentClubs/{uid}             → the clubs the student joined
- * - sessionsByGroup/{groupId} and sessionsByClub/{clubId} → sessions for me
- *   (SessionWatcher), used for the open-session card
- * - studentAttendance/{uid}        → overall percentage and "My courses"
- * Course names for "My courses" need each attended session's courseId, which is
- * read once per session (sessions/{sid}) because a session's course never changes.
- */
+/** Student Dashboard Page. */
 public class StudentHomeFragment extends Fragment {
 
     private static final long TICK_MS = 30_000;
@@ -184,8 +173,8 @@ public class StudentHomeFragment extends Fragment {
                     public void onSuccess(DataSnapshot snapshot) {
                         List<String> clubs = UserRepository.clubIds(snapshot, uid,
                                 Registration.ROLE_STUDENT);
-                        // Follow sessionsByClub for every joined club, and stop
-                        // following clubs the student has left.
+                        // Follow sessionsByClub for every joined club, and stop following clubs the
+                        // student has left.
                         for (String name : watcher.indexNames()) {
                             if (name.startsWith(INDEX_CLUB)
                                     && !clubs.contains(name.substring(INDEX_CLUB.length()))) {
@@ -253,7 +242,7 @@ public class StudentHomeFragment extends Fragment {
 
                         @Override
                         public void onError(String message) {
-                            courseLookups.remove(sid); // try again on the next update
+                            courseLookups.remove(sid); // Try again on the next update
                         }
                     });
         }
@@ -296,9 +285,8 @@ public class StudentHomeFragment extends Fragment {
     }
 
     /**
-     * DEBUG only: writes a present/late record (method "debug") for the open
-     * session, as a real check-in would, so the Live Monitor can be tested
-     * before the GPS check-in (C9) exists. The button is never shown in release.
+     * DEBUG only: writes a present/late record (method "debug") for the open session, as a real
+     * check-in would, so the Live Monitor can be tested before the GPS check-in exists.
      */
     private void simulateCheckIn() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -346,7 +334,7 @@ public class StudentHomeFragment extends Fragment {
         binding.txtOverallDetail.setText(getResources().getQuantityString(R.plurals.overall_detail, total, attended, total));
     }
 
-    /** One row per course: attended / recorded sessions of that course. Club sessions are left out. */
+    /** One row per course: attended / recorded sessions of that course. */
     private void renderCourses() {
         binding.listCourses.removeAllViews();
         if (myAttendance == null) {
@@ -360,10 +348,10 @@ public class StudentHomeFragment extends Fragment {
         for (Map.Entry<String, String> e : myAttendance.entrySet()) {
             String courseId = courseOfSession.get(e.getKey());
             if (courseId == null) {
-                waiting = true; // still reading this session's course
+                waiting = true; // Still reading this session's course
                 continue;
             }
-            if (courseId.isEmpty()) continue; // club session
+            if (courseId.isEmpty()) continue; // Club session
             int[] counts = perCourse.get(courseId);
             if (counts == null) perCourse.put(courseId, counts = new int[2]);
             if (Attendance.attended(e.getValue())) counts[0]++;

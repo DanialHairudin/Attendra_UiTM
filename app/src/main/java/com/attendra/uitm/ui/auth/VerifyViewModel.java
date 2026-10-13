@@ -16,33 +16,26 @@ import com.attendra.uitm.data.VerificationRepository;
 import com.attendra.uitm.data.VerificationRepository.Result;
 import com.google.firebase.auth.FirebaseUser;
 
-/**
- * State of the Email Verification Page (CLAUDE.md 12.3). Kept in a ViewModel so
- * a send or check that is still running survives a screen rotation.
- *
- * Times (expiresAt, resendAt) are System.currentTimeMillis() values, the same
- * clock that VerificationRepository writes into the database. The screen works
- * out "Code expires in 0:42" and "Resend in 0:24" from them once a second.
- */
+/** State of the Email Verification Page. */
 public class VerifyViewModel extends AndroidViewModel {
 
-    /** Everything the screen draws. Fields are changed here only. */
+    /** Everything the screen draws. */
     public static class State {
         /** Reading the role / waiting code when the screen opens. */
         public boolean loading = true;
         public boolean sending;
         public boolean verifying;
-        /** When the current code stops working. 0 = there is no usable code. */
+        /** When the current code stops working. */
         public long expiresAt;
         /** When Resend becomes available again. */
         public long resendAt;
         /** 5 wrong tries: a new code is needed. */
         public boolean locked;
-        /** The last send failed (shows the 12.3 "could not send" message). */
+        /** The last send failed (shows the "could not send" message). */
         public boolean sendFailed;
-        /** Other message (incorrect code, network error). null = none. */
+        /** Other message (incorrect code, network error). */
         public String error;
-        /** The screen could not start (signed out, no role, offline). Shown above all else. */
+        /** The screen could not start (signed out, no role, offline). */
         public boolean fatal;
     }
 
@@ -53,7 +46,7 @@ public class VerifyViewModel extends AndroidViewModel {
     private final MutableLiveData<State> stateLive = new MutableLiveData<>(state);
     /** Set once when the code is right: the role whose dashboard to open. */
     private final MutableLiveData<String> verifiedRole = new MutableLiveData<>();
-    /** One-shot events for the screen. Cleared after it has handled them. */
+    /** One-shot events for the screen. */
     private final MutableLiveData<Boolean> clearBoxes = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> codeSent = new MutableLiveData<>(false);
 
@@ -90,14 +83,7 @@ public class VerifyViewModel extends AndroidViewModel {
         codeSent.setValue(false);
     }
 
-    /**
-     * Called when the screen opens. Runs once per screen, also after rotation.
-     *
-     * @param sendNow true straight after registering: create and email the first
-     *                code now. false when coming from Login: do NOT send a new
-     *                code automatically (12.3), just show the one that is waiting,
-     *                if it is still valid. The user can tap Resend code.
-     */
+    /** Called when the screen opens. */
     public void start(boolean sendNow) {
         if (started) return;
         started = true;
@@ -147,7 +133,7 @@ public class VerifyViewModel extends AndroidViewModel {
         });
     }
 
-    /** Creates a NEW code and emails it. The old code stops working. */
+    /** Creates a NEW code and emails it. */
     public void resend() {
         if (role == null || state.sending) return;
         state.sending = true;
@@ -170,8 +156,8 @@ public class VerifyViewModel extends AndroidViewModel {
             @Override
             public void onError(String message) {
                 state.sending = false;
-                // The database may already hold a new code that never arrived, so
-                // treat the old one as unusable. Resend is allowed again at once.
+                // The database may already hold a new code that never arrived, so treat the old one
+                // as unusable.
                 state.expiresAt = 0;
                 state.resendAt = 0;
                 state.sendFailed = true;
@@ -192,7 +178,7 @@ public class VerifyViewModel extends AndroidViewModel {
                 switch (result) {
                     case OK:
                         verifiedRole.setValue(role);
-                        return; // the screen closes
+                        return; // The screen closes
                     case WRONG:
                         state.error = str(R.string.code_incorrect);
                         clearBoxes.setValue(true);

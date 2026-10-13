@@ -7,10 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Dates, times and lists written the way the prototype shows them.
- * The app's text is English, so English month/day names are used.
- */
+/** Date, time and list formats used on screen. */
 public final class Formats {
 
     private Formats() {
@@ -81,10 +78,7 @@ public final class Formats {
         return startOfDay(a) == startOfDay(b);
     }
 
-    /**
-     * Groups written like the prototype: "CDCS2405A, B, C". When the IDs share
-     * everything except the last letter, only that letter is repeated.
-     */
+    /** Groups written: "CDCS2405A, B, C". */
     public static String groups(List<String> ids) {
         if (ids.isEmpty()) return "";
         String first = ids.get(0);

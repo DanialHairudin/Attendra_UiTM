@@ -23,12 +23,7 @@ import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.util.Formats;
 import com.google.android.material.snackbar.Snackbar;
 
-/**
- * Session Review Page: everything in one place, then "Start session".
- * Starting writes the session, its indexes and one notification per eligible
- * student in ONE updateChildren (SessionRepository.create), then opens the
- * Live Monitor.
- */
+/** Session Review Page: everything in one place, then "Start session". */
 public class ReviewStepFragment extends BaseStepFragment {
 
     private FragmentStepReviewBinding binding;

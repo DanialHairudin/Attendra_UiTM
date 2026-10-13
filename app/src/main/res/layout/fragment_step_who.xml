@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Step 2, Session Participants Page ("cWho" in the prototype). -->
+<!-- Step 2, Session Participants Page. -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -73,6 +73,15 @@
                     android:visibility="gone" />
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
+
+        <!-- SULAM: "Add CDCS2406C in Teaching Classes to include it." -->
+        <TextView
+            android:id="@+id/txt_sulam_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption"
+            android:visibility="gone" />
 
         <!-- Test only: groups of the chosen course -->
         <LinearLayout

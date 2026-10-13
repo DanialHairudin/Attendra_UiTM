@@ -10,9 +10,7 @@ import com.attendra.uitm.model.Registration;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-/**
- * Wraps Firebase Authentication (Email/Password only) for the Auth screens.
- */
+/** Wraps Firebase Authentication (Email/Password only) for the Auth screens. */
 public class AuthRepository {
 
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -32,18 +30,7 @@ public class AuthRepository {
         auth.signOut();
     }
 
-    /**
-     * Register flow (CLAUDE.md 12.1 and 12.3):
-     * 1. createUserWithEmailAndPassword
-     * 2. write the role, profile + indexes in one multi-path update
-     * 3. the caller opens the Verify screen, which creates and emails the
-     *    6-digit code straight away (so the send result can be shown there)
-     *
-     * If step 2 fails, the new Auth account is deleted again. Otherwise the
-     * email would be "taken" by an account that has no profile and can never log in.
-     * The user stays signed in afterwards so the Verify screen can save the code
-     * and set emailVerified.
-     */
+    /** Register flow. */
     public void register(Registration r, Callback<Void> callback) {
         auth.createUserWithEmailAndPassword(r.email, r.password)
                 .addOnSuccessListener(result -> {
@@ -70,7 +57,7 @@ public class AuthRepository {
                 .addOnFailureListener(e -> callback.onError(AuthErrors.message(e)));
     }
 
-    /** Where a signed-in user should go next. HomeRouter.open() follows it. */
+    /** Where a signed-in user should go next. */
     public static final class Route {
         /** "lecturer" or "student", from roles/{uid}. */
         public final String role;
@@ -101,13 +88,8 @@ public class AuthRepository {
     }
 
     /**
-     * Works out where a signed-in user should go: Verify screen, Preferred Name
-     * Page, or the dashboard for their role.
-     *
-     * Firebase Auth's own isEmailVerified() is NOT used, because the app sends its
-     * own 6-digit code (CLAUDE.md 12.3). The source of truth is emailVerified in
-     * lecturers/{uid} or students/{uid}. Test accounts (isTest: true) skip both
-     * verification and the Preferred Name Page (12.6).
+     * Works out where a signed-in user should go: Verify screen, Preferred Name Page, or the
+     * dashboard for their role.
      */
     public void resolveHome(FirebaseUser user, Callback<Route> callback) {
         loadRole(user, new Callback<String>() {
@@ -136,10 +118,7 @@ public class AuthRepository {
         });
     }
 
-    /**
-     * Reads the signed-in user's role from roles/{uid}. If the account has no role,
-     * it signs out and reports an error, so nobody lands in the app half set up.
-     */
+    /** Reads the signed-in user's role from roles/{uid}. */
     public void loadRole(FirebaseUser user, Callback<String> callback) {
         users.getRole(user.getUid(), new Callback<String>() {
             @Override
@@ -159,11 +138,7 @@ public class AuthRepository {
         });
     }
 
-    /**
-     * Sends a password reset link. With email enumeration protection on (the
-     * Firebase default), this succeeds even if no account uses the email, so the
-     * screen must not claim that the account exists.
-     */
+    /** Sends a password reset link. */
     public void sendPasswordReset(String email, Callback<Void> callback) {
         auth.sendPasswordResetEmail(email)
                 .addOnSuccessListener(unused -> callback.onSuccess(null))

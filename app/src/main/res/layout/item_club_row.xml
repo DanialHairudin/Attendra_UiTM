@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One club: star icon, short name, full name, and an optional gold badge
-     (member count on the Classes tab) or on/off switch (My Clubs Page). -->
+<!-- One club: star icon, short name, full name, and an optional gold badge (member count on the
+     Classes tab) or on/off switch (My Clubs Page). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/Widget.Attendra.ListRow"

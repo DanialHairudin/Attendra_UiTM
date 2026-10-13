@@ -37,8 +37,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 
 /**
- * Settings Page for both roles: profile button, theme (Light / Dark / System),
- * text size, My clubs, session notifications (students) and Log out.
+ * Settings Page for both roles: profile button, theme (Light / Dark / System), text size, My clubs,
+ * session notifications (students) and Log out.
  */
 public class SettingsFragment extends Fragment {
 
@@ -154,10 +154,7 @@ public class SettingsFragment extends Fragment {
         return 2; // system
     }
 
-    /**
-     * Saves the choice in SharedPreferences ("theme_mode") and applies it.
-     * AppCompat then recreates the open screens in the new colours.
-     */
+    /** Saves the choice in SharedPreferences ("theme_mode") and applies it. */
     private void chooseTheme() {
         String[] labels = new String[THEME_LABELS.length];
         for (int i = 0; i < labels.length; i++) labels[i] = getString(THEME_LABELS[i]);
@@ -174,19 +171,15 @@ public class SettingsFragment extends Fragment {
 
     // --------------------------------------------------------------- text size
 
-    /**
-     * Bottom sheet with a live preview and a 4-step slider. Apply saves the
-     * level (TextSizePrefs) and recreates the screen, so BaseActivity applies
-     * the new font scale. Screens opened later pick it up when they start.
-     */
+    /** Bottom sheet with a live preview and a 4-step slider. */
     private void chooseTextSize() {
         int current = TextSizePrefs.get(requireContext());
         BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
         SheetTextSizeBinding s = SheetTextSizeBinding.inflate(getLayoutInflater());
         sheet.setContentView(s.getRoot());
 
-        // The sheet is already drawn at the current scale, so the preview is
-        // resized relative to it: size × (new scale / current scale).
+        // The sheet is already drawn at the current scale, so the preview is resized relative to
+        // it: size × (new scale / current scale).
         float titlePx = s.previewTitle.getTextSize();
         float bodyPx = s.previewBody.getTextSize();
         Slider.OnChangeListener preview = (slider, value, fromUser) -> {
@@ -212,7 +205,7 @@ public class SettingsFragment extends Fragment {
         sheet.show();
     }
 
-    /** "Session notifications" on/off (NotificationPrefs). Off hides the unread badge. */
+    /** "Session notifications" on/off (NotificationPrefs). */
     private void addNotificationsRow() {
         ItemSwitchRowBinding row = ItemSwitchRowBinding.inflate(getLayoutInflater(),
                 binding.listSettings, false);

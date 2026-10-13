@@ -1,13 +1,18 @@
 package com.attendra.uitm.ui.lecturer;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.fragment.app.Fragment;
 
 import com.attendra.uitm.R;
@@ -36,18 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Lecturer History tab (CLAUDE.md section 9, build step C11).
- *
- * Every session in sessionsByLecturer/{uid}, newest first, filtered by
- * All · Class · Test · Activity (SULAM and club) · This week. Each row shows
- * the attendance of that session: "88%" (attended of everyone recorded), or
- * "41 of 48" for a club. Open sessions show "Live" instead.
- *
- * For a closed session, attendance/{sid} holds a record for every eligible
- * student (close fills in Absent), so its size is the total. It is read once
- * per session and kept.
- */
+/** Lecturer History tab. */
 public class HistoryFragment extends Fragment {
 
     private static final int MAX_SESSIONS = 200;
@@ -66,6 +60,12 @@ public class HistoryFragment extends Fragment {
     /** sessionId → {attended, total} for closed sessions. */
     private final Map<String, int[]> counts = new HashMap<>();
     private final Set<String> lookups = new HashSet<>();
+
+    /** Session Report, opened for a result so a delete made there shows "Session deleted" here. */
+    private final ActivityResultLauncher<Intent> openReport = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == SessionReportActivity.RESULT_DELETED) showDeleted();
+            });
 
     @Nullable
     @Override
@@ -159,7 +159,7 @@ public class HistoryFragment extends Fragment {
 
             @Override
             public void onError(String message) {
-                lookups.remove(s.id); // try again on the next update
+                lookups.remove(s.id); // Try again on the next update
             }
         });
     }
@@ -230,9 +230,47 @@ public class HistoryFragment extends Fragment {
         }
         row.getRoot().setOnClickListener(v -> {
             if (s.isOpen()) LiveMonitorActivity.open(requireContext(), s.id);
-            else SessionReportActivity.open(requireContext(), s.id);
+            else openReport.launch(SessionReportActivity.intent(requireContext(), s.id, false));
         });
+        // Long-press a CLOSED session to delete it.
+        if (!s.isOpen()) {
+            row.getRoot().setOnLongClickListener(v -> {
+                confirmDelete(s);
+                return true;
+            });
+            ViewCompat.replaceAccessibilityAction(row.getRoot(),
+                    AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_LONG_CLICK,
+                    getString(R.string.delete_session), null);
+        }
         Ui.addRow(binding.listSessions, row.getRoot());
+    }
+
+    private void confirmDelete(Session s) {
+        DeleteSessionDialog.show(requireContext(), s, new DeleteSessionDialog.Listener() {
+            @Override
+            public void onShareCsvFirst() {
+                // The CSV is built on the Report page; it opens the share sheet once loaded.
+                openReport.launch(SessionReportActivity.intent(requireContext(), s.id, true));
+            }
+
+            @Override
+            public void onDeleted() {
+                // The sessionsByLecturer listener removes the row by itself.
+                counts.remove(s.id);
+                showDeleted();
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+            }
+        });
+    }
+
+    private void showDeleted() {
+        if (binding != null) {
+            Snackbar.make(binding.getRoot(), R.string.session_deleted, Snackbar.LENGTH_LONG).show();
+        }
     }
 
     private void showError(String message) {

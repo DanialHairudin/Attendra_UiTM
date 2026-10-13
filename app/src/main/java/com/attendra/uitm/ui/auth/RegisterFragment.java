@@ -29,15 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Register screen (CLAUDE.md section 4). One form with a Student | Lecturer toggle.
- *
- * Student: student ID, programme → part → group cascade, clubs they join.
- * Lecturer: staff ID, clubs they advise.
- * Both: name, email, phone, password + confirm.
- *
- * Programmes, groups and clubs come from the seed nodes in the database.
- */
+/** Register screen. */
 public class RegisterFragment extends Fragment {
 
     private FragmentRegisterBinding binding;
@@ -65,7 +57,6 @@ public class RegisterFragment extends Fragment {
         setRole(vm.role);
 
         // Long programme names wrap onto up to 3 lines instead of being cut off.
-        // setSingleLine(false) resets maxLines, so maxLines is set after it.
         binding.inputProgramme.setSingleLine(false);
         binding.inputProgramme.setMaxLines(3);
 
@@ -81,7 +72,7 @@ public class RegisterFragment extends Fragment {
         vm.getRegisterError().observe(getViewLifecycleOwner(), message -> {
             if (message == null) return;
             Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
-            vm.clearRegisterError(); // show it once, not again after rotation
+            vm.clearRegisterError(); // Show it once, not again after rotation
         });
 
         vm.getSeedState().observe(getViewLifecycleOwner(), this::onSeedState);
@@ -105,8 +96,8 @@ public class RegisterFragment extends Fragment {
         binding.txtLabelClubs.setText(student
                 ? R.string.label_clubs_student : R.string.label_clubs_lecturer);
 
-        // The UiTM email domain is required for both roles (CLAUDE.md 12.2),
-        // so the label and example always show the right format.
+        // The UiTM email domain is required for both roles, so the label and example always show
+        // the right format.
         binding.inputEmail.setHint(student ? R.string.hint_email_student : R.string.hint_email_staff);
         binding.txtLabelEmail.setText(student ? R.string.label_email_student : R.string.label_email_staff);
 
@@ -153,7 +144,6 @@ public class RegisterFragment extends Fragment {
 
     // In each dropdown below, the chosen item is read from the clicked row itself
     // (parent.getItemAtPosition), never looked up by position in another list.
-    // The field and the list rows both use the adapter's label, so they match.
 
     private void bindProgrammeDropdown() {
         DropdownAdapter<Programme> adapter =
@@ -216,11 +206,11 @@ public class RegisterFragment extends Fragment {
         binding.layoutGroup.setEnabled(vm.programme != null && vm.part != 0);
     }
 
-    /** One pill per club. Pills are one line and scroll sideways (CLAUDE.md section 3). */
+    /** One pill per club. */
     private void bindClubChips() {
         binding.chipsClubs.removeAllViews();
         for (Club club : vm.clubs) {
-            Chip chip = new Chip(requireContext()); // picks up Widget.Attendra.Pill from the theme
+            Chip chip = new Chip(requireContext()); // Picks up Widget.Attendra.Pill from the theme
             chip.setText(club.shortName);
             chip.setContentDescription(club.name);
             chip.setCheckable(true);
@@ -249,7 +239,6 @@ public class RegisterFragment extends Fragment {
         r.clubIds.addAll(vm.selectedClubs);
 
         // Each check puts its message under the field (or clears it when OK).
-        // The first field with a problem gets focus.
         TextInputLayout firstError = null;
         firstError = check(binding.layoutName, Validators.name(r.name), firstError);
         if (r.isStudent()) {

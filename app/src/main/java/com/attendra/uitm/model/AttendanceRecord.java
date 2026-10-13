@@ -1,9 +1,6 @@
 package com.attendra.uitm.model;
 
-/**
- * One student's record in attendance/{sessionId}/{studentUid} (CLAUDE.md section 7).
- * time is the server time of the check-in or mark, in milliseconds.
- */
+/** One student's record in attendance/{sessionId}/{studentUid}. */
 public class AttendanceRecord {
     public static final String METHOD_GPS = "gps";
     public static final String METHOD_MANUAL = "manual";
@@ -17,7 +14,7 @@ public class AttendanceRecord {
     /** Metres from the geofence centre (GPS check-ins only). */
     public Double distance;
     public Double accuracy;
-    /** Where the check-in fix was (5 decimals, about 1 m). GPS attempts only. */
+    /** Where the check-in fix was (5 decimals, about 1 m). */
     public Double lat;
     public Double lng;
     public String method;

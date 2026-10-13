@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Warning note ("Building location not set"): rejected colour at 12% over the
-     surface colour, with a rejected border. -->
+<!-- Warning note ("Building location not set"): rejected colour at 12% over the surface colour,
+     with a rejected border. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">

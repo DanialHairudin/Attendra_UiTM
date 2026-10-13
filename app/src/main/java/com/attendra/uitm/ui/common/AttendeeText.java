@@ -38,13 +38,7 @@ public final class AttendeeText {
         }
     }
 
-    /**
-     * One student row. The small line is:
-     * - checked in by GPS: "2025000001 · 9:05 AM · 23 m"
-     * - marked manually:   "2025000001 · 9:05 AM · Manual: phone GPS not working"
-     * - not yet:           "2025000001 · CDCS2405A"
-     * Returns the row, so a screen can make it tappable.
-     */
+    /** One student row. */
     public static View addStudent(LinearLayout list, SessionAttendanceWatcher.Person p,
                                   @Nullable AttendanceRecord r) {
         Context c = list.getContext();

@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Check-in page ("checkin" in the prototype). No map (CLAUDE.md section 6):
-     the session, one status card and one big button. When a check fails, the
-     whole page is replaced by a state (permission, GPS off, weak GPS, offline,
-     session closed, not in this session) from include_check_in_state. -->
+<!-- Check-in page: the session, a read-only venue map, one status card and one big button. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/check_in_root"
@@ -160,6 +157,89 @@
                             android:textColor="@color/ink"
                             android:textSize="15sp" />
                     </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Venue map (map/VenuePinMap, read-only): pin + check-in circle. -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Attendra.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_map_place"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:accessibilityHeading="true"
+                        android:paddingStart="16dp"
+                        android:paddingTop="14dp"
+                        android:paddingEnd="16dp"
+                        android:paddingBottom="10dp"
+                        android:textAppearance="@style/TextAppearance.Attendra.H3" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp">
+
+                        <org.osmdroid.views.MapView
+                            android:id="@+id/map_venue"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@string/check_in_map_description" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_my_location"
+                            style="@style/Widget.Attendra.Button.Secondary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_gravity="top|end"
+                            android:layout_margin="10dp"
+                            android:backgroundTint="@color/surface"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:paddingStart="14dp"
+                            android:paddingEnd="14dp"
+                            android:text="@string/map_show_my_location"
+                            android:textSize="13sp"
+                            app:icon="@drawable/ic_target"
+                            app:iconSize="16dp"
+                            app:iconTint="@color/goldText" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_directions"
+                            style="@style/Widget.Attendra.Button.Secondary"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_gravity="bottom|end"
+                            android:layout_margin="10dp"
+                            android:backgroundTint="@color/surface"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:paddingStart="14dp"
+                            android:paddingEnd="14dp"
+                            android:text="@string/map_directions"
+                            android:textSize="13sp"
+                            app:icon="@drawable/ic_directions"
+                            app:iconSize="16dp"
+                            app:iconTint="@color/goldText" />
+                    </FrameLayout>
+
+                    <!-- "You are about 120 m from the venue", shown after Show my location -->
+                    <TextView
+                        android:id="@+id/txt_my_distance"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:accessibilityLiveRegion="polite"
+                        android:fontFeatureSettings="tnum"
+                        android:padding="12dp"
+                        android:textAppearance="@style/TextAppearance.Attendra.Caption"
+                        android:visibility="gone" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

@@ -39,26 +39,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Lecturer Classes tab (CLAUDE.md 12.5, C5b "Teaching Classes Page"):
- * - teachingAssignments/{uid}     → the lecturer's own classes, copied from the
- *                                   faculty timetable. This semester's classes have
- *                                   Edit and Remove; older ones (behind "Show previous
- *                                   semesters") have Remove only.
- * - studentsByGroup/{groupId}     → number of students in each class
- * - clubAdvisors                  → the clubs this lecturer advises
- * - clubMembers/{clubId}          → number of members per club
- * All listeners are added in onStart and removed in onStop.
- */
+/** Lecturer Classes tab. */
 public class ClassesFragment extends Fragment {
 
     private FragmentClassesBinding binding;
     private final Subscriptions subs = new Subscriptions();
 
-    private List<TeachingAssignment> assignments; // null = not loaded yet
+    private List<TeachingAssignment> assignments; // Null = not loaded yet
     private boolean showPrevious;
-    private List<String> clubIds;         // null = not loaded yet
-    /** groupId or clubId → count. Missing = not loaded yet. */
+    private List<String> clubIds;         // Null = not loaded yet
+    /** groupId or clubId → count. */
     private final Map<String, Integer> groupCounts = new HashMap<>();
     private final Map<String, Integer> clubCounts = new HashMap<>();
     private final Map<String, Subscriptions.Handle> countHandles = new HashMap<>();
@@ -190,7 +180,6 @@ public class ClassesFragment extends Fragment {
         binding.listClasses.removeAllViews();
         binding.listPrevious.removeAllViews();
         // Main list: this semester (and the next one, if already added).
-        // Previous: semesters that have ended.
         List<TeachingAssignment> active = new ArrayList<>();
         List<TeachingAssignment> previous = new ArrayList<>();
         if (assignments != null) {
@@ -216,7 +205,7 @@ public class ClassesFragment extends Fragment {
         for (TeachingAssignment a : active) addClassCard(binding.listClasses, a, true);
     }
 
-    /** One class card. {@code editable} is false for previous semesters (Remove only). */
+    /** One class card. */
     private void addClassCard(LinearLayout list, TeachingAssignment a, boolean editable) {
         Course course = SeedCache.course(a.courseId);
         ItemClassCardBinding card = ItemClassCardBinding.inflate(getLayoutInflater(), list, false);
@@ -243,7 +232,7 @@ public class ClassesFragment extends Fragment {
         list.addView(card.getRoot());
     }
 
-    /** "Remove ICT600 · CDCS2405A from your teaching classes? Past sessions are kept." */
+    /** "Remove ICT600 · CDCS2405A from your teaching classes? */
     private void confirmRemove(TeachingAssignment a, @Nullable Course course) {
         String name = course == null ? a.courseId
                 : course.hasRealCode() ? course.code : course.name;

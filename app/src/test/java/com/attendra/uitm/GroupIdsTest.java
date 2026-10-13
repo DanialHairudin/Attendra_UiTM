@@ -19,9 +19,9 @@ public class GroupIdsTest {
     @Test
     public void convertsOldIdsOnly() {
         assertEquals("CDCS2405A", GroupIds.toCdcs("CS2405A"));
-        assertEquals("CDCS2405A", GroupIds.toCdcs("CDCS2405A")); // safe to run twice
-        assertEquals("CS240", GroupIds.toCdcs("CS240"));           // programme code
-        assertEquals("CS240_ICT602", GroupIds.toCdcs("CS240_ICT602")); // course ID
+        assertEquals("CDCS2405A", GroupIds.toCdcs("CDCS2405A")); // Safe to run twice
+        assertEquals("CS240", GroupIds.toCdcs("CS240"));           // Programme code
+        assertEquals("CS240_ICT602", GroupIds.toCdcs("CS240_ICT602")); // Course ID
     }
 
     @Test

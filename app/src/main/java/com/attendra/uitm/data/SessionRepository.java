@@ -15,26 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Creates attendance sessions (CLAUDE.md sections 5 and 7). */
+/** Creates attendance sessions. */
 public class SessionRepository {
 
     /**
-     * Starts a session with ONE multi-path updateChildren, so the session, its
-     * indexes and the notifications are all written or none are:
-     *
-     *   sessions/{id}                          the session itself
-     *   sessionsByLecturer/{uid}/{id}          → Lecturer Dashboard
-     *   sessionsByGroup/{group}/{id}           → Student Dashboard (each group), or
-     *   sessionsByClub/{club}/{id}             → Student Dashboard (club members)
-     *   notifications/{studentUid}/{pushId}    one per eligible student (in-app only)
-     *
-     * The eligible students are read fresh right before writing, so a student
-     * who registered a minute ago still gets the notification.
-     *
-     * @param s       the session to write (s.id is ignored; a new push ID is used)
-     * @param title   notification title shown to students
-     * @param body    notification body shown to students
-     * onSuccess receives the new session ID.
+     * Starts a session with ONE multi-path updateChildren, so the session, its indexes and the
+     * notifications are all written or none are.
      */
     public void create(Session s, String title, String body, Callback<String> callback) {
         // A session by the Test Lecturer is marked isTest, so it stays in the test world.
@@ -74,8 +60,8 @@ public class SessionRepository {
     }
 
     /**
-     * Reads, once and fresh, the uids of every student who may attend the session:
-     * the group/club members in the same world as the session (real or test).
+     * Reads, once and fresh, the uids of every student who may attend the session: the group/club
+     * members in the same world as the session (real or test).
      */
     public static void eligibleStudents(Session s, Callback<Set<String>> callback) {
         readEligible(eligibleIndexPaths(s), 0, new LinkedHashSet<>(), new Callback<Set<String>>() {
@@ -103,6 +89,82 @@ public class SessionRepository {
             public void onSuccess(DataSnapshot snapshot) {
                 for (DataSnapshot child : snapshot.getChildren()) into.add(child.getKey());
                 readEligible(paths, i + 1, into, callback);
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    // ------------------------------------------------------------ delete
+
+    /** Deletes a CLOSED session for good (the lecturer owns it). */
+    public void delete(Session s, Callback<Void> callback) {
+        if (!Session.STATUS_CLOSED.equals(s.status)) {
+            callback.onError(str(R.string.delete_open_refused));
+            return;
+        }
+        eligibleStudents(s, new Callback<Set<String>>() {
+            @Override
+            public void onSuccess(Set<String> eligible) {
+                Db.readOnce(Db.root().child("attendance").child(s.id), new Callback<DataSnapshot>() {
+                    @Override
+                    public void onSuccess(DataSnapshot records) {
+                        Set<String> withRecord = new LinkedHashSet<>();
+                        for (DataSnapshot r : records.getChildren()) withRecord.add(r.getKey());
+                        Set<String> students = new LinkedHashSet<>(eligible);
+                        students.addAll(withRecord);
+
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("sessions/" + s.id, null);
+                        updates.put("sessionsByLecturer/" + s.lecturerUid + "/" + s.id, null);
+                        if (s.isClub()) {
+                            updates.put("sessionsByClub/" + s.clubId + "/" + s.id, null);
+                        } else {
+                            for (String g : s.groupIds()) {
+                                updates.put("sessionsByGroup/" + g + "/" + s.id, null);
+                            }
+                        }
+                        updates.put("attendance/" + s.id, null);
+                        updates.put("attempts/" + s.id, null);
+                        for (String uid : withRecord) {
+                            updates.put("studentAttendance/" + uid + "/" + s.id, null);
+                        }
+                        addNotificationPaths(s.id, new ArrayList<>(students), 0, updates, callback);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    /** Finds each student's notifications about the session, one student at a time, then writes. */
+    private static void addNotificationPaths(String sid, List<String> students, int i,
+                                             Map<String, Object> updates, Callback<Void> callback) {
+        if (i == students.size()) {
+            Db.write(updates, callback);
+            return;
+        }
+        String uid = students.get(i);
+        Db.readOnce(Db.root().child("notifications").child(uid)
+                .orderByChild("sessionId").equalTo(sid), new Callback<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot found) {
+                for (DataSnapshot n : found.getChildren()) {
+                    updates.put("notifications/" + uid + "/" + n.getKey(), null);
+                }
+                addNotificationPaths(sid, students, i + 1, updates, callback);
             }
 
             @Override

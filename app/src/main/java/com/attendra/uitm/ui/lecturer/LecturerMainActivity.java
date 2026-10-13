@@ -22,10 +22,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 
-/**
- * Lecturer area. Bottom nav: Home · Classes · (+) · History · Settings
- * (CLAUDE.md 12.5). The gold (+) opens the Create session wizard (C6).
- */
+/** Lecturer area. */
 public class LecturerMainActivity extends MainTabsActivity {
 
     private static final String EXTRA_CLASSES_TAB = "classes_tab";
@@ -69,12 +66,7 @@ public class LecturerMainActivity extends MainTabsActivity {
         return new LecturerHomeFragment();
     }
 
-    /**
-     * Opens the Create Session wizard (C6). Guard (C5b): with no teaching class
-     * this semester and no advised club there is nothing to pick, so the
-     * lecturer is asked to add their classes first. If a read fails, the
-     * wizard opens anyway and shows its own error.
-     */
+    /** Opens the Create Session wizard. */
     public void openCreateSession() {
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null || checkingCreate) return;

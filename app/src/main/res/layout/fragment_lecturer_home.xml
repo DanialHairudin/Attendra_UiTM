@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Lecturer Dashboard Page (CLAUDE.md 12.5), matching "lHome" in the prototype. -->
+<!-- Lecturer Dashboard Page. -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/home_scroll"

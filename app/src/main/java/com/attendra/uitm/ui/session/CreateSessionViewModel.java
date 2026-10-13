@@ -12,7 +12,6 @@ import com.attendra.uitm.data.TeachingRepository;
 import com.attendra.uitm.data.UserRepository;
 import com.attendra.uitm.model.Building;
 import com.attendra.uitm.model.Course;
-import com.attendra.uitm.model.Programme;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.model.Session;
 import com.attendra.uitm.model.TeachingAssignment;
@@ -29,14 +28,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 /**
- * Everything the Create Session wizard needs, kept across the 5 steps and
- * across screen rotation:
- * - what the lecturer may use: this semester's teachingAssignments, advised clubs, buildings
- *   (read once when the wizard opens), plus SeedCache for courses and rooms
- * - the draft being built, step by step
- *
- * The rules from CLAUDE.md section 5 live here (which choices are allowed,
- * which location the geofence uses).
+ * Everything the Create Session wizard needs, kept across the 5 steps and across screen rotation.
  */
 public class CreateSessionViewModel extends ViewModel {
 
@@ -56,8 +48,6 @@ public class CreateSessionViewModel extends ViewModel {
     public static final int RADIUS_MIN = 30;
     public static final int RADIUS_MAX = 150;
     public static final int RADIUS_DEFAULT = 60;
-    /** SULAM is done in the final part (Part 6) unless a programme sets its own sulamPart. */
-    public static final int DEFAULT_SULAM_PART = 6;
     /** Map start point when nothing else is known: UiTM Shah Alam main campus. */
     public static final double DEFAULT_LAT = 3.0698;
     public static final double DEFAULT_LNG = 101.5037;
@@ -70,8 +60,6 @@ public class CreateSessionViewModel extends ViewModel {
     public final List<String> advisedClubs = new ArrayList<>();
     /** Building ID → building, sorted by ID (CS1, CS2). */
     public final Map<String, Building> buildings = new LinkedHashMap<>();
-    /** Programme code → the part its students do SULAM in (from /programmes). */
-    public final Map<String, Integer> sulamParts = new HashMap<>();
 
     // ------------------------------------------------------------ the draft
     public String uid;
@@ -96,7 +84,7 @@ public class CreateSessionViewModel extends ViewModel {
     /** Minutes after midnight. */
     public int startMinute;
     public int endMinute;
-    public int lateMinutes = 15; // CLAUDE.md section 5 default
+    public int lateMinutes = 15; // default: late 15 minutes after the start
     /** Live eligible-student count from the Participants step, for the Review step. */
     public int eligibleCount;
 
@@ -142,7 +130,7 @@ public class CreateSessionViewModel extends ViewModel {
         Db.readOnce(TeachingRepository.ref(uid), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
-                // Only this semester's classes can have sessions (C5b). parse() sorts them.
+                // Only this semester's classes can have sessions.
                 for (TeachingAssignment a : TeachingRepository.current(TeachingRepository.parse(snapshot))) {
                     assignments.add(new Assignment(a.courseId, a.groupId));
                 }
@@ -183,27 +171,7 @@ public class CreateSessionViewModel extends ViewModel {
                         buildings.put(building.id, building);
                     }
                 }
-                loadSulamParts();
-            }
-
-            @Override
-            public void onError(String message) {
-                fail(message);
-            }
-        });
-    }
-
-    /** programmes/{code}/sulamPart, e.g. CS240 → 6. Programmes without it are not filtered. */
-    private void loadSulamParts() {
-        Db.readOnce(Db.root().child("programmes"), new Callback<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot snapshot) {
-                for (DataSnapshot p : snapshot.getChildren()) {
-                    Programme programme = p.getValue(Programme.class);
-                    if (programme != null && programme.sulamPart > 0) {
-                        sulamParts.put(p.getKey(), programme.sulamPart);
-                    }
-                }
+                // Programmes (sulamCourse, sulamPart) and groups come with SeedCache.
                 loadState.setValue(LoadState.READY);
             }
 
@@ -236,8 +204,8 @@ public class CreateSessionViewModel extends ViewModel {
     }
 
     /**
-     * Test and SULAM allow several groups of one course (a combined test, or a
-     * SULAM activity for CDCS2406A, B and C together). A Class is exactly one group.
+     * Test and SULAM allow several groups of one course (a combined test, or a SULAM activity for
+     * CDCS2406A, B and C together).
      */
     public boolean multiGroup() {
         return isType(Session.TYPE_TEST) || isType(Session.TYPE_SULAM);
@@ -256,15 +224,26 @@ public class CreateSessionViewModel extends ViewModel {
     }
 
     /**
-     * True if the course is in its programme's SULAM part: Part 6 for every
-     * programme, unless programmes/{code}/sulamPart says otherwise. Courses in
-     * Part 5 and below are never offered for SULAM.
+     * The programme's SULAM course (programmes/{code}/sulamCourse, e.g. CS240 → ICT652), or, while
+     * that is still "TBC", every course in the SULAM part.
      */
     public boolean isSulamCourse(String courseId) {
+        return SeedCache.isSulamCourse(courseId);
+    }
+
+    /**
+     * Groups of a SULAM course's part that the lecturer has NOT added in Teaching Classes, e.g.
+     * [CDCS2406C] when only A and B were added.
+     */
+    public List<String> missingGroupsFor(String courseId) {
         Course course = SeedCache.course(courseId);
-        if (course == null) return false;
-        Integer part = sulamParts.get(course.programme);
-        return course.part == (part != null ? part : DEFAULT_SULAM_PART);
+        List<String> missing = new ArrayList<>();
+        if (course == null) return missing;
+        List<String> mine = groupsFor(courseId);
+        for (String g : SeedCache.groupIdsFor(course.programme, course.part)) {
+            if (!mine.contains(g)) missing.add(g);
+        }
+        return missing;
     }
 
     /** Every assigned class (course + group) the lecturer may use for SULAM. */
@@ -293,7 +272,7 @@ public class CreateSessionViewModel extends ViewModel {
         return building == null ? null : buildings.get(building);
     }
 
-    /** Rooms of a building, sorted by `order` (CLAUDE.md section 5). */
+    /** Rooms of a building, sorted by `order`. */
     public List<Venue> roomsIn(String buildingId) {
         List<Venue> rooms = new ArrayList<>();
         for (Venue v : SeedCache.venuesIn(buildingId)) rooms.add(v);
@@ -320,7 +299,7 @@ public class CreateSessionViewModel extends ViewModel {
         return startTime() + lateMinutes * 60_000L;
     }
 
-    /** Builds the Session to write. Call only when every step is valid. */
+    /** Builds the Session to write. */
     public Session toSession() {
         Session s = new Session();
         s.lecturerUid = uid;
@@ -343,7 +322,7 @@ public class CreateSessionViewModel extends ViewModel {
             s.where = "building";
             s.building = building;
             s.venueId = venueId;
-            // GPS can't tell rooms apart, so the geofence is the building (section 5).
+            // GPS can't tell rooms apart, so the geofence is the building.
             s.lat = b.lat;
             s.lng = b.lng;
         }

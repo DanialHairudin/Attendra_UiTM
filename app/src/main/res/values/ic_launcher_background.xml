@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Launcher icon background. Kept out of colors.xml because it is the same in
-     light and dark mode and is not part of the app palette. -->
+<!-- Launcher icon background. -->
 <resources>
     <color name="ic_launcher_background">#A97A1E</color>
 </resources>

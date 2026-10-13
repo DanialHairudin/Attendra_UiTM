@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.attendra.uitm.R;
 import com.attendra.uitm.data.Callback;
+import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.data.TeachingRepository;
 import com.attendra.uitm.databinding.ActivityAddTeachingClassBinding;
 import com.attendra.uitm.model.Course;
@@ -33,20 +34,7 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Add Teaching Class Page (C5b). The lecturer copies a class from the faculty
- * timetable: Semester → Programme → Part → Course → Groups (tick one or more).
- *
- * Three ways in:
- * - add:   "+ Add teaching class" on the Classes tab, or the Create session guard
- * - edit:  Edit on a class row; the form starts filled in. Saving removes the
- *          old key and writes the new one in the same update.
- * - setup: right after a new lecturer picks a preferred name, titled
- *          "Set up your teaching classes", with "Skip for now". Both open the dashboard.
- *
- * "Save classes" writes every ticked group in ONE updateChildren
- * (TeachingRepository.save). A class already in the list is skipped.
- */
+/** Add Teaching Class Page. */
 public class AddTeachingClassActivity extends BaseActivity {
 
     private static final String EXTRA_MODE = "mode";
@@ -154,7 +142,7 @@ public class AddTeachingClassActivity extends BaseActivity {
         });
     }
 
-    /** Cancel / back / Skip for now. In setup mode there is nothing behind us. */
+    /** Cancel / back / Skip for now. */
     private void close() {
         if (mode == MODE_SETUP) {
             HomeRouter.openHome(this, Registration.ROLE_LECTURER);
@@ -175,7 +163,7 @@ public class AddTeachingClassActivity extends BaseActivity {
 
     private void bindSemester() {
         List<String> options = new ArrayList<>(SemesterUtil.options());
-        if (!options.contains(vm.semester)) options.add(0, vm.semester); // editing an older label
+        if (!options.contains(vm.semester)) options.add(0, vm.semester); // Editing an older label
         DropdownAdapter<String> adapter = new DropdownAdapter<>(this, options, s -> s);
         binding.inputSemester.setAdapter(adapter);
         binding.inputSemester.setText(vm.semester, false);
@@ -229,11 +217,19 @@ public class AddTeachingClassActivity extends BaseActivity {
         binding.inputCourse.setAdapter(adapter);
         binding.inputCourse.setText(vm.course != null ? adapter.labelOf(vm.course) : "", false);
         binding.layoutCourse.setEnabled(vm.programme != null && vm.part != 0);
+        showSulamChip();
         binding.inputCourse.setOnItemClickListener((parent, v, position, id) -> {
             vm.course = (Course) parent.getItemAtPosition(position);
             binding.layoutCourse.setError(null);
-            binding.layoutCourse.setErrorEnabled(false); // also drop the space the error used
+            binding.layoutCourse.setErrorEnabled(false); // Also drop the space the error used
+            showSulamChip();
         });
+    }
+
+    /** "SULAM course" chip under the dropdown when the course is the programme's SULAM course. */
+    private void showSulamChip() {
+        boolean sulam = vm.course != null && SeedCache.isSulamCourse(vm.course.id);
+        binding.chipSulam.setVisibility(sulam ? View.VISIBLE : View.GONE);
     }
 
     private void bindGroups() {
@@ -252,7 +248,7 @@ public class AddTeachingClassActivity extends BaseActivity {
             MaterialCheckBox box = new MaterialCheckBox(this);
             box.setText(g.id);
             box.setMinHeight(Ui.dp(this, 48));
-            box.setSaveEnabled(false); // the ViewModel keeps the ticks across rotation
+            box.setSaveEnabled(false); // The ViewModel keeps the ticks across rotation
             box.setChecked(vm.groups.contains(g.id));
             box.setOnCheckedChangeListener((b, checked) -> {
                 if (checked) vm.groups.add(g.id); else vm.groups.remove(g.id);

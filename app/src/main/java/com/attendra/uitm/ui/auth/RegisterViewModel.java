@@ -19,9 +19,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Keeps the Register screen's data alive when the screen rotates: the seed lists
- * from the database and the user's choices (role, programme, part, group, clubs).
- * Text fields don't need to be here; Android restores typed text by itself.
+ * Keeps the Register screen's data alive when the screen rotates: the seed lists from the database
+ * and the user's choices (role, programme, part, group, clubs).
  */
 public class RegisterViewModel extends ViewModel {
 
@@ -49,16 +48,12 @@ public class RegisterViewModel extends ViewModel {
     private final MutableLiveData<Boolean> submitting = new MutableLiveData<>(false);
     /** Set once, when the account is created: the email to show on the Verify screen. */
     private final MutableLiveData<String> registeredEmail = new MutableLiveData<>();
-    /** Latest register error. Cleared after the screen has shown it. */
+    /** Latest register error. */
     private final MutableLiveData<String> registerError = new MutableLiveData<>();
 
     private final AuthRepository auth = new AuthRepository();
 
-    /**
-     * Runs the register flow here instead of in the Fragment. The ViewModel
-     * survives rotation, so the result still arrives if the screen rotates while
-     * "Creating account…" is showing.
-     */
+    /** Runs the register flow here instead of in the Fragment. */
     public void register(Registration r) {
         if (Boolean.TRUE.equals(submitting.getValue())) return;
         submitting.setValue(true);
@@ -101,14 +96,13 @@ public class RegisterViewModel extends ViewModel {
         return seedError;
     }
 
-    /** Loads programmes, groups and clubs once. Safe to call again after an error. */
+    /** Loads programmes, groups and clubs once. */
     public void loadSeedIfNeeded() {
         SeedState current = seedState.getValue();
         if (current == SeedState.LOADING || current == SeedState.READY) return;
         seedState.setValue(SeedState.LOADING);
 
-        // The three reads run one after another. That keeps the code simple, and
-        // the data is small.
+        // The three reads run one after another.
         seed.loadProgrammes(new Callback<List<Programme>>() {
             @Override
             public void onSuccess(List<Programme> result) {

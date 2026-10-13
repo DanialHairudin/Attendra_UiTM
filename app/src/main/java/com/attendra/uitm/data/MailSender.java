@@ -31,16 +31,8 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
 /**
- * Sends the verification code email through Gmail's SMTP server with JavaMail
- * (CLAUDE.md 12.3): smtp.gmail.com, port 587, STARTTLS.
- *
- * Network calls are not allowed on the main (UI) thread on Android, so the
- * send runs on a background thread from an ExecutorService. The result is
- * passed back to the main thread, so callers can update the screen directly.
- *
- * Note for the report: this is a prototype design. The SMTP password is inside
- * the app (from local.properties via BuildConfig). In production a server
- * (e.g. Cloud Functions) would send the email instead.
+ * Sends the verification code email through Gmail's SMTP server with JavaMail: smtp.gmail.com, port
+ * 587, STARTTLS.
  */
 public class MailSender {
 
@@ -61,12 +53,7 @@ public class MailSender {
         this.context = context.getApplicationContext();
     }
 
-    /**
-     * Sends the code email in the background.
-     *
-     * @param role "student" or "lecturer", shown in the email text.
-     * On failure the exception is logged and onError gets the message from 12.3.
-     */
+    /** Sends the code email in the background. */
     public void sendVerificationCode(String toEmail, String name, String role, String code,
                                      Callback<Void> callback) {
         EXECUTOR.execute(() -> {
@@ -88,9 +75,7 @@ public class MailSender {
         props.put("mail.smtp.host", HOST);
         props.put("mail.smtp.port", PORT);
         props.put("mail.smtp.auth", "true");
-        // Port 587 starts as plain text and then upgrades to an encrypted
-        // connection (STARTTLS). "required" refuses to send if that upgrade fails,
-        // so the password is never sent unencrypted.
+        // Port 587 starts as plain text and then upgrades to an encrypted connection (STARTTLS).
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.starttls.required", "true");
         // Without timeouts a bad connection could block the thread for minutes.
@@ -105,19 +90,7 @@ public class MailSender {
         });
     }
 
-    /**
-     * MIME layout of the email:
-     *
-     *   multipart/alternative
-     *   ├── text/plain          (for mail apps that don't show HTML)
-     *   └── multipart/related   (the HTML version and what it needs)
-     *       ├── text/html       (res/raw/verification_email.html)
-     *       └── image/png       (the gold logo: Content-ID <logo>, used as cid:logo)
-     *
-     * The logo sits INSIDE the HTML's related part, has Content-Disposition
-     * INLINE and no filename. That tells mail apps it is part of the page, so
-     * Gmail shows it in the email and not as an attachment chip (CLAUDE.md 12.6 C).
-     */
+    /** MIME layout of the email. */
     private MimeMessage buildMessage(String toEmail, String name, String role, String code)
             throws MessagingException, IOException {
         String minutes = String.valueOf(BuildConfig.CODE_TTL_MINUTES);
@@ -140,7 +113,7 @@ public class MailSender {
         logoPart.setDataHandler(new DataHandler(
                 new ByteArrayDataSource(readBytes(R.drawable.attendra_mark_gold), "image/png")));
         logoPart.setContentID("<logo>");
-        logoPart.setDisposition(MimeBodyPart.INLINE); // no setFileName(): not an attachment
+        logoPart.setDisposition(MimeBodyPart.INLINE); // No setFileName(): not an attachment
         MimeMultipart related = new MimeMultipart("related");
         related.addBodyPart(htmlPart);
         related.addBodyPart(logoPart);
@@ -154,7 +127,7 @@ public class MailSender {
         alternative.addBodyPart(textPart);
         alternative.addBodyPart(relatedWrapper);
 
-        // "Attendra UiTM" is the name inboxes show instead of the bare address (12.6 B).
+        // "Attendra UiTM" is the name inboxes show instead of the bare address.
         InternetAddress sender = new InternetAddress(BuildConfig.SMTP_USER, FROM_NAME, "UTF-8");
         MimeMessage message = new MimeMessage(session());
         message.setFrom(sender);

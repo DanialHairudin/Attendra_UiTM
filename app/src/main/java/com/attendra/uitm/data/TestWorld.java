@@ -18,21 +18,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Keeps the two tester accounts (isTest: true, CLAUDE.md 12.4) apart from real
- * lecturers and students, so testing never shows up in the real app:
- *
- *  - A session made by the Test Lecturer is saved with isTest: true.
- *  - Only test students see such a session, get its notification, count as
- *    "Expected" or get Absent when it closes. Real students never see it.
- *  - Real lecturers never see the Test Student in their classes or sessions.
- *
- * The rules enforce the same split for attendance records (database.rules.json).
- * isTest never changes after an account is made, so the values are cached.
- * All calls run on the main thread (Firebase callbacks), so a plain map is enough.
+ * Keeps the two tester accounts (isTest: true) apart from real lecturers and students, so testing
+ * never shows up in the real app.
  */
 public final class TestWorld {
 
-    /** uid → isTest, for the signed-in user and every student looked up. */
+    /** Uid → isTest, for the signed-in user and every student looked up. */
     private static final Map<String, Boolean> flags = new HashMap<>();
 
     private TestWorld() {
@@ -63,10 +54,7 @@ public final class TestWorld {
         read(user.getUid(), UserRepository.profileRef(user.getUid(), role), callback);
     }
 
-    /**
-     * Keeps only the students in the given world (test or real), in the same
-     * order. Reads students/{uid}/isTest once for each uid not cached yet.
-     */
+    /** Keeps only the students in the given world (test or real), in the same order. */
     public static void filter(Collection<String> uids, boolean test,
                               Callback<Set<String>> callback) {
         List<String> todo = new ArrayList<>();

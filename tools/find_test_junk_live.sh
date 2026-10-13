@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# READ-ONLY (GET only): shows the live paths the old rules_test.sh may have
-# written while the permissive dev rules were published. Changes nothing.
-# Usage (Git Bash, from the project folder): bash tools/find_test_junk_live.sh .
+# READ-ONLY (GET only): shows the live paths the old rules_test.sh may have written while the
+# permissive dev rules were published.
 P="${1:-.}"
 DB=https://attendra-uitm-default-rtdb.asia-southeast1.firebasedatabase.app
 KEY=$(grep -o '"current_key": *"[^"]*"' "$P/app/google-services.json" | head -1 | sed 's/.*: *"\(.*\)"/\1/')

@@ -8,27 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-/**
- * Suggests short names to call someone by, from their full registered name
- * (CLAUDE.md 12.6). Plain Java, so it is covered by a unit test.
- *
- * Steps:
- * 1. Tidy the case: a word typed ALL CAPS or all lower case becomes "Title Case".
- * 2. Drop academic or honorific titles at the start ("Dr.", "Prof.").
- * 3. The given name is everything before the first separator
- *    (bin, binti, bt, bte, b., A/L, A/P, s/o, d/o, @). No separator → all words.
- * 4. Malay-style names (a separator, or a leading prefix such as Muhammad / Nur):
- *      the first word after the prefixes ("Danial"), the whole given name
- *      ("Muhammad Danial"), and the first word ("Muhammad").
- *    Other names without a separator (e.g. Chinese "Tan Wei Ming", surname first):
- *      the words after the first ("Wei Ming"), the last word ("Ming"), and the
- *      whole name ("Tan Wei Ming").
- *
- * Examples:
- *   "Muhammad Danial Bin Mohd Hairudin" → Danial, Muhammad Danial, Muhammad
- *   "Tan Wei Ming"                      → Wei Ming, Ming, Tan Wei Ming
- *   "Kavitha A/P Ramasamy"              → Kavitha
- */
+/** Suggests short names to call someone by, from their full registered name. */
 public final class NameSuggestions {
 
     private static final Set<String> SEPARATORS = new HashSet<>(Arrays.asList(
@@ -48,7 +28,7 @@ public final class NameSuggestions {
     private NameSuggestions() {
     }
 
-    /** The suggestions, best first. Never empty for a non-blank name. */
+    /** The suggestions, best first. */
     public static List<String> suggest(String fullName) {
         List<String> words = words(fullName);
         while (words.size() > 1 && isTitle(words.get(0))) words.remove(0);
@@ -64,7 +44,7 @@ public final class NameSuggestions {
             }
             given.add(w);
         }
-        if (given.isEmpty()) given = words; // name started with a separator: use everything
+        if (given.isEmpty()) given = words; // Name started with a separator: use everything
 
         Set<String> out = new LinkedHashSet<>();
         boolean startsWithPrefix = isPrefix(given.get(0));
@@ -91,7 +71,7 @@ public final class NameSuggestions {
         return s.isEmpty() ? "" : s.get(0);
     }
 
-    /** "2–20 letters and spaces" for the "Other" field. Returns the tidied name, or null if invalid. */
+    /** "2–20 letters and spaces" for the "Other" field. */
     public static String validOther(String typed) {
         if (typed == null) return null;
         String name = typed.trim().replaceAll("\\s+", " ");
@@ -111,12 +91,12 @@ public final class NameSuggestions {
         return list;
     }
 
-    /** "DANIAL" or "danial" → "Danial". Mixed case ("McDonald") is kept as typed. */
+    /** "DANIAL" or "danial" → "Danial". */
     private static String tidyCase(String w) {
         boolean allUpper = w.equals(w.toUpperCase(Locale.ROOT));
         boolean allLower = w.equals(w.toLowerCase(Locale.ROOT));
         if (!allUpper && !allLower) return w;
-        if (SEPARATORS.contains(w.toLowerCase(Locale.ROOT))) return w; // keep "A/P", "bin" as is
+        if (SEPARATORS.contains(w.toLowerCase(Locale.ROOT))) return w; // Keep "A/P", "bin" as is
         String lower = w.toLowerCase(Locale.ROOT);
         return lower.substring(0, 1).toUpperCase(Locale.ROOT) + lower.substring(1);
     }

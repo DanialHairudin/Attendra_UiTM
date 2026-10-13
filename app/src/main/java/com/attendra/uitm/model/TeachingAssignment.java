@@ -2,17 +2,14 @@ package com.attendra.uitm.model;
 
 import androidx.annotation.Nullable;
 
-/**
- * One teaching class: teachingAssignments/{lecturerUid}/{courseId}_{groupId}.
- * The lecturer copies it from the faculty timetable (C5b).
- */
+/** One teaching class: teachingAssignments/{lecturerUid}/{courseId}_{groupId}. */
 public class TeachingAssignment {
     public String courseId;
     public String groupId;
-    /** e.g. "September 2026 – February 2027". Null for classes saved before C5b. */
+    /** e.g. "September 2026 – February 2027". */
     @Nullable
     public String semester;
-    /** Server time it was first saved. Null for classes saved before C5b. */
+    /** Server time it was first saved. */
     @Nullable
     public Long createdAt;
 
@@ -25,7 +22,7 @@ public class TeachingAssignment {
         this.semester = semester;
     }
 
-    /** The database key, e.g. "CS240_ICT600_CDCS2405A". The rules check this format. */
+    /** The database key, e.g. "CS240_ICT600_CDCS2405A". */
     public static String key(String courseId, String groupId) {
         return courseId + "_" + groupId;
     }

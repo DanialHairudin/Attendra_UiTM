@@ -8,14 +8,7 @@ import androidx.annotation.StringRes;
 
 import com.attendra.uitm.R;
 
-/**
- * Text size chosen in Settings: Small, Default, Large or Extra large.
- *
- * Saved in SharedPreferences under "text_size" (0–3). BaseActivity multiplies
- * the phone's own font scale by our factor before any screen is drawn, so every
- * "sp" size in the app grows or shrinks together and the phone's accessibility
- * setting still counts on top.
- */
+/** Text size chosen in Settings: Small, Default, Large or Extra large. */
 public final class TextSizePrefs {
 
     public static final int SMALL = 0;
@@ -52,10 +45,7 @@ public final class TextSizePrefs {
         return LABELS[level];
     }
 
-    /**
-     * A copy of the context whose font scale includes our factor. BaseActivity
-     * wraps every Activity's base context with this in attachBaseContext().
-     */
+    /** A copy of the context whose font scale includes our factor. */
     public static Context wrap(Context base) {
         float factor = scale(get(base));
         if (factor == 1.0f) return base;

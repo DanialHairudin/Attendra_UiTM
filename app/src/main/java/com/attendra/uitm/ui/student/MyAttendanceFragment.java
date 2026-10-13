@@ -7,11 +7,14 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.fragment.app.Fragment;
 
 import com.attendra.uitm.R;
 import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
+import com.attendra.uitm.data.HiddenSessions;
 import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.data.Subscriptions;
 import com.attendra.uitm.databinding.FragmentMyAttendanceBinding;
@@ -24,6 +27,7 @@ import com.attendra.uitm.ui.common.AttendeeText;
 import com.attendra.uitm.ui.common.SessionText;
 import com.attendra.uitm.ui.common.Ui;
 import com.attendra.uitm.util.Formats;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,18 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-/**
- * My Attendance Page (CLAUDE.md section 9, build step C10).
- *
- * Data: studentAttendance/{uid} (the student's own mirror: {status, time} per
- * session), live. Each session's title, course and time come from
- * sessions/{sid}, read once per session and kept.
- *
- * - Overall: attended (present + late) out of every recorded session.
- * - One card per course: percentage, bar, "19 of 20 sessions · 1 late".
- *   Club sessions are not a course, so they only appear in the history.
- * - History: every recorded session, newest first, with its status.
- */
+/** My Attendance Page. */
 public class MyAttendanceFragment extends Fragment {
 
     /** One studentAttendance entry. */
@@ -66,13 +59,17 @@ public class MyAttendanceFragment extends Fragment {
 
     private FragmentMyAttendanceBinding binding;
     private final Subscriptions subs = new Subscriptions();
-    /** sessionId → my mark. null until studentAttendance has loaded once. */
+    /** sessionId → my mark. */
     @Nullable
     private Map<String, Mark> marks;
-    /** sessionId → session (null value = the session was deleted). Kept between visits. */
+    /** sessionId → session (null value = the session was deleted). */
     private final Map<String, Session> sessions = new HashMap<>();
     private final Set<String> lookups = new HashSet<>();
     private boolean seedReady;
+    /** hiddenSessions/{uid}: left out of the history, still counted in every percentage. */
+    private Set<String> hidden = new HashSet<>();
+    /** "Show hidden sessions" switch at the bottom. */
+    private boolean showHidden;
 
     @Nullable
     @Override
@@ -86,6 +83,14 @@ public class MyAttendanceFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Ui.setEmpty(binding.empty, R.drawable.ic_chart,
                 R.string.empty_courses_title, R.string.empty_courses_body);
+        binding.rowShowHidden.switchTitle.setText(R.string.show_hidden);
+        binding.rowShowHidden.switchToggle.setContentDescription(getString(R.string.show_hidden));
+        binding.rowShowHidden.switchToggle.setOnCheckedChangeListener((b, on) -> {
+            showHidden = on;
+            render();
+        });
+        binding.rowShowHidden.getRoot().setOnClickListener(v ->
+                binding.rowShowHidden.switchToggle.toggle());
     }
 
     @Override
@@ -103,7 +108,7 @@ public class MyAttendanceFragment extends Fragment {
 
             @Override
             public void onError(String message) {
-                seedReady = true; // course names fall back to their IDs
+                seedReady = true; // Course names fall back to their IDs
                 showError(message);
                 render();
             }
@@ -133,6 +138,19 @@ public class MyAttendanceFragment extends Fragment {
                         render();
                     }
                 });
+
+        subs.listen(HiddenSessions.ref(user.getUid()), new Callback<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot snapshot) {
+                hidden = HiddenSessions.ids(snapshot);
+                render();
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+            }
+        });
     }
 
     @Override
@@ -155,7 +173,7 @@ public class MyAttendanceFragment extends Fragment {
 
             @Override
             public void onError(String message) {
-                lookups.remove(sid); // try again on the next update
+                lookups.remove(sid); // Try again on the next update
             }
         });
     }
@@ -194,7 +212,7 @@ public class MyAttendanceFragment extends Fragment {
         binding.txtOfTotal.setText(getString(R.string.of_total, total));
     }
 
-    /** One card per course: {attended, total, late}. Club sessions are skipped. */
+    /** One card per course: {attended, total, late}. */
     private void renderCourses(Map<String, Mark> all) {
         binding.listCourses.removeAllViews();
         Map<String, int[]> perCourse = new TreeMap<>();
@@ -235,22 +253,86 @@ public class MyAttendanceFragment extends Fragment {
     private void renderHistory(Map<String, Mark> all) {
         binding.listHistory.removeAllViews();
         List<Session> list = new ArrayList<>();
+        int hiddenCount = 0;
         for (String sid : all.keySet()) {
             Session s = sessions.get(sid);
-            if (s != null) list.add(s);
+            if (s == null) continue;
+            if (hidden.contains(sid)) {
+                hiddenCount++;
+                if (!showHidden) continue;
+            }
+            list.add(s);
         }
         binding.groupHistory.setVisibility(list.isEmpty() ? View.GONE : View.VISIBLE);
+        binding.cardShowHidden.setVisibility(hiddenCount > 0 ? View.VISIBLE : View.GONE);
+        binding.rowShowHidden.switchSubtitle.setText(getResources().getQuantityString(
+                R.plurals.hidden_count, hiddenCount, hiddenCount));
         Collections.sort(list, (a, b) -> Long.compare(b.start, a.start));
         for (Session s : list) {
+            boolean isHidden = hidden.contains(s.id);
             ItemSessionRowBinding row = ItemSessionRowBinding.inflate(getLayoutInflater(),
                     binding.listHistory, false);
             row.rowIcon.setImageResource(SessionText.icon(s));
             row.rowTitle.setText(s.title);
             row.rowMeta.setText(SessionText.join(SessionText.course(s),
-                    Formats.shortDate(s.start), Formats.time(s.start)));
+                    Formats.shortDate(s.start), Formats.time(s.start),
+                    isHidden ? getString(R.string.hidden_label) : null));
             AttendeeText.statusChip(row.rowChip, all.get(s.id).status);
+            row.getRoot().setAlpha(isHidden ? 0.6f : 1f);
+            row.getRoot().setOnLongClickListener(v -> {
+                if (isHidden) confirmUnhide(s);
+                else confirmHide(s);
+                return true;
+            });
+            ViewCompat.replaceAccessibilityAction(row.getRoot(),
+                    AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_LONG_CLICK,
+                    getString(isHidden ? R.string.unhide_session : R.string.hide_session), null);
             Ui.addRow(binding.listHistory, row.getRoot());
         }
+    }
+
+    // --------------------------------------------------------- hide
+
+    /** Only closed sessions can be hidden (the rules check this too). */
+    private void confirmHide(Session s) {
+        if (s.isOpen()) {
+            showError(getString(R.string.hide_open_refused));
+            return;
+        }
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.hide_session_title)
+                .setMessage(R.string.hide_session_body)
+                .setPositiveButton(R.string.hide_session, (d, w) -> {
+                    String uid = FirebaseAuth.getInstance().getUid();
+                    if (uid != null) HiddenSessions.hide(uid, s.id, snackOnError());
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void confirmUnhide(Session s) {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setMessage(R.string.unhide_session_body)
+                .setPositiveButton(R.string.unhide_session, (d, w) -> {
+                    String uid = FirebaseAuth.getInstance().getUid();
+                    if (uid != null) HiddenSessions.unhide(uid, s.id, snackOnError());
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    /** The hiddenSessions listener redraws the list; only errors need handling. */
+    private Callback<Void> snackOnError() {
+        return new Callback<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+            }
+        };
     }
 
     private void showError(String message) {

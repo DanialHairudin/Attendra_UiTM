@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import com.attendra.uitm.R;
 import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
+import com.attendra.uitm.data.HiddenSessions;
 import com.attendra.uitm.data.Subscriptions;
 import com.attendra.uitm.databinding.ActivityStudentMainBinding;
 import com.attendra.uitm.model.Registration;
@@ -20,18 +21,19 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 
-/**
- * Student area. Bottom nav: Home · Attendance · Notifications · Settings
- * (CLAUDE.md 12.5). The Notifications item shows the number of unread
- * notifications as a gold badge (C8), unless the student turned
- * "Session notifications" off in Settings.
- */
+import java.util.HashSet;
+import java.util.Set;
+
+/** Student area. */
 public class StudentMainActivity extends MainTabsActivity {
 
     private BottomNavigationView nav;
     private final Subscriptions subs = new Subscriptions();
     /** Last unread count from the database, kept so the switch can redraw the badge. */
     private int unread;
+    @Nullable
+    private DataSnapshot notifications;
+    private Set<String> hidden = new HashSet<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,20 +53,40 @@ public class StudentMainActivity extends MainTabsActivity {
         subs.listen(Db.root().child("notifications").child(uid), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
-                int count = 0;
-                for (DataSnapshot n : snapshot.getChildren()) {
-                    if (!Boolean.TRUE.equals(n.child("read").getValue(Boolean.class))) count++;
-                }
-                unread = count;
-                refreshBadge();
+                notifications = snapshot;
+                countUnread();
             }
 
             @Override
             public void onError(String message) {
-                unread = 0; // the tab itself shows the error
-                refreshBadge();
+                notifications = null;
+                countUnread(); // The tab itself shows the error
             }
         });
+        // Notifications of hidden sessions are not listed, so they are not counted either.
+        subs.listen(HiddenSessions.ref(uid), new Callback<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot snapshot) {
+                hidden = HiddenSessions.ids(snapshot);
+                countUnread();
+            }
+
+            @Override
+            public void onError(String message) {
+            }
+        });
+    }
+
+    private void countUnread() {
+        int count = 0;
+        if (notifications != null) {
+            for (DataSnapshot n : notifications.getChildren()) {
+                if (hidden.contains(n.child("sessionId").getValue(String.class))) continue;
+                if (!Boolean.TRUE.equals(n.child("read").getValue(Boolean.class))) count++;
+            }
+        }
+        unread = count;
+        refreshBadge();
     }
 
     @Override

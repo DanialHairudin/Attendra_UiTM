@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- My attendance tab ("myAtt" in the prototype): overall percentage, one card
-     per course, then the student's history (newest first). -->
+<!-- My attendance tab: overall percentage, one card per course, then the student's history (newest first). -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -146,5 +145,19 @@
                     android:orientation="vertical" />
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
+
+        <!-- "Show hidden sessions": shown only when the student has hidden any -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_show_hidden"
+            style="@style/Widget.Attendra.Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:visibility="gone">
+
+            <include
+                android:id="@+id/row_show_hidden"
+                layout="@layout/item_switch_row" />
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

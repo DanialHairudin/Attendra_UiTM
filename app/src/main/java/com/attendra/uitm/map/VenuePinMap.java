@@ -3,12 +3,15 @@ package com.attendra.uitm.map;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.attendra.uitm.R;
 
 import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
@@ -17,10 +20,11 @@ import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * The lecturer's venue map in the "Where" step.
- * Shows: the venue pin, the attendance radius circle and (optionally) the lecturer's own location.
- * The pin moves when the lecturer picks a search result, taps the map, or long-presses and drags the pin.
+ * Venue map: the venue pin, the attendance radius circle and (optionally) the user's own location.
  */
 public class VenuePinMap {
 
@@ -46,15 +50,15 @@ public class VenuePinMap {
         circle.getFillPaint().setColor((gold & 0x00FFFFFF) | 0x33000000);  // 20% opacity fill
         circle.getOutlinePaint().setColor(gold);
         circle.getOutlinePaint().setStrokeWidth(4f);
-        circle.setOnClickListener((poly, mv, pos) -> false);                 // let taps go through to the map
+        circle.setOnClickListener((poly, mv, pos) -> false);                 // Let taps go through to the map
 
-        // Venue pin. Long-press the pin to start dragging it.
+        // Venue pin.
         pin = new Marker(map);
         pin.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         pin.setDraggable(true);
         pin.setInfoWindow(null);
-        pin.setIcon(ContextCompat.getDrawable(ctx, R.drawable.ic_map_pin));  // gold app pin
-        pin.setOnMarkerClickListener((m, mv) -> true);                        // no popup, no auto-centre
+        pin.setIcon(ContextCompat.getDrawable(ctx, R.drawable.ic_map_pin));  // Gold app pin
+        pin.setOnMarkerClickListener((m, mv) -> true);                        // No popup, no auto-centre
         pin.setOnMarkerDragListener(new Marker.OnMarkerDragListener() {
             @Override public void onMarkerDrag(Marker m) { drawCircle(m.getPosition()); }
             @Override public void onMarkerDragEnd(Marker m) { notifyMoved(m.getPosition()); }
@@ -71,7 +75,7 @@ public class VenuePinMap {
             @Override public boolean longPressHelper(GeoPoint p) { return false; }
         });
 
-        map.getOverlays().add(0, taps);   // index 0 = receives taps last, after the pin
+        map.getOverlays().add(0, taps);   // Index 0 = receives taps last, after the pin
         map.getOverlays().add(circle);
         map.getOverlays().add(pin);
         map.getController().setZoom(17.0);
@@ -83,7 +87,7 @@ public class VenuePinMap {
 
     /**
      * Building mode (Class, Test, inside Club): the centre comes from /buildings, so the lecturer
-     * cannot move the pin, only change the radius. Map pin mode (SULAM, outside Club): editable.
+     * cannot move the pin, only change the radius.
      */
     public void setEditable(boolean editable) {
         this.editable = editable;
@@ -109,10 +113,7 @@ public class VenuePinMap {
     public double getLng() { return pin.getPosition().getLongitude(); }
     public double getRadius() { return radiusM; }
 
-    /**
-     * Shows the lecturer's own location as a blue dot.
-     * Call only after ACCESS_FINE_LOCATION has been granted. Returns false if it is not granted.
-     */
+    /** Shows the lecturer's own location as a blue dot. */
     public boolean showMyLocation() {
         Context ctx = map.getContext();
         if (ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -120,6 +121,12 @@ public class VenuePinMap {
         }
         if (myLocation == null) {
             myLocation = new MyLocationNewOverlay(new GpsMyLocationProvider(ctx), map);
+            // A blue dot instead of osmdroid's default person icon / direction arrow.
+            Bitmap dot = MapIcons.myLocationDot(ctx);
+            myLocation.setPersonIcon(dot);
+            myLocation.setDirectionIcon(dot);
+            myLocation.setPersonAnchor(0.5f, 0.5f);
+            myLocation.setDirectionAnchor(0.5f, 0.5f);
             map.getOverlays().add(myLocation);
         }
         myLocation.enableMyLocation();
@@ -135,7 +142,8 @@ public class VenuePinMap {
             setPin(me.getLatitude(), me.getLongitude(), true);
         } else {
             onNoFixYet.run();
-            // Move as soon as the first GPS fix arrives (runs on a background thread, so post to the UI thread).
+            // Move as soon as the first GPS fix arrives (runs on a background thread, so post to
+            // the UI thread).
             myLocation.runOnFirstFix(() -> map.post(() -> {
                 GeoPoint g = myLocation.getMyLocation();
                 if (g != null) setPin(g.getLatitude(), g.getLongitude(), true);
@@ -143,7 +151,34 @@ public class VenuePinMap {
         }
     }
 
-    // ---- lifecycle: call from the Fragment ----
+    /** The blue dot's position, or null before showMyLocation() or before the first GPS fix. */
+    @Nullable
+    public GeoPoint getMyLocation() {
+        return myLocation == null ? null : myLocation.getMyLocation();
+    }
+
+    /** Student map: zooms out so the whole radius circle and the blue dot fit. */
+    public void zoomToVenueAndMe() {
+        if (myLocation == null) return;
+        if (myLocation.getMyLocation() != null) {
+            fitVenueAnd(myLocation.getMyLocation());
+        } else {
+            // runOnFirstFix runs on a background thread, so post to the UI thread.
+            myLocation.runOnFirstFix(() -> map.post(() -> {
+                GeoPoint g = myLocation.getMyLocation();
+                if (g != null) fitVenueAnd(g);
+            }));
+        }
+    }
+
+    private void fitVenueAnd(GeoPoint me) {
+        List<GeoPoint> pts = new ArrayList<>(Polygon.pointsAsCircle(pin.getPosition(), radiusM));
+        pts.add(me);
+        BoundingBox box = BoundingBox.fromGeoPointsSafe(pts).increaseByScale(1.3f);
+        map.post(() -> map.zoomToBoundingBox(box, true));
+    }
+
+    // ---- lifecycle: call from the Fragment / Activity
     public void onResume() { map.onResume(); if (myLocation != null) myLocation.enableMyLocation(); }
     public void onPause()  { if (myLocation != null) myLocation.disableMyLocation(); map.onPause(); }
     public void onDestroyView() { map.onDetach(); }

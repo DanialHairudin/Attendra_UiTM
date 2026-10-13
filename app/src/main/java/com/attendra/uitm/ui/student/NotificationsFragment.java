@@ -7,16 +7,21 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 
 import com.attendra.uitm.R;
 import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
+import com.attendra.uitm.data.HiddenSessions;
 import com.attendra.uitm.data.Subscriptions;
 import com.attendra.uitm.databinding.FragmentNotificationsBinding;
 import com.attendra.uitm.databinding.ItemNotificationRowBinding;
+import com.attendra.uitm.model.Session;
+import com.attendra.uitm.ui.common.SwipeToDismiss;
 import com.attendra.uitm.ui.common.Ui;
 import com.attendra.uitm.util.Formats;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -24,19 +29,12 @@ import com.google.firebase.database.DataSnapshot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-/**
- * Student Notifications tab (CLAUDE.md 7 and 9, C8). Lists notifications/{uid},
- * which a lecturer writes for every eligible student when a session opens.
- * In-app only: there is no push (FCM) on the Spark plan.
- *
- * Tapping one marks it read and opens Check in for its session; the Check in
- * page itself shows "Session closed" when it is too late. "Mark all read"
- * marks every unread one in a single update. The rules let the owner change
- * only the `read` field.
- */
+/** Student Notifications tab. */
 public class NotificationsFragment extends Fragment {
 
     /** How many recent notifications to show. */
@@ -54,7 +52,9 @@ public class NotificationsFragment extends Fragment {
 
     private FragmentNotificationsBinding binding;
     private final Subscriptions subs = new Subscriptions();
-    private List<Item> items; // null = not loaded yet
+    private List<Item> items; // Null = not loaded yet
+    /** hiddenSessions/{uid}: notifications about these sessions are not listed. */
+    private Set<String> hidden = new HashSet<>();
 
     @Nullable
     @Override
@@ -100,6 +100,27 @@ public class NotificationsFragment extends Fragment {
                 showError(message);
             }
         });
+        subs.listen(HiddenSessions.ref(uid), new Callback<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot snapshot) {
+                hidden = HiddenSessions.ids(snapshot);
+                render();
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+            }
+        });
+    }
+
+    /** The loaded notifications minus those about hidden sessions. */
+    private List<Item> visible() {
+        List<Item> list = new ArrayList<>();
+        if (items != null) {
+            for (Item n : items) if (!hidden.contains(n.sessionId)) list.add(n);
+        }
+        return list;
     }
 
     @Override
@@ -112,12 +133,11 @@ public class NotificationsFragment extends Fragment {
     private void render() {
         if (binding == null) return;
         binding.listNotifications.removeAllViews();
+        List<Item> shown = visible();
         boolean anyUnread = false;
-        if (items != null) {
-            for (Item n : items) anyUnread |= !n.read;
-        }
+        for (Item n : shown) anyUnread |= !n.read;
         binding.btnMarkAll.setVisibility(anyUnread ? View.VISIBLE : View.GONE);
-        if (items == null || items.isEmpty()) {
+        if (items == null || shown.isEmpty()) {
             Ui.showListState(items == null ? Ui.ListState.LOADING : Ui.ListState.EMPTY,
                     binding.txtNotificationsLoading, binding.emptyNotifications,
                     binding.listNotifications);
@@ -126,7 +146,7 @@ public class NotificationsFragment extends Fragment {
         Ui.showListState(Ui.ListState.CONTENT, binding.txtNotificationsLoading,
                 binding.emptyNotifications, binding.listNotifications);
         long now = System.currentTimeMillis();
-        for (Item n : items) {
+        for (Item n : shown) {
             ItemNotificationRowBinding row = ItemNotificationRowBinding.inflate(
                     getLayoutInflater(), binding.listNotifications, false);
             row.notifTitle.setText(n.title);
@@ -137,8 +157,89 @@ public class NotificationsFragment extends Fragment {
             row.getRoot().setContentDescription(n.read ? null
                     : getString(R.string.notifications_unread, n.title));
             row.getRoot().setOnClickListener(v -> open(n));
+            // Swipe to delete, long-press for Hide session / Delete.
+            SwipeToDismiss.attach(row.getRoot(), () -> delete(n));
+            row.getRoot().setOnLongClickListener(v -> {
+                showMenu(n);
+                return true;
+            });
+            ViewCompat.addAccessibilityAction(row.getRoot(),
+                    getString(R.string.delete_notification), (view, args) -> {
+                        delete(n);
+                        return true;
+                    });
             Ui.addRow(binding.listNotifications, row.getRoot());
         }
+    }
+
+    // ------------------------------------------------- hide and delete
+
+    /** Long-press menu: "Hide session" (closed sessions only) and "Delete notification". */
+    private void showMenu(Item n) {
+        String[] options = {getString(R.string.hide_session), getString(R.string.delete_notification)};
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(n.title)
+                .setItems(options, (d, which) -> {
+                    if (which == 0) hideSession(n);
+                    else delete(n);
+                })
+                .show();
+    }
+
+    /** Hides the notification's session from the student's lists. */
+    private void hideSession(Item n) {
+        String uid = FirebaseAuth.getInstance().getUid();
+        if (uid == null || n.sessionId == null) return;
+        Db.readOnce(Db.root().child("sessions").child(n.sessionId).child("status"),
+                new Callback<DataSnapshot>() {
+                    @Override
+                    public void onSuccess(DataSnapshot status) {
+                        if (!Session.STATUS_CLOSED.equals(status.getValue(String.class))) {
+                            showError(getString(R.string.hide_open_refused));
+                            return;
+                        }
+                        HiddenSessions.hide(uid, n.sessionId, new Callback<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                showMessage(R.string.session_hidden);
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                showError(message);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        showError(message);
+                    }
+                });
+    }
+
+    /** Deletes this notification only (the student's own). */
+    private void delete(Item n) {
+        String uid = FirebaseAuth.getInstance().getUid();
+        if (uid == null) return;
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("notifications/" + uid + "/" + n.id, null);
+        Db.write(updates, new Callback<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                showMessage(R.string.notification_deleted);
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+                render(); // Put the swiped row back
+            }
+        });
+    }
+
+    private void showMessage(int message) {
+        if (binding != null) Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_SHORT).show();
     }
 
     /** "2:00 PM" today, "Yesterday", otherwise "12 Oct". */
@@ -159,7 +260,7 @@ public class NotificationsFragment extends Fragment {
     private void markAllRead() {
         if (items == null) return;
         List<Item> unread = new ArrayList<>();
-        for (Item n : items) if (!n.read) unread.add(n);
+        for (Item n : visible()) if (!n.read) unread.add(n);
         if (!unread.isEmpty()) setRead(unread);
     }
 

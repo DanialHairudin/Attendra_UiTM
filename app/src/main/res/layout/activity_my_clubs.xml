@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- My Clubs Page, matching "clubs" in the prototype. Shows the clubs the user
-     joins (student) or advises (lecturer). Every club has an on/off switch. -->
+<!-- My Clubs Page. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/clubs_root"
     android:layout_width="match_parent"

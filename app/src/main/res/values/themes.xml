@@ -1,7 +1,5 @@
 <resources>
-    <!-- App theme. The parent is DayNight, so colours swap automatically between
-         values/colors.xml and values-night/colors.xml. There is deliberately no
-         values-night/themes.xml: one theme, two palettes. -->
+    <!-- App theme. -->
     <style name="Base.Theme.AttendraUiTM" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Material colour roles mapped onto the Attendra palette -->
         <item name="colorPrimary">@color/gold</item>
@@ -28,9 +26,7 @@
         <item name="android:textColorHint">@color/muted</item>
         <item name="android:textColorLink">@color/goldText</item>
 
-        <!-- Manrope as the default for plain TextViews. This goes through textViewStyle
-             (not android:fontFamily on the theme) because a theme-level fontFamily
-             overrides every textAppearance, which would wipe out the heading fonts. -->
+        <!-- Manrope as the default for plain TextViews. -->
         <item name="android:textViewStyle">@style/Widget.Attendra.TextView</item>
 
         <!-- Material 3 text slots pointed at our type scale (values/type.xml) -->
@@ -51,8 +47,7 @@
         <item name="bottomNavigationStyle">@style/Widget.Attendra.BottomNav</item>
         <item name="textInputStyle">@style/Widget.Attendra.TextInput</item>
 
-        <!-- Edge-to-edge: system bars are transparent and content draws behind them.
-             BaseActivity pads each screen with the system bar insets. -->
+        <!-- Edge-to-edge: system bars are transparent and content draws behind them. -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>

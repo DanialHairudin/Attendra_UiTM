@@ -36,12 +36,7 @@ import com.google.firebase.database.DataSnapshot;
 
 import java.util.List;
 
-/**
- * Profile Page. Shows lecturers/{uid} or students/{uid} and the user's clubs, live.
- * Preferred name (and Title for lecturers) and the phone number can be changed
- * here. The full name, email and IDs are fixed; the greeting uses the preferred
- * name (CLAUDE.md 12.6). The clubs card opens My Clubs.
- */
+/** Profile Page. */
 public class ProfileActivity extends BaseActivity {
 
     private static final String EXTRA_ROLE = "role";
@@ -58,7 +53,7 @@ public class ProfileActivity extends BaseActivity {
     private DataSnapshot profile;
     private List<String> clubIds;
     private boolean seedReady;
-    /** Lecturer only: classes this semester (C5b). Null = not loaded yet. */
+    /** Lecturer only: classes this semester. */
     private Integer classCount;
 
     @Override
@@ -156,7 +151,7 @@ public class ProfileActivity extends BaseActivity {
             binding.txtAvatar.setText(Names.initials(name));
 
             binding.listInfo.removeAllViews();
-            // Editable rows (CLAUDE.md 12.6): both open the Preferred Name Page.
+            // Editable rows: both open the Preferred Name Page.
             String preferred = text("preferredName");
             addEditable(R.string.profile_preferred_name, preferred.isEmpty()
                     ? getString(R.string.profile_not_set) : preferred);
@@ -165,7 +160,7 @@ public class ProfileActivity extends BaseActivity {
                 String title = text("title");
                 addEditable(R.string.profile_title_row, title.isEmpty()
                         ? getString(R.string.name_title_none) : title);
-                // C5b: opens the Classes tab, where classes are added or changed.
+                // Opens the Classes tab, where classes are added or changed.
                 addTappable(R.string.profile_teaching_classes, classCount == null
                         ? getString(R.string.dash)
                         : getResources().getQuantityString(R.plurals.classes_this_semester,
@@ -220,7 +215,7 @@ public class ProfileActivity extends BaseActivity {
     /** A row with a chevron that runs {@code onTap}. */
     private void addTappable(@StringRes int label, String value, View.OnClickListener onTap) {
         ItemInfoRowBinding row = addInfo(label, value);
-        row.infoValue.setTextIsSelectable(false); // so a tap reaches the row
+        row.infoValue.setTextIsSelectable(false); // So a tap reaches the row
         row.infoChevron.setVisibility(View.VISIBLE);
         TypedValue ripple = new TypedValue();
         getTheme().resolveAttribute(android.R.attr.selectableItemBackground, ripple, true);

@@ -17,9 +17,8 @@ public final class HomeRouter {
     }
 
     /**
-     * Follows a verified user's route: the Preferred Name Page first if they
-     * have not picked a name yet (CLAUDE.md 12.6), otherwise their dashboard.
-     * (route.unverified is handled by the caller, which shows the Verify screen.)
+     * Follows a verified user's route: the Preferred Name Page first if they have not picked a name
+     * yet, otherwise their dashboard.
      */
     public static void open(Activity from, AuthRepository.Route route) {
         if (route.needsName) {
@@ -45,8 +44,8 @@ public final class HomeRouter {
         start(from, SplashActivity.class);
     }
 
-    // NEW_TASK + CLEAR_TASK removes every screen behind the new one, so pressing
-    // Back on the home screen can't return to Login (or Login to a home screen).
+    // NEW_TASK + CLEAR_TASK removes every screen behind the new one, so pressing Back on the home
+    // screen can't return to Login (or Login to a home screen).
     private static void start(Activity from, Class<?> target) {
         Intent intent = new Intent(from, target);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

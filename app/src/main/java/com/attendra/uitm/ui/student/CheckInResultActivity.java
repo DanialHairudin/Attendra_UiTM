@@ -23,11 +23,7 @@ import com.attendra.uitm.ui.common.SessionText;
 import com.attendra.uitm.ui.common.Ui;
 import com.attendra.uitm.util.Formats;
 
-/**
- * Check-in Result page (CLAUDE.md section 9): Present, Late, or Rejected with
- * the reason. Also shown when the student already has a record for the
- * session. Everything it shows comes in the Intent, so it reads nothing.
- */
+/** Check-in Result page: Present, Late, or Rejected with the reason. */
 public class CheckInResultActivity extends BaseActivity {
 
     private static final String KIND_REJECTED = "rejected";
@@ -81,8 +77,8 @@ public class CheckInResultActivity extends BaseActivity {
     }
 
     /**
-     * The venue as it reads inside "You are 214 m from …": the room or place
-     * name, or "the pinned location" for a pin session with no place name.
+     * The venue as it reads inside "You are 214 m from …": the room or place name, or "the pinned
+     * location" for a pin session with no place name.
      */
     private static String venueInSentence(Context c, Session s) {
         boolean unnamedPin = "pin".equals(s.where)

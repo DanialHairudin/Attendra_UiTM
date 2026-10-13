@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One in-app notification ("notifs" in the prototype): bell tile, title,
-     body, time, and a gold dot while it is unread. -->
+<!-- One in-app notification: bell tile, title, body, time, and a gold dot while it is unread. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Widget.Attendra.ListRow"
     android:layout_width="match_parent"

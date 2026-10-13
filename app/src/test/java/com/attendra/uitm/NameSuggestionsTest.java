@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-/** The examples from CLAUDE.md 12.6, plus a few edge cases. */
+/** The documented name examples, plus a few edge cases. */
 public class NameSuggestionsTest {
 
     @Test

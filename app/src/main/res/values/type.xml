@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Type scale from CLAUDE.md section 3. -->
+<!-- Type scale: headings, body text and big numbers. -->
 <resources>
     <!-- Headings: Plus Jakarta Sans ExtraBold -->
     <style name="TextAppearance.Attendra.H1" parent="TextAppearance.Material3.HeadlineLarge">
@@ -18,7 +18,7 @@
         <item name="android:textColor">@color/ink</item>
     </style>
 
-    <!-- Splash title: a bigger H1 (44sp in the prototype) -->
+    <!-- Splash title: a bigger H1 -->
     <style name="TextAppearance.Attendra.Display" parent="TextAppearance.Attendra.H1">
         <item name="android:textSize">44sp</item>
     </style>

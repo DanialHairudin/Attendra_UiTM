@@ -18,16 +18,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Everything the Live Monitor and the Session Report show about ONE session,
- * kept up to date with ValueEventListeners:
- *
- *   sessions/{sid}                         the session (end time, radius, status)
- *   studentsByGroup/{g} or clubMembers/{c} who may attend ("eligible")
- *   attendance/{sid}                       who checked in / was marked
- *   attempts/{sid}                         every check-in attempt (rejected ones listed)
- *
- * Student names and IDs (students/{uid}) are read once each and kept, because
- * they don't change during a session. Call start() in onStart and stop() in onStop.
+ * Everything the Live Monitor and the Session Report show about ONE session, kept up to date with
+ * ValueEventListeners.
  */
 public class SessionAttendanceWatcher {
 
@@ -58,15 +50,15 @@ public class SessionAttendanceWatcher {
 
     @Nullable
     public Session session;
-    /** uid → record. null until attendance/{sid} has loaded once. */
+    /** Uid → record. */
     @Nullable
     public Map<String, AttendanceRecord> records;
-    /** All attempts, oldest first. null until attempts/{sid} has loaded once. */
+    /** All attempts, oldest first. */
     @Nullable
     public List<Attempt> attempts;
     /**
-     * The latest raw snapshots of attendance/{sid} and attempts/{sid}, for the
-     * live check-in map (map/LiveCheckInMap.fromSnapshots). null until loaded.
+     * The latest raw snapshots of attendance/{sid} and attempts/{sid}, for the live check-in map
+     * (map/LiveCheckInMap.fromSnapshots).
      */
     @Nullable
     public DataSnapshot attendanceSnapshot;
@@ -198,7 +190,7 @@ public class SessionAttendanceWatcher {
 
             @Override
             public void onError(String message) {
-                lookups.remove(uid); // try again on the next update
+                lookups.remove(uid); // Try again on the next update
             }
         });
     }
@@ -250,8 +242,8 @@ public class SessionAttendanceWatcher {
     }
 
     /**
-     * The "Rejected" count: students whose attempts were rejected and who are
-     * still not checked in (a later successful check-in no longer counts).
+     * The "Rejected" count: students whose attempts were rejected and who are still not checked in
+     * (a later successful check-in no longer counts).
      */
     public int rejectedCount() {
         Set<String> uids = new HashSet<>();

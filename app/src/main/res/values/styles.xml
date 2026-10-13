@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Shared component styles (CLAUDE.md section 3, "Shapes and components"). -->
+<!-- Shared component styles ("Shapes and components"). -->
 <resources>
 
-    <!-- Default TextView: Manrope body text. Only textAppearance is set here, so a
-         layout's own android:textAppearance (e.g. H1) replaces it cleanly. -->
+    <!-- Default TextView: Manrope body text. -->
     <style name="Widget.Attendra.TextView" parent="Widget.AppCompat.TextView">
         <item name="android:textAppearance">@style/TextAppearance.Attendra.Body</item>
     </style>
 
-    <!-- Card: radius 20dp, surface fill, 1dp line stroke, shadow only in light mode
-         (card_elevation is 0dp in values-night/dimens.xml) -->
+    <!-- Card: radius 20dp, surface fill, 1dp line stroke, shadow only in light mode (card_elevation
+         is 0dp in values-night/dimens.xml) -->
     <style name="Widget.Attendra.Card" parent="Widget.Material3.CardView.Outlined">
         <item name="cardCornerRadius">@dimen/card_radius</item>
         <item name="cardBackgroundColor">@color/surface</item>
@@ -25,8 +24,7 @@
         <item name="strokeColor">@color/heroLine</item>
     </style>
 
-    <!-- Primary button: 52dp tall, radius 14dp, gold fill, onGold text.
-         insetTop/insetBottom are zeroed so the visible button really is 52dp. -->
+    <!-- Primary button: 52dp tall, radius 14dp, gold fill, onGold text. -->
     <style name="Widget.Attendra.Button.Primary" parent="Widget.Material3.Button">
         <item name="android:minHeight">@dimen/button_height</item>
         <item name="android:insetTop">0dp</item>
@@ -58,8 +56,7 @@
         <item name="rippleColor">@color/gold_tint</item>
     </style>
 
-    <!-- Pill: selectable chip, one line. Put pills in a HorizontalScrollView around a
-         ChipGroup with app:singleLine="true" so they scroll instead of wrapping. -->
+    <!-- Pill: selectable chip, one line. -->
     <style name="Widget.Attendra.Pill" parent="Widget.Material3.Chip.Filter">
         <item name="chipMinHeight">38dp</item>
         <item name="chipCornerRadius">12dp</item>
@@ -136,12 +133,10 @@
         <item name="boxStrokeColor">@color/input_stroke</item>
         <item name="boxBackgroundColor">@color/surface</item>
         <item name="hintTextColor">@color/goldText</item>
-        <!-- The label sits above the field (prototype style), so no floating hint.
-             The grey example text goes in the EditText's own android:hint. -->
+        <!-- The label sits above the field, so no floating hint. -->
         <item name="hintEnabled">false</item>
-        <!-- Prefix such as "+60": Material styles it as textAppearanceTitleMedium,
-             which our theme maps to the bold card-title font. Use the same
-             Manrope 15sp ink as the typed text instead. -->
+        <!-- Prefix such as "+60": Material styles it as textAppearanceTitleMedium, which our theme
+             maps to the bold card-title font. -->
         <item name="prefixTextAppearance">@style/TextAppearance.Attendra.Body</item>
         <item name="prefixTextColor">@color/ink</item>
         <item name="startIconTint">@color/muted</item>

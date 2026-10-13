@@ -44,23 +44,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Lecturer Dashboard Page (CLAUDE.md 12.5).
- *
- * Data, all live (ValueEventListeners added in onStart, removed in onStop):
- * - lecturers/{uid}                → greeting and avatar
- * - sessionsByLecturer/{uid}       → the lecturer's sessions (via SessionWatcher)
- * - for the open session:
- *     attendance/{sid}             → "Checked in"
- *     studentsByGroup/{group} or clubMembers/{club} → "Expected"
- *     attempts/{sid}               → "Rejected"
- * Nothing is made up: with no sessions the cards show empty states.
- */
+/** Lecturer Dashboard Page. */
 public class LecturerHomeFragment extends Fragment {
 
     /** Re-check times every 30 s, so "Scheduled" turns "Live" without new data. */
     private static final long TICK_MS = 30_000;
-    /** Newest sessions to follow. Older ones belong to History (C11). */
+    /** Newest sessions to follow. */
     private static final int MAX_SESSIONS = 100;
 
     private FragmentLecturerHomeBinding binding;
@@ -184,15 +173,14 @@ public class LecturerHomeFragment extends Fragment {
         long now = now();
         binding.txtDate.setText(Formats.dateLine(now));
         autoCloseOverdue(now);
-        if (!seedReady) return; // course and room names are needed for every row
+        if (!seedReady) return; // Course and room names are needed for every row
         renderLive(now);
         renderToday(now);
     }
 
     /**
-     * Auto-close (CLAUDE.md section 5): a session still "open" after its end
-     * time is closed the same way as the Close button, so no-shows get Absent.
-     * Runs whenever the sessions change and on the 30 s tick.
+     * Auto-close: a session still "open" after its end time is closed the same way as the Close
+     * button, so no-shows get Absent.
      */
     private void autoCloseOverdue(long now) {
         for (Session s : sessions.values()) {
@@ -205,7 +193,7 @@ public class LecturerHomeFragment extends Fragment {
 
                     @Override
                     public void onError(String message) {
-                        closing.remove(s.id); // try again on the next tick
+                        closing.remove(s.id); // Try again on the next tick
                         showError(message);
                     }
                 });
@@ -295,8 +283,8 @@ public class LecturerHomeFragment extends Fragment {
             }
         });
 
-        // Expected = everyone who may attend: the members of the club, or the
-        // students of every group in the session.
+        // Expected = everyone who may attend: the members of the club, or the students of every
+        // group in the session.
         List<String> indexes = new ArrayList<>();
         if (live.isClub()) {
             indexes.add("clubMembers/" + live.clubId);

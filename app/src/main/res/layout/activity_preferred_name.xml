@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Preferred Name Page "What should we call you?" (CLAUDE.md 12.6).
-     Shown once after the email code is verified, and opened from the Profile
-     Page to change the name (and the title, for lecturers). -->
+<!-- Preferred Name Page "What should we call you?". -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/name_root"
@@ -58,7 +56,7 @@
                 android:layout_marginTop="24dp"
                 android:text="@string/name_suggestions" />
 
-            <!-- One line of chips that scrolls sideways (CLAUDE.md section 3) -->
+            <!-- One line of chips that scrolls sideways -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

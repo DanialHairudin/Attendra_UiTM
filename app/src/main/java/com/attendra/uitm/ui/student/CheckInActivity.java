@@ -1,6 +1,7 @@
 package com.attendra.uitm.ui.student;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -29,6 +30,7 @@ import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
 import com.attendra.uitm.data.Subscriptions;
 import com.attendra.uitm.databinding.ActivityCheckInBinding;
+import com.attendra.uitm.map.VenuePinMap;
 import com.attendra.uitm.model.Attempt;
 import com.attendra.uitm.model.Attendance;
 import com.attendra.uitm.model.AttendanceRecord;
@@ -43,31 +45,16 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.CancellationTokenSource;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 
+import org.osmdroid.util.GeoPoint;
+
 import java.util.Locale;
 
-/**
- * Check-in page (CLAUDE.md section 6). No map: the session, a status card and
- * one big button. When the student taps "Check in now", the checks run in
- * this order, each in its own method below:
- *
- *  0. Online?               .info/connected, else the Offline state
- *  1. Session open?         status open and server time inside start–end, else Session closed
- *  2. Eligible?             the student's group, or club membership, else Not in this session
- *     (already has a record for this session → straight to the Result page, nothing written)
- *  3. Location permission?  else the Permission state (foreground only)
- *  4. GPS on?               else the GPS off state
- *  5. One fresh fix         getCurrentLocation(PRIORITY_HIGH_ACCURACY), 15 s timeout
- *  6. Mock location?        → rejected MOCK_LOCATION (logged in attempts)
- *  7. Accuracy ≤ 50 m?      else the Low accuracy state; nothing is written
- *  8. Inside the radius?    Location.distanceBetween, else rejected OUTSIDE_RADIUS (logged)
- *  9. Write the record      present if server time ≤ lateAfter, else late (+ attempts entry)
- *
- * Location is read ONCE, in step 5, only after the tap. It is never tracked.
- */
+/** Check-in page: the session, a read-only venue map, a status card and one big button. */
 public class CheckInActivity extends BaseActivity {
 
     private static final String TAG = "CheckIn";
@@ -99,21 +86,41 @@ public class CheckInActivity extends BaseActivity {
     private Session session;
     /** Phone clock minus server clock, from .info/serverTimeOffset. */
     private long serverOffset;
-    /** From .info/connected. Starts true so a slow first answer doesn't block. */
+    /** From .info/connected. */
     private boolean connected = true;
     private boolean busy;
     @Nullable
     private State shownState;
     /** True once Android said "don't ask again" for location. */
     private boolean permissionBlocked;
+    /** Read-only venue map, created when the session first loads. */
+    @Nullable
+    private VenuePinMap venueMap;
+    /** True after the student tapped "Show my location" (preview only, never saved). */
+    private boolean showingMe;
 
     private final Runnable tick = new Runnable() {
         @Override
         public void run() {
             showCountdown();
+            showMyDistance();
             handler.postDelayed(this, 1000);
         }
     };
+
+    /** Permission prompt for "Show my location". */
+    private final ActivityResultLauncher<String[]> askMapLocation = registerForActivityResult(
+            new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                if (LocationPermission.granted(this)) {
+                    showMyLocationOnMap();
+                } else if (!shouldShowRequestPermissionRationale(
+                        android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    // "Don't ask again": only the app's settings page can turn it on.
+                    snack(getString(R.string.state_permission_blocked_body), R.string.open_settings,
+                            () -> startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", getPackageName(), null))));
+                }
+            });
 
     /** Android's own permission prompt (fine + coarse, never background). */
     private final ActivityResultLauncher<String[]> askLocation = registerForActivityResult(
@@ -147,6 +154,8 @@ public class CheckInActivity extends BaseActivity {
 
         binding.btnBack.setOnClickListener(v -> finish());
         binding.btnCheckIn.setOnClickListener(v -> startCheckIn());
+        binding.btnMyLocation.setOnClickListener(v -> onShowMyLocation());
+        binding.btnDirections.setOnClickListener(v -> openDirections());
         binding.state.statePrimary.setOnClickListener(v -> onStatePrimary());
         binding.state.stateSecondary.setOnClickListener(v -> finish());
     }
@@ -166,7 +175,7 @@ public class CheckInActivity extends BaseActivity {
             public void onError(String message) {
             }
         });
-        // Offline state (section 6): no check-in without a server connection.
+        // Offline state: no check-in without a server connection.
         subs.listen(Db.get().getReference(".info/connected"), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snap) {
@@ -185,7 +194,7 @@ public class CheckInActivity extends BaseActivity {
 
             @Override
             public void onError(String message) {
-                listenToSession(); // the page still works, course names just show IDs
+                listenToSession(); // The page still works, course names just show IDs
             }
         });
         handler.post(tick);
@@ -197,6 +206,20 @@ public class CheckInActivity extends BaseActivity {
         // Back from Android settings: if what was missing is now fixed, return to the page.
         if (shownState == State.GPS_OFF && gpsOn()) hideState();
         if (shownState == State.PERMISSION && LocationPermission.granted(this)) hideState();
+        if (venueMap != null) venueMap.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Also switches the blue dot's location updates off while the page is not shown.
+        if (venueMap != null) venueMap.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (venueMap != null) venueMap.onDestroyView();
     }
 
     @Override
@@ -232,9 +255,8 @@ public class CheckInActivity extends BaseActivity {
 
     private void renderSession() {
         binding.progressLoad.setVisibility(View.GONE);
-        // Already over (closed by the lecturer, or past its end time): show
-        // "Session closed" straight away instead of a "Ready" button that can
-        // only fail. Check 1 still runs again when the button is tapped.
+        // Already over (closed by the lecturer, or past its end time): show "Session closed"
+        // straight away instead of a "Ready" button that can only fail.
         if (session == null || !session.isOpen() || serverNow() >= session.end) {
             showState(State.CLOSED, null);
             return;
@@ -246,8 +268,80 @@ public class CheckInActivity extends BaseActivity {
         binding.txtTitle.setText(session.title);
         binding.txtCourse.setText(SessionText.course(session));
         binding.txtVenue.setText(SessionText.room(this, session));
+        showVenueOnMap(session);
         if (!busy) showReady();
         showCountdown();
+    }
+
+    // -------------------------------------------------------------- the map
+
+    /** Pin at the session's lat/lng and the circle with its radius. */
+    private void showVenueOnMap(Session s) {
+        binding.txtMapPlace.setText(SessionText.room(this, s));
+        if (venueMap == null) {
+            venueMap = new VenuePinMap(binding.mapVenue, s.lat, s.lng, s.radius);
+            venueMap.setEditable(false); // Students cannot drag or tap-move the pin
+            return;
+        }
+        venueMap.setRadius(s.radius);
+    }
+
+    /** "Show my location": explain and ask for permission first, then show the blue dot. */
+    private void onShowMyLocation() {
+        if (venueMap == null) return;
+        if (!LocationPermission.granted(this)) {
+            LocationPermission.explain(this, R.string.state_permission_body,
+                    () -> askMapLocation.launch(LocationPermission.PERMISSIONS));
+            return;
+        }
+        showMyLocationOnMap();
+    }
+
+    private void showMyLocationOnMap() {
+        if (venueMap == null || !venueMap.showMyLocation()) return;
+        if (!gpsOn()) {
+            snack(getString(R.string.state_gps_off_body), R.string.open_settings,
+                    () -> startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)));
+        }
+        showingMe = true;
+        binding.txtMyDistance.setVisibility(View.VISIBLE);
+        venueMap.zoomToVenueAndMe();
+        showMyDistance();
+    }
+
+    /** "You are about 120 m from the venue", refreshed every second by tick. */
+    private void showMyDistance() {
+        if (!showingMe || venueMap == null || session == null) return;
+        GeoPoint me = venueMap.getMyLocation();
+        if (me == null) {
+            binding.txtMyDistance.setText(R.string.finding_location);
+            return;
+        }
+        float[] d = new float[1];
+        Location.distanceBetween(me.getLatitude(), me.getLongitude(), session.lat, session.lng, d);
+        binding.txtMyDistance.setText(getString(R.string.map_my_distance, Math.round(d[0])));
+    }
+
+    /** Opens the phone's maps app at the venue: geo:lat,lng?q=lat,lng(place name). */
+    private void openDirections() {
+        Session s = session;
+        if (s == null) return;
+        String latLng = String.format(Locale.ROOT, "%.6f,%.6f", s.lat, s.lng);
+        Uri uri = Uri.parse("geo:" + latLng + "?q=" + latLng
+                + "(" + Uri.encode(SessionText.room(this, s)) + ")");
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, uri));
+        } catch (ActivityNotFoundException e) {
+            snack(getString(R.string.map_no_maps_app), 0, null);
+        }
+    }
+
+    /** Snackbar above the Check in button, with an optional action (action 0 = none). */
+    private void snack(String message, @StringRes int action, @Nullable Runnable onAction) {
+        Snackbar bar = Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG);
+        if (binding.btnCheckIn.getVisibility() == View.VISIBLE) bar.setAnchorView(binding.btnCheckIn);
+        if (action != 0 && onAction != null) bar.setAction(action, v -> onAction.run());
+        bar.show();
     }
 
     /** "closes in 14:32" in the app bar, from the server clock. */
@@ -310,7 +404,7 @@ public class CheckInActivity extends BaseActivity {
 
     // --------------------------------------------------------- the checks
 
-    /** "Check in now" (and every Try again). Runs the checks in section 6 order. */
+    /** "Check in now" (and every Try again). */
     private void startCheckIn() {
         if (busy) return;
         // 0. Offline: don't even try.
@@ -348,7 +442,7 @@ public class CheckInActivity extends BaseActivity {
         });
     }
 
-    /** Already checked in (or marked by the lecturer)? Show that; never overwrite it. */
+    /** Already checked in (or marked by the lecturer)? */
     private void checkNotAlreadyRecorded(Session s) {
         repo.existingRecord(s.id, uid, new Callback<AttendanceRecord>() {
             @Override
@@ -390,10 +484,10 @@ public class CheckInActivity extends BaseActivity {
     }
 
     /**
-     * 5. ONE fresh fix: high accuracy, never a cached old location
-     * (maxUpdateAge 0), and at most 15 s. A null result means no fix in time.
+     * 5. ONE fresh fix: high accuracy, never a cached old location (maxUpdateAge 0), and at most 15
+     * s.
      */
-    @SuppressLint("MissingPermission") // checked in step 3 just before this
+    @SuppressLint("MissingPermission") // Checked in step 3 just before this
     private void getFreshFix(Session s) {
         showBusy(R.string.check_in_step_location);
         CurrentLocationRequest request = new CurrentLocationRequest.Builder()
@@ -455,11 +549,7 @@ public class CheckInActivity extends BaseActivity {
         writeRecord(s, lat, lng, distance, accuracy);
     }
 
-    /**
-     * After logging a rejected attempt, show the Rejected result. The result
-     * is shown even if the log could not be saved: the student still needs to
-     * know why they were not checked in.
-     */
+    /** After logging a rejected attempt, show the Rejected result. */
     private Callback<Void> thenShowRejected(Session s, String reason, double distance,
                                             float accuracy) {
         return new Callback<Void>() {
@@ -482,18 +572,14 @@ public class CheckInActivity extends BaseActivity {
         };
     }
 
-    /** API 31+: isMock(). Older: isFromMockProvider(). */
+    /** API 31+: isMock(). */
     @SuppressWarnings("deprecation")
     private static boolean isMock(Location fix) {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                 ? fix.isMock() : fix.isFromMockProvider();
     }
 
-    /**
-     * 9. Present if the server time is at or before lateAfter, otherwise late.
-     * The session window is checked again first, because getting the fix can
-     * take up to 15 s. The C12 rules check the same things on the server.
-     */
+    /** 9. Present if the server time is at or before lateAfter, otherwise late. */
     private void writeRecord(Session s, double lat, double lng, double distance, float accuracy) {
         long now = serverNow();
         Session live = session != null ? session : s;
@@ -521,10 +607,7 @@ public class CheckInActivity extends BaseActivity {
 
     // ------------------------------------------------------------- states
 
-    /**
-     * Replaces the page with a state. detail is the accuracy in metres for
-     * LOW_ACCURACY (null when there was no fix at all).
-     */
+    /** Replaces the page with a state. */
     private void showState(State state, @Nullable Integer detail) {
         shownState = state;
         binding.scrollMain.setVisibility(View.GONE);

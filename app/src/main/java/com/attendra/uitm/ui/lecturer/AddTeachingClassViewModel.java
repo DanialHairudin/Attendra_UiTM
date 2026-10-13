@@ -23,11 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * Keeps the Add Teaching Class page's lists and choices across screen rotation.
- * Loads once: programmes and groups (seed), courses (SeedCache) and the keys
- * the lecturer already has (to skip classes already in the list).
- */
+/** Keeps the Add Teaching Class page's lists and choices across screen rotation. */
 public class AddTeachingClassViewModel extends ViewModel {
 
     public enum LoadState { LOADING, READY, ERROR }
@@ -128,7 +124,7 @@ public class AddTeachingClassViewModel extends ViewModel {
         loadState.setValue(LoadState.ERROR);
     }
 
-    /** Fills the form from an existing class (Edit). Call once, after loading. */
+    /** Fills the form from an existing class (Edit). */
     public void prefill(String courseId, String groupId) {
         course = SeedCache.course(courseId);
         if (course == null) return;

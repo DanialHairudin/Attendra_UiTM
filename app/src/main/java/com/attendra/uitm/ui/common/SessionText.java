@@ -13,10 +13,7 @@ import com.attendra.uitm.model.Session;
 import com.attendra.uitm.model.Venue;
 import com.attendra.uitm.util.Formats;
 
-/**
- * Turns a Session into the short texts the dashboards show. Course, venue and
- * club names come from SeedCache, so SeedCache.load() must have finished.
- */
+/** Turns a Session into the short texts the dashboards show. */
 public final class SessionText {
 
     private SessionText() {
@@ -38,12 +35,7 @@ public final class SessionText {
         return Formats.groups(s.groupIds());
     }
 
-    /**
-     * Where it happens: "DK1, CS1 1st floor" for a room. For a SULAM/outside
-     * session, the place picked in search ("i-City, Seksyen 7, Shah Alam"), or
-     * "Pinned location" if none was picked. The room is a label only; GPS
-     * checks the building.
-     */
+    /** Where it happens: "DK1, CS1 1st floor" for a room. */
     public static String room(Context c, Session s) {
         if ("pin".equals(s.where)) {
             return s.placeName != null && !s.placeName.isEmpty()
@@ -76,10 +68,8 @@ public final class SessionText {
     }
 
     /**
-     * Status chip for a list row:
-     * closed, or past its end time → "Closed" (grey), not started → "Scheduled"
-     * (gold), otherwise "Live" (green). A session past its end counts as closed
-     * even before its status is updated (CLAUDE.md section 6).
+     * Status chip for a list row: closed, or past its end time → "Closed" (grey), not started →
+     * "Scheduled" (gold), otherwise "Live" (green).
      */
     public static void statusChip(TextView chip, Session s, long now) {
         if (!s.isOpen() || now >= s.end) {

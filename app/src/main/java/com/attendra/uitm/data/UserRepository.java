@@ -13,16 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Reads and writes a user's account data (CLAUDE.md 12.1):
- *
- *   roles/{uid}        "lecturer" | "student"   small lookup for routing and rules
- *   lecturers/{uid}    lecturer profile
- *   students/{uid}     student profile
- *
- * plus the index nodes that hang off a user (studentsByGroup, studentClubs,
- * clubMembers, clubAdvisors).
- */
+/** Reads and writes a user's account data. */
 public class UserRepository {
 
     /** "lecturers" or "students": the profile node for a role. */
@@ -35,13 +26,7 @@ public class UserRepository {
         return Db.root().child(profileNode(role)).child(uid);
     }
 
-    /**
-     * Where a user's clubs are listed:
-     * - student: studentClubs/{uid} = {clubId: true}
-     * - lecturer: there is no per-lecturer index, so the whole clubAdvisors node
-     *   ({clubId: {uid: true}}) is read. It is small (one entry per club).
-     * Use clubIds() to turn the snapshot into a list.
-     */
+    /** Where a user's clubs are listed. */
     public static Query clubsQuery(String uid, String role) {
         return Registration.ROLE_LECTURER.equals(role)
                 ? Db.root().child("clubAdvisors")
@@ -49,11 +34,8 @@ public class UserRepository {
     }
 
     /**
-     * Joins or leaves a club (student), or starts or stops advising it (lecturer),
-     * in ONE updateChildren so the indexes stay in sync (CLAUDE.md C4):
-     * - student:  studentClubs/{uid}/{clubId} and clubMembers/{clubId}/{uid}
-     * - lecturer: clubAdvisors/{clubId}/{uid}
-     * null removes the entry.
+     * Joins or leaves a club (student), or starts or stops advising it (lecturer), in ONE
+     * updateChildren so the indexes stay in sync.
      */
     public void setClub(String uid, String role, String clubId, boolean on,
                         Callback<Void> callback) {
@@ -89,18 +71,8 @@ public class UserRepository {
     }
 
     /**
-     * Writes the new user's role, profile and every index node in ONE multi-path
-     * updateChildren() call. Either all paths are written or none are, so the
-     * indexes can never get out of sync with the profile.
-     *
-     * Student writes:
-     *   roles/{uid}, students/{uid}, studentsByGroup/{groupId}/{uid},
-     *   studentClubs/{uid}/{clubId}, clubMembers/{clubId}/{uid}
-     * Lecturer writes:
-     *   roles/{uid}, lecturers/{uid}, clubAdvisors/{clubId}/{uid}
-     *
-     * emailVerified starts false. It becomes true once the user enters the
-     * 6-digit code from the email (VerificationRepository).
+     * Writes the new user's role, profile and every index node in ONE multi-path updateChildren()
+     * call.
      */
     public void createProfile(String uid, Registration r, Callback<Void> callback) {
         Map<String, Object> profile = new HashMap<>();
@@ -133,7 +105,7 @@ public class UserRepository {
         Db.write(updates, callback);
     }
 
-    /** Reads roles/{uid}. Returns null in onSuccess if the user has no role yet. */
+    /** Reads roles/{uid}. */
     public void getRole(String uid, Callback<String> callback) {
         readString("roles/" + uid, callback);
     }
@@ -146,12 +118,12 @@ public class UserRepository {
     /** What login needs to know about a profile to decide where to go. */
     public static final class AccountState {
         public boolean emailVerified;
-        /** Test accounts skip verification and the Preferred Name Page (CLAUDE.md 12.4, 12.6). */
+        /** Test accounts skip verification and the Preferred Name Page. */
         public boolean isTest;
         public boolean hasPreferredName;
     }
 
-    /** Reads {lecturers|students}/{uid} once. Missing values count as false. */
+    /** Reads {lecturers|students}/{uid} once. */
     public void loadAccountState(String uid, String role, Callback<AccountState> callback) {
         Db.readOnce(Db.root().child(profileNode(role)).child(uid),
                 new Callback<DataSnapshot>() {

@@ -7,10 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- * One attendance session, /sessions/{sessionId} (CLAUDE.md section 7).
- * Times (start, end, lateAfter, createdAt) are milliseconds since 1970.
- */
+/** One attendance session, /sessions/{sessionId}. */
 public class Session {
     public static final String TYPE_CLASS = "class";
     public static final String TYPE_TEST = "test";
@@ -19,7 +16,7 @@ public class Session {
     public static final String STATUS_OPEN = "open";
     public static final String STATUS_CLOSED = "closed";
 
-    /** Node key. Filled in after reading; not stored inside the node. */
+    /** Node key. */
     @Exclude
     public String id;
 

@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
@@ -38,23 +40,34 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Session Report Page (opened after Close, or for a closed session):
- * attendance percentage with a bar, Present / Late / Absent / Rejected tiles,
- * the rejected attempts and the absent students. Same live data as the
- * Live Monitor (SessionAttendanceWatcher). "Share CSV" exports the list (C11).
+ * Session Report Page (opened after Close, or for a closed session): attendance percentage with a
+ * bar, Present / Late / Absent / Rejected tiles, the rejected attempts and the absent students.
  */
 public class SessionReportActivity extends BaseActivity {
 
     private static final String EXTRA_SESSION = "sessionId";
+    private static final String EXTRA_SHARE = "shareCsv";
+    /** Result for a caller that used intent(): the session was deleted. */
+    public static final int RESULT_DELETED = RESULT_FIRST_USER;
 
     public static void open(Context from, String sessionId) {
-        from.startActivity(new Intent(from, SessionReportActivity.class)
-                .putExtra(EXTRA_SESSION, sessionId));
+        from.startActivity(intent(from, sessionId, false));
+    }
+
+    /** shareCsv = open the share sheet as soon as the report has loaded ("Share CSV first"). */
+    public static Intent intent(Context from, String sessionId, boolean shareCsv) {
+        return new Intent(from, SessionReportActivity.class)
+                .putExtra(EXTRA_SESSION, sessionId)
+                .putExtra(EXTRA_SHARE, shareCsv);
     }
 
     private ActivitySessionReportBinding binding;
     private SessionAttendanceWatcher watcher;
     private boolean seedReady;
+    /** "Share CSV first" from History: share once, when the data is ready. */
+    private boolean shareWhenReady;
+    /** True while deleting: the listeners lose access to the session, so their errors are expected. */
+    private boolean deleting;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +78,9 @@ public class SessionReportActivity extends BaseActivity {
 
         binding.btnBack.setOnClickListener(v -> finish());
         binding.btnShareCsv.setOnClickListener(v -> shareCsv());
+        binding.btnMore.setOnClickListener(this::showMenu);
+        shareWhenReady = savedInstanceState == null
+                && getIntent().getBooleanExtra(EXTRA_SHARE, false);
         binding.tiles.labelThird.setText(R.string.status_absent);
         Ui.setEmpty(binding.emptyAbsent, R.drawable.ic_book,
                 R.string.report_no_absent_title, R.string.report_no_absent_body);
@@ -78,9 +94,52 @@ public class SessionReportActivity extends BaseActivity {
 
                     @Override
                     public void onError(String message) {
+                        if (deleting) return;
                         Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    // ---------------------------------------------------------- delete
+
+    /** Overflow menu: "Delete session" (closed sessions only; the button is hidden otherwise). */
+    private void showMenu(View anchor) {
+        Session s = watcher.session;
+        if (s == null || s.isOpen()) return;
+        PopupMenu menu = new PopupMenu(this, anchor);
+        menu.getMenu().add(R.string.delete_session);
+        menu.setOnMenuItemClickListener(item -> {
+            confirmDelete(s);
+            return true;
+        });
+        menu.show();
+    }
+
+    private void confirmDelete(Session s) {
+        DeleteSessionDialog.show(this, s, new DeleteSessionDialog.Listener() {
+            @Override
+            public void onShareCsvFirst() {
+                shareCsv();
+            }
+
+            @Override
+            public void onDeleted() {
+                deleting = true;
+                watcher.stop();
+                if (getCallingActivity() != null) {
+                    setResult(RESULT_DELETED); // History shows "Session deleted"
+                } else {
+                    Toast.makeText(SessionReportActivity.this, R.string.session_deleted,
+                            Toast.LENGTH_SHORT).show();
+                }
+                finish();
+            }
+
+            @Override
+            public void onError(String message) {
+                Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
@@ -115,7 +174,12 @@ public class SessionReportActivity extends BaseActivity {
         binding.txtMeta.setText(SessionText.join(SessionText.course(s), SessionText.groups(s),
                 Formats.shortDate(s.start) + ", " + Formats.timeRange(s.start, s.end)));
         binding.btnShareCsv.setEnabled(watcher.ready());
+        binding.btnMore.setVisibility(s.isOpen() ? View.GONE : View.VISIBLE);
         if (!watcher.ready()) return;
+        if (shareWhenReady) {
+            shareWhenReady = false;
+            shareCsv();
+        }
 
         int present = watcher.count(Attendance.PRESENT);
         int late = watcher.count(Attendance.LATE);
@@ -163,13 +227,11 @@ public class SessionReportActivity extends BaseActivity {
         }
     }
 
-    // --------------------------------------------------------------- CSV (C11)
+    // --------------------------------------------------------------- CSV
 
     /**
-     * Writes every eligible student (with their status, time, method, distance
-     * and reason) to cache/reports/{name}.csv and opens the share sheet. The
-     * file is shared through our FileProvider, so no storage permission is
-     * needed. Check-in lat/lng are left out on purpose: the file leaves the app.
+     * Writes every eligible student (with their status, time, method, distance and reason) to
+     * cache/reports/{name}.csv and opens the share sheet.
      */
     private void shareCsv() {
         Session s = watcher.session;

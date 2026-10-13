@@ -2,13 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Firebase, the SMTP connection for verification codes, OpenStreetMap
-         tiles and Photon place search -->
+    <!-- Firebase, the SMTP connection for verification codes, OpenStreetMap tiles and Photon place search -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- osmdroid checks the network before downloading map tiles -->
+    <!-- Osmdroid checks the network before downloading map tiles -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- Foreground location only: read when the student taps Check in, or when
-         the lecturer taps "Use my location". Never background location. -->
+    <!-- Foreground location only: read when the student taps Check in, or when the lecturer taps "Use my location". -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -74,8 +72,7 @@
             android:name=".ui.student.CheckInResultActivity"
             android:exported="false" />
 
-        <!-- Shares the Session Report CSV with other apps (email, Drive) without
-             any storage permission. Only cache/reports/ is exposed. -->
+        <!-- Shares the Session Report CSV with other apps (email, Drive) without any storage permission. -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
