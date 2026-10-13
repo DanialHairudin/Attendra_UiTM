@@ -96,16 +96,21 @@ check('buildings, venues and clubs copied unchanged',
   ['buildings', 'venues', 'clubs'].every(k => JSON.stringify(whole[k]) === JSON.stringify(seed[k])));
 
 // ---------------------------------------------------------------- filling in a code
-const algo = 'CS230,1,TBC,Algorithms and Problem Solving,FALSE';
-r = run(csvText.replace(algo, 'CS230,1,CSC402,Algorithms and Problem Solving,FALSE'), ['--draft']);
-let c = read(r.dir, 'import_courses.json');
-check('TBC code filled in: the course keeps its old ID',
-  c.CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING && c.CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING.code === 'CSC402' && !c.CS230_CSC402);
+// Uses the first course that still has a TBC code, so the test does not depend on one programme.
+const toLine = r => r.map(v => /[",]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v).join(',');
+const tbc = csvRows.find(r => (r[2] || '').trim().toUpperCase() === 'TBC');
+if (tbc) {
+  const [tp, tpart, , tname, tflag] = tbc;
+  const oldId = `${tp}_P${tpart}_${slug(tname)}`;
+  r = run(csvText.replace(toLine(tbc), toLine([tp, tpart, 'ZZQ999', tname, tflag])), ['--draft']);
+  let c = read(r.dir, 'import_courses.json');
+  check('TBC code filled in: the course keeps its old ID', c[oldId] && c[oldId].code === 'ZZQ999' && !c[tp + '_ZZQ999']);
 
-r = run(csvText.replace(algo, 'CS230,1,CSC402,Algorithm and Problem Solving,FALSE'), ['--draft']);
-c = read(r.dir, 'import_courses.json');
-check('code AND name changed: new ID {programme}_{code} + warning',
-  c.CS230_CSC402 && !c.CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING && /CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING .*no longer in the CSV/.test(r.out));
+  r = run(csvText.replace(toLine(tbc), toLine([tp, tpart, 'ZZQ999', tname + ' X', tflag])), ['--draft']);
+  c = read(r.dir, 'import_courses.json');
+  check('code AND name changed: new ID {programme}_{code} + warning',
+    c[tp + '_ZZQ999'] && !c[oldId] && new RegExp(oldId + ' .*no longer in the CSV').test(r.out));
+}
 
 // ---------------------------------------------------------------- errors
 const ict600 = 'CS240,5,ICT600,Web Technology and Application,FALSE';
@@ -140,16 +145,22 @@ const backup = path.join(TMP, 'backup.json');
 fs.writeFileSync(backup, JSON.stringify({
   teachingAssignments: { zzLec: {
     CS240_ICT652_CDCS2406C: { courseId: 'CS240_ICT652', groupId: 'CDCS2406C' },
-    CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING_CDCS2301A: { courseId: 'CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING', groupId: 'CDCS2301A' },
+    ...(tbc ? { zzRef: { courseId: `${tbc[0]}_P${tbc[1]}_${slug(tbc[3])}`, groupId: `CD${tbc[0]}${tbc[1]}A` } } : {}),
   } },
   sessions: { zzS1: { courseId: 'CS240_ICT652', groups: { CDCS2406A: true } } },
   students: { zzStu: { groupId: 'CDCS2406B' } },
 }));
 r = run(full, ['--backup', backup]);
 check('backup: nothing broken → passes', r.code === 0, r.out.split('\n').filter(l => l.startsWith('ERROR')).join(' | '));
-r = run(full.replace('CS230,1,ZZT', 'CS230,1,ZZX').replace('Algorithms and Problem Solving', 'Algorithm Solving'), ['--backup', backup]);
-check('backup: renamed course used by a teaching class → ERROR',
-  r.code === 1 && /teachingAssignments\/zzLec\/CS230_P1_ALGORITHMS_AND_PROBLEM_SOLVING_CDCS2301A: course .* would no longer exist/.test(r.out));
+if (tbc) {
+  // Rename that course in the complete CSV: the teaching class pointing at it must be reported.
+  const fullRows = parseCsv(full);
+  const i = fullRows.findIndex(x => x[0] === tbc[0] && x[1] === tbc[1] && x[3] === tbc[3]);
+  fullRows[i] = [tbc[0], tbc[1], 'ZZQ998', tbc[3] + ' X', fullRows[i][4]];
+  r = run(fullRows.filter(x => x.some(v => v)).map(toLine).join('\r\n') + '\r\n', ['--backup', backup]);
+  check('backup: renamed course used by a teaching class → ERROR',
+    r.code === 1 && /teachingAssignments\/zzLec\/zzRef: course .* would no longer exist/.test(r.out));
+}
 
 check('the real seed file was not changed', fs.readFileSync(SEED, 'utf8') === seedTextBefore);
 fs.rmSync(TMP, { recursive: true, force: true });
