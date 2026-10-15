@@ -219,7 +219,6 @@ public class RegisterFragment extends Fragment {
                 id -> vm.programme.trackLabel(id));
         binding.inputTrack.setAdapter(adapter);
         String locked = vm.groupTrack();
-        android.util.Log.w("ZZTRACK", "bindTrack group=" + vm.groupId + " locked=" + locked + " groups=" + vm.allGroups.size()); // TEMP
         if (locked != null) {
             binding.inputTrack.setText(vm.programme.trackLabel(locked), false);
             binding.layoutTrack.setEnabled(false);

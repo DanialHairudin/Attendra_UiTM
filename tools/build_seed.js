@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /*
  * Rebuilds the programmes / courses / groups part of the Attendra seed from the three CSVs in
- * seed/ (programme_structure.csv, elective_options.csv, groups.csv). SCHEMA.md explains the
- * columns. Everything else in the seed (buildings, venues, clubs, ...) is copied as it is.
+ * seed/ (programme_structure.csv, elective_options.csv, groups.csv). Everything else in the
+ * seed (buildings, venues, clubs, ...) is copied as it is.
  */
 'use strict';
 
