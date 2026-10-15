@@ -3,12 +3,17 @@ package com.attendra.uitm.model;
 import androidx.annotation.Nullable;
 
 import com.google.firebase.database.Exclude;
+import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
-/** One row of /courses (seed data), e.g. CS240_ICT602. */
+/**
+ * One row of /courses (seed data), e.g. CS240_ICT602. parts and tracks are read by hand in
+ * SeedCache, so Firebase is told to skip them here instead of warning about them for every course.
+ */
+@IgnoreExtraProperties
 public class Course {
     public static final String SLOT_CORE = "CORE";
     public static final String SLOT_UNIVERSITY = "UNIVERSITY";

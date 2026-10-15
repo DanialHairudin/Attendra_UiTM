@@ -41,10 +41,11 @@ function run(csv = {}, extra = []) {
   try {
     const out = execFileSync(process.execPath,
       [path.join(__dirname, 'build_seed.js'), ...files, '--seed', SEED, '--out', dir, ...extra],
-      { encoding: 'utf8' });
+      // stderr is caught too, so the errors some tests trigger on purpose don't clutter the output.
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
     return { code: 0, out, dir };
   } catch (e) {
-    return { code: e.status, out: e.stdout, dir };
+    return { code: e.status, out: (e.stdout || '') + (e.stderr || ''), dir };
   }
 }
 const read = (dir, f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
