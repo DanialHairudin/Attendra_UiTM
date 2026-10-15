@@ -287,6 +287,43 @@
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
                 </LinearLayout>
+
+                <!-- Track: only for parts that have tracks (Part 5-6, or Part 4 for CS259) -->
+                <LinearLayout
+                    android:id="@+id/group_track"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        style="@style/Widget.Attendra.FieldLabel"
+                        android:layout_marginTop="14dp"
+                        android:labelFor="@id/input_track"
+                        android:text="@string/label_track" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layout_track"
+                        style="@style/Widget.Attendra.TextInput.Dropdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/input_track"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/hint_track"
+                            android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/txt_track_note"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/track_note_pick"
+                        android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Clubs: optional pills, one line, scroll sideways -->

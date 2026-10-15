@@ -3,6 +3,7 @@ package com.attendra.uitm.ui.lecturer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -157,8 +158,8 @@ public class AddTeachingClassActivity extends BaseActivity {
         bindSemester();
         bindProgramme();
         bindPart();
-        bindCourse();
         bindGroups();
+        bindCourse();
     }
 
     private void bindSemester() {
@@ -186,8 +187,8 @@ public class AddTeachingClassActivity extends BaseActivity {
             vm.groups.clear();
             binding.inputPart.setText("", false);
             bindPart();
-            bindCourse();
             bindGroups();
+            bindCourse();
         });
     }
 
@@ -205,8 +206,8 @@ public class AddTeachingClassActivity extends BaseActivity {
             vm.part = chosen;
             vm.course = null;
             vm.groups.clear();
-            bindCourse();
             bindGroups();
+            bindCourse();
         });
     }
 
@@ -217,17 +218,28 @@ public class AddTeachingClassActivity extends BaseActivity {
         binding.inputCourse.setAdapter(adapter);
         binding.inputCourse.setText(vm.course != null ? adapter.labelOf(vm.course) : "", false);
         binding.layoutCourse.setEnabled(vm.programme != null && vm.part != 0);
-        showSulamChip();
+        showChips();
         binding.inputCourse.setOnItemClickListener((parent, v, position, id) -> {
             vm.course = (Course) parent.getItemAtPosition(position);
             binding.layoutCourse.setError(null);
             binding.layoutCourse.setErrorEnabled(false); // Also drop the space the error used
-            showSulamChip();
+            showChips();
         });
     }
 
-    /** "SULAM course" chip under the dropdown when the course is the programme's SULAM course. */
-    private void showSulamChip() {
+    /**
+     * Chips under the dropdown: "Elective" (with the track, e.g. "Elective · Big Data") for an
+     * elective, and "SULAM course" for the programme's SULAM course.
+     */
+    private void showChips() {
+        List<String> tracks = vm.electiveTracks(vm.course);
+        if (tracks == null) {
+            binding.chipElective.setVisibility(View.GONE);
+        } else {
+            binding.chipElective.setText(tracks.isEmpty() ? getString(R.string.elective_chip)
+                    : getString(R.string.elective_chip_track, TextUtils.join(" / ", tracks)));
+            binding.chipElective.setVisibility(View.VISIBLE);
+        }
         boolean sulam = vm.course != null && SeedCache.isSulamCourse(vm.course.id);
         binding.chipSulam.setVisibility(sulam ? View.VISIBLE : View.GONE);
     }
@@ -251,8 +263,11 @@ public class AddTeachingClassActivity extends BaseActivity {
             box.setSaveEnabled(false); // The ViewModel keeps the ticks across rotation
             box.setChecked(vm.groups.contains(g.id));
             box.setOnCheckedChangeListener((b, checked) -> {
+                String trackBefore = vm.groupTrack();
                 if (checked) vm.groups.add(g.id); else vm.groups.remove(g.id);
                 binding.txtGroupsError.setVisibility(View.GONE);
+                // A group with a track (e.g. CDCS2306A, Big Data) puts that track's electives first.
+                if (!TextUtils.equals(trackBefore, vm.groupTrack())) bindCourse();
             });
             binding.listGroups.addView(box);
         }

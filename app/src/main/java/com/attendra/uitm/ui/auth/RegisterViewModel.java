@@ -41,6 +41,8 @@ public class RegisterViewModel extends ViewModel {
     public Programme programme;
     public int part; // 0 = not chosen
     public String groupId;
+    /** The track the student picked (only when the group doesn't set one). */
+    public String trackId;
     /** Ordered set so the saved clubs keep the order they appear on screen. */
     public final Set<String> selectedClubs = new LinkedHashSet<>();
 
@@ -150,6 +152,25 @@ public class RegisterViewModel extends ViewModel {
     /** Parts 1..N for the chosen programme (N comes from /programmes/{code}/parts). */
     public int partCount() {
         return programme == null ? 0 : programme.parts;
+    }
+
+    /** True when the chosen programme splits into tracks at the chosen part. */
+    public boolean needsTrack() {
+        return programme != null && programme.hasTracksIn(part);
+    }
+
+    /** The track the chosen group follows, e.g. "BIG_DATA", or null if the student picks. */
+    public String groupTrack() {
+        for (Group g : allGroups) if (g.id.equals(groupId)) return g.track;
+        return null;
+    }
+
+    /** Track IDs of the chosen programme, sorted (e.g. BIG_DATA, CREATIVE_IT, IT_INFRASTRUCTURE). */
+    public List<String> trackIds() {
+        List<String> ids = new ArrayList<>();
+        if (programme != null && programme.tracks != null) ids.addAll(programme.tracks.keySet());
+        java.util.Collections.sort(ids);
+        return ids;
     }
 
     /** Groups for the chosen programme and part, e.g. CDCS2405A, CDCS2405B, CDCS2405C. */

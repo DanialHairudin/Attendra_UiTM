@@ -19,6 +19,7 @@ public class SeedRepository {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
                 List<Programme> list = new ArrayList<>();
+                android.util.Log.w("ZZTRACK", "programmes CS230.trackStartPart=" + snapshot.child("CS230/trackStartPart").getValue()); // TEMP
                 for (DataSnapshot child : snapshot.getChildren()) {
                     Programme p = child.getValue(Programme.class);
                     if (p != null) {
@@ -41,6 +42,16 @@ public class SeedRepository {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
                 List<Group> list = new ArrayList<>();
+                android.util.Log.w("ZZTRACK", "groups once count=" + snapshot.getChildrenCount()
+                        + " 2306A=" + snapshot.child("CDCS2306A").getValue()); // TEMP
+                Db.root().child("groups").addValueEventListener(new com.google.firebase.database.ValueEventListener() { // TEMP
+                    @Override public void onDataChange(@androidx.annotation.NonNull DataSnapshot s) {
+                        android.util.Log.w("ZZTRACK", "groups live count=" + s.getChildrenCount() + " 2306A=" + s.child("CDCS2306A").getValue());
+                    }
+                    @Override public void onCancelled(@androidx.annotation.NonNull com.google.firebase.database.DatabaseError e) {
+                        android.util.Log.w("ZZTRACK", "groups live cancelled " + e);
+                    }
+                });
                 for (DataSnapshot child : snapshot.getChildren()) {
                     Group g = child.getValue(Group.class);
                     if (g != null) {

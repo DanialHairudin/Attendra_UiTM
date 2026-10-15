@@ -50,6 +50,10 @@
     <string name="hint_part">Select</string>
     <string name="label_group">Group</string>
     <string name="hint_group">Select</string>
+    <string name="label_track">Track</string>
+    <string name="hint_track">Select your track</string>
+    <string name="track_note_pick">You can change this later in your profile.</string>
+    <string name="track_note_group">Set by your group.</string>
     <string name="part_n">Part %1$d</string>
     <string name="label_clubs_student">Clubs joined</string>
     <string name="label_clubs_lecturer">Clubs advised</string>
@@ -196,6 +200,11 @@
     <string name="profile_programme">Programme</string>
     <string name="profile_part">Part</string>
     <string name="profile_group">Group</string>
+    <string name="profile_track">My track</string>
+    <!-- %1$s is the track, e.g. "Big Data" -->
+    <string name="profile_track_by_group">%1$s (set by your group)</string>
+    <string name="track_pick_title">Choose your track</string>
+    <string name="track_saved">Track saved</string>
     <string name="no_clubs_yet">No clubs yet · optional</string>
     <string name="profile_preferred_name">Preferred name</string>
     <string name="profile_title_row">Title</string>
@@ -438,6 +447,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="error_choose_programme">Please select your programme.</string>
     <string name="error_choose_part">Please select your part.</string>
     <string name="error_choose_group">Please select your group.</string>
+    <string name="error_choose_track">Please select your track.</string>
     <string name="error_no_groups">No groups are available for this programme and part.</string>
     <string name="error_fix_fields">Please correct the highlighted fields.</string>
 
@@ -636,6 +646,9 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     </plurals>
     <!-- SULAM course from programmes/{code}/sulamCourse -->
     <string name="sulam_course_chip">SULAM course</string>
+    <!-- Elective chip on Add Teaching Class; %1$s is the track, e.g. "Big Data" -->
+    <string name="elective_chip">Elective</string>
+    <string name="elective_chip_track">Elective · %1$s</string>
     <plurals name="sulam_missing_groups">
         <item quantity="one">Add %1$s in Teaching Classes to include it.</item>
         <item quantity="other">Add %1$s in Teaching Classes to include them.</item>

@@ -20,6 +20,8 @@ public class Registration {
     public String programme;
     public int part;
     public String groupId;
+    /** Track the student picked, e.g. "BIG_DATA". Null when the part has no tracks or the group sets it. */
+    public String track;
 
     // Lecturer only
     public String staffId;

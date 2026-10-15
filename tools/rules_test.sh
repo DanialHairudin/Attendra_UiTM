@@ -17,8 +17,9 @@ case "$DB" in
 esac
 NS=attendra-uitm-default-rtdb
 P="${1:-.}"
-SEED="$P/seed/attendra_seed.json"
-[ -f "$SEED" ] || { echo "ERROR: $SEED not found (run from the project folder)" >&2; exit 1; }
+# The seed tools/build_seed.js makes from the CSVs, since that's what the live database will have.
+SEED="$P/seed/attendra_seed.built.json"
+[ -f "$SEED" ] || { echo "ERROR: $SEED not found. Run node tools/build_seed.js first (from the project folder)" >&2; exit 1; }
 curl -s -o /dev/null --max-time 3 "$DB/.json?ns=$NS&shallow=true" \
   || { echo "ERROR: emulator not running at $DB. Start it with: firebase emulators:start --only database" >&2; exit 1; }
 
@@ -155,6 +156,35 @@ check "tester clears own isTest"           deny  PUT "students/$TSU/isTest" "$TS
 check "student changes own groupId"        deny  PUT "students/$SU/groupId" "$ST" '"CDCS2405B"'
 check "student sets emailVerified (no code)" deny PUT "students/$SU/emailVerified" "$ST" 'true'
 check "student edits own phone"            allow PUT "students/$SU/phone" "$ST" '"0123456789"'
+
+# My track. $SU is CS240 Part 5 in CDCS2405A, which has no group track, so they pick their own.
+# Two extra students: one in a group that has a track, one in a part before tracks start.
+TRU=zzTest_trk1; TRU2=zzTest_trk2; TRT=$(token $TRU); TRT2=$(token $TRU2)
+owner PATCH '' '{"roles/'$TRU'":"student","roles/'$TRU2'":"student",
+  "students/'$TRU'":{"name":"zzTest Track","email":"zztest.trk1@student.uitm.edu.my","studentId":"2025009911",
+                     "programme":"CS230","part":6,"groupId":"CDCS2306A","emailVerified":true,"createdAt":1},
+  "students/'$TRU2'":{"name":"zzTest Track Two","email":"zztest.trk2@student.uitm.edu.my","studentId":"2025009912",
+                     "programme":"CS240","part":4,"groupId":"CDCS2404A","emailVerified":true,"createdAt":1}}' > /dev/null
+check "student picks own track"            allow PUT "students/$SU/track" "$ST" '"CREATIVE_IT"'
+check "student picks unknown track"        deny  PUT "students/$SU/track" "$ST" '"zzTest_NOPE"'
+check "student picks another programme's track" deny PUT "students/$SU/track" "$ST" '"SOFT_COMPUTING"'
+check "student sets another student's track" deny PUT "students/$SU2/track" "$ST" '"CREATIVE_IT"'
+check "track when the group already has one" deny PUT "students/$TRU/track" "$TRT" '"SOFT_COMPUTING"'
+check "track before tracks start (CS240 Part 4)" deny PUT "students/$TRU2/track" "$TRT2" '"CREATIVE_IT"'
+
+# Picking a track at sign-up: role + profile in one write, the same way the app does it.
+# signup <uid> <programme> <part> <group> [track]
+signup() {
+  local track=""; [ -n "$5" ] && track=',"track":"'$5'"'
+  echo '{"roles/'$1'":"student","students/'$1'":{"name":"zzTest Signup","email":"'$1'@student.uitm.edu.my",
+    "studentId":"20250099'$((RANDOM % 90 + 10))'","programme":"'$2'","part":'$3',"groupId":"'$4'",
+    "emailVerified":false,"createdAt":{".sv":"timestamp"}'$track'}}'
+}
+check "sign-up, picks a track (CS240 Part 5)"   allow PATCH "" "$(token zzTest_su1)" "$(signup zzTest_su1 CS240 5 CDCS2405C CREATIVE_IT)"
+check "sign-up, no track (still allowed)"       allow PATCH "" "$(token zzTest_su2)" "$(signup zzTest_su2 CS240 5 CDCS2405C)"
+check "sign-up, track but group has one"        deny  PATCH "" "$(token zzTest_su3)" "$(signup zzTest_su3 CS230 6 CDCS2306A SOFT_COMPUTING)"
+check "sign-up, track before tracks start"      deny  PATCH "" "$(token zzTest_su4)" "$(signup zzTest_su4 CS240 4 CDCS2404A CREATIVE_IT)"
+check "sign-up, another programme's track"      deny  PATCH "" "$(token zzTest_su5)" "$(signup zzTest_su5 CS240 5 CDCS2405C SOFT_COMPUTING)"
 check "student reads all students"         deny  GET students "$ST"
 
 # Teaching assignments and clubs
@@ -167,9 +197,12 @@ check "lecturer adds own class"            allow PUT "teachingAssignments/$LU/CS
 check "lecturer writes another lecturer's node" deny PUT "teachingAssignments/$LU2/CS240_ICT602_CDCS2405B" "$LT" "$(assignment CS240_ICT602 CDCS2405B)"
 check "student writes teachingAssignments" deny  PUT "teachingAssignments/$SU/CS240_ICT602_CDCS2405B" "$ST" "$(assignment CS240_ICT602 CDCS2405B)"
 check "key not equal to courseId_groupId"  deny  PUT "teachingAssignments/$LU/zzTest_wrongkey" "$LT" "$(assignment CS240_ICT602 CDCS2405C)"
-check "course from another programme"      deny  PUT "teachingAssignments/$LU/CS230_P5_INTRODUCTION_TO_TECHNOPRENEURSHIP_CDCS2405C" "$LT" \
-  "$(assignment CS230_P5_INTRODUCTION_TO_TECHNOPRENEURSHIP CDCS2405C)"
+check "course from another programme"      deny  PUT "teachingAssignments/$LU/CS230_ENT600_CDCS2405C" "$LT" "$(assignment CS230_ENT600 CDCS2405C)"
 check "course from another part"           deny  PUT "teachingAssignments/$LU/CS240_ICT602_CDCS2404A" "$LT" "$(assignment CS240_ICT602 CDCS2404A)"
+# A course can sit in more than one part now (courses/{id}/parts). CS259 ACC407 is in 2, 3 and 5.
+check "CS259 ACC407 to a Part 3 group"     allow PUT "teachingAssignments/$LU/CS259_ACC407_CDCS2593C" "$LT" "$(assignment CS259_ACC407 CDCS2593C)"
+check "CS259 ACC407 to a Part 4 group"     deny  PUT "teachingAssignments/$LU/CS259_ACC407_CDCS2594A" "$LT" "$(assignment CS259_ACC407 CDCS2594A)"
+check "CS230 ISP610 (Big Data track) to Part 6" allow PUT "teachingAssignments/$LU/CS230_ISP610_CDCS2306A" "$LT" "$(assignment CS230_ISP610 CDCS2306A)"
 check "unknown course"                     deny  PUT "teachingAssignments/$LU/zzTest_NOPE_CDCS2405C" "$LT" "$(assignment zzTest_NOPE CDCS2405C)"
 check "unknown group"                      deny  PUT "teachingAssignments/$LU/CS240_ICT602_zzTest_NOPE" "$LT" "$(assignment CS240_ICT602 zzTest_NOPE)"
 check "extra field"                        deny  PUT "teachingAssignments/$LU/CS240_ICT602_CDCS2405C" "$LT" \

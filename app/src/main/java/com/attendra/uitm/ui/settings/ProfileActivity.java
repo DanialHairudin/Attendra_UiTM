@@ -21,6 +21,8 @@ import com.attendra.uitm.databinding.ActivityProfileBinding;
 import com.attendra.uitm.databinding.ItemInfoRowBinding;
 import com.attendra.uitm.databinding.SheetPhoneBinding;
 import com.attendra.uitm.model.Club;
+import com.attendra.uitm.model.Group;
+import com.attendra.uitm.model.Programme;
 import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.ui.BaseActivity;
 import com.attendra.uitm.ui.common.Ui;
@@ -29,12 +31,15 @@ import com.attendra.uitm.util.HomeRouter;
 import com.attendra.uitm.util.Names;
 import com.attendra.uitm.util.Validators;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 /** Profile Page. */
 public class ProfileActivity extends BaseActivity {
@@ -179,6 +184,7 @@ public class ProfileActivity extends BaseActivity {
                 Long part = profile.child("part").getValue(Long.class);
                 addInfo(R.string.profile_part, part == null ? "" : String.valueOf(part));
                 addInfo(R.string.profile_group, text("groupId"));
+                if (seedReady) addTrackRow(part == null ? 0 : part.intValue());
             }
         }
 
@@ -196,6 +202,54 @@ public class ProfileActivity extends BaseActivity {
                 }
             }
         }
+    }
+
+    /**
+     * "My track", only once the programme splits into tracks (Part 5, or Part 4 for CS259). If the
+     * group follows a track it's filled in and locked; otherwise the student picks one.
+     */
+    private void addTrackRow(int part) {
+        Programme programme = SeedCache.programme(text("programme"));
+        if (programme == null || !programme.hasTracksIn(part)) return;
+
+        Group group = SeedCache.group(text("groupId"));
+        if (group != null && group.track != null) {
+            addInfo(R.string.profile_track, getString(R.string.profile_track_by_group,
+                    programme.trackLabel(group.track)));
+            return;
+        }
+        String mine = text("track");
+        addTappable(R.string.profile_track, mine.isEmpty()
+                ? getString(R.string.profile_not_set) : programme.trackLabel(mine),
+                v -> pickTrack(programme, mine));
+    }
+
+    /** A simple list of the programme's tracks; picking one saves it straight away. */
+    private void pickTrack(Programme programme, String current) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        List<String> ids = new ArrayList<>(new TreeMap<>(programme.tracks).keySet());
+        String[] labels = new String[ids.size()];
+        for (int i = 0; i < ids.size(); i++) labels[i] = programme.trackLabel(ids.get(i));
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.track_pick_title)
+                .setSingleChoiceItems(labels, ids.indexOf(current), (dialog, which) -> {
+                    dialog.dismiss();
+                    if (ids.get(which).equals(current)) return;
+                    new UserRepository().setTrack(user.getUid(), ids.get(which), new Callback<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Snackbar.make(binding.getRoot(), R.string.track_saved,
+                                    Snackbar.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            showError(message);
+                        }
+                    });
+                })
+                .show();
     }
 
     private ItemInfoRowBinding addInfo(@StringRes int label, String value) {

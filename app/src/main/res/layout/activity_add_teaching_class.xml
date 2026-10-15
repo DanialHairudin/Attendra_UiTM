@@ -125,35 +125,6 @@
                 <TextView
                     style="@style/Widget.Attendra.FieldLabel"
                     android:layout_marginTop="14dp"
-                    android:labelFor="@id/input_course"
-                    android:text="@string/label_course" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/layout_course"
-                    style="@style/Widget.Attendra.TextInput.Dropdown"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                        android:id="@+id/input_course"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/hint_course"
-                        android:inputType="none"
-                        android:maxLines="3" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Shown when the chosen course is the programme's SULAM course -->
-                <TextView
-                    android:id="@+id/chip_sulam"
-                    style="@style/Widget.Attendra.Badge.Gold"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/sulam_course_chip"
-                    android:visibility="gone" />
-
-                <TextView
-                    style="@style/Widget.Attendra.FieldLabel"
-                    android:layout_marginTop="14dp"
                     android:text="@string/label_groups" />
 
                 <com.google.android.material.card.MaterialCardView
@@ -180,6 +151,48 @@
                     android:textAppearance="@style/TextAppearance.Attendra.Caption"
                     android:textColor="@color/rejected"
                     android:visibility="gone" />
+
+                <TextView
+                    style="@style/Widget.Attendra.FieldLabel"
+                    android:layout_marginTop="14dp"
+                    android:labelFor="@id/input_course"
+                    android:text="@string/label_course" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layout_course"
+                    style="@style/Widget.Attendra.TextInput.Dropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/input_course"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_course"
+                        android:inputType="none"
+                        android:maxLines="3" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Chips for the chosen course: "Elective · Big Data" and/or "SULAM course" -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/chip_elective"
+                        style="@style/Widget.Attendra.Badge.Neutral"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="6dp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/chip_sulam"
+                        style="@style/Widget.Attendra.Badge.Gold"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/sulam_course_chip"
+                        android:visibility="gone" />
+                </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_save"

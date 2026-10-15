@@ -37,6 +37,10 @@
           ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true",
           ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
         },
+        "track": {
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true",
+          ".validate": "newData.isString() && root.child('programmes/' + newData.parent().child('programme').val() + '/tracks/' + newData.val()).exists() && !root.child('groups/' + newData.parent().child('groupId').val() + '/track').exists() && newData.parent().child('part').val() >= root.child('programmes/' + newData.parent().child('programme').val() + '/trackStartPart').val()"
+        },
         "email": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())" },
         "studentId": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{10}$/) && (!data.exists() || newData.val() === data.val())" },
         "programme": { ".validate": "root.child('programmes/' + newData.val()).exists() && (!data.exists() || newData.val() === data.val())" },
@@ -140,7 +144,7 @@
         ".read": "auth != null && auth.uid === $uid",
         "$aid": {
           ".write": "auth != null && auth.uid === $uid && root.child('roles/' + $uid).val() === 'lecturer' && root.child('lecturers/' + $uid + '/emailVerified').val() === true",
-          ".validate": "newData.hasChildren(['courseId', 'groupId', 'semester', 'createdAt']) && $aid === newData.child('courseId').val() + '_' + newData.child('groupId').val() && root.child('courses/' + newData.child('courseId').val() + '/programme').val() === root.child('groups/' + newData.child('groupId').val() + '/programme').val() && root.child('courses/' + newData.child('courseId').val() + '/part').val() === root.child('groups/' + newData.child('groupId').val() + '/part').val()",
+          ".validate": "newData.hasChildren(['courseId', 'groupId', 'semester', 'createdAt']) && $aid === newData.child('courseId').val() + '_' + newData.child('groupId').val() && root.child('courses/' + newData.child('courseId').val() + '/programme').val() === root.child('groups/' + newData.child('groupId').val() + '/programme').val() && root.child('courses/' + newData.child('courseId').val() + '/parts/' + root.child('groups/' + newData.child('groupId').val() + '/part').val()).val() === true",
           "courseId": { ".validate": "root.child('courses/' + newData.val()).exists()" },
           "groupId": { ".validate": "root.child('groups/' + newData.val()).exists()" },
           "semester": { ".validate": "newData.isString() && newData.val().length >= 4 && newData.val().length <= 40" },

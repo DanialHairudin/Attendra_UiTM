@@ -30,8 +30,12 @@ public final class Db {
     private Db() {
     }
 
+    private static boolean zzTempEmulator; // TEMP local test run: remove after testing
+
     public static FirebaseDatabase get() {
-        return FirebaseDatabase.getInstance(BuildConfig.DATABASE_URL);
+        FirebaseDatabase db = FirebaseDatabase.getInstance(BuildConfig.DATABASE_URL);
+        if (!zzTempEmulator) { db.useEmulator("127.0.0.1", 9000); zzTempEmulator = true; } // TEMP
+        return db;
     }
 
     public static DatabaseReference root() {

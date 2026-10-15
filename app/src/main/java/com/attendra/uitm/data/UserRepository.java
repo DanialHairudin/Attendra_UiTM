@@ -57,6 +57,13 @@ public class UserRepository {
         Db.write(updates, callback);
     }
 
+    /** Student only: the track they picked, e.g. "BIG_DATA" (when their group doesn't set one). */
+    public void setTrack(String uid, String track, Callback<Void> callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("students/" + uid + "/track", track);
+        Db.write(updates, callback);
+    }
+
     /** Club IDs (sorted) from a clubsQuery() snapshot. */
     public static List<String> clubIds(DataSnapshot snapshot, String uid, String role) {
         List<String> ids = new ArrayList<>();
@@ -88,6 +95,7 @@ public class UserRepository {
             profile.put("programme", r.programme);
             profile.put("part", r.part);
             profile.put("groupId", r.groupId);
+            if (r.track != null) profile.put("track", r.track);
             updates.put("studentsByGroup/" + r.groupId + "/" + uid, true);
             for (String clubId : r.clubIds) {
                 updates.put("studentClubs/" + uid + "/" + clubId, true);

@@ -129,6 +129,7 @@ public class RegisterFragment extends Fragment {
                 bindProgrammeDropdown();
                 bindPartDropdown();
                 bindGroupDropdown();
+                bindTrack();
                 bindClubChips();
                 break;
             case ERROR:
@@ -161,10 +162,12 @@ public class RegisterFragment extends Fragment {
             vm.programme = chosen;
             vm.part = 0;
             vm.groupId = null;
+            vm.trackId = null; // Tracks belong to a programme
             binding.inputPart.setText("", false);
             binding.inputGroup.setText("", false);
             bindPartDropdown();
             bindGroupDropdown();
+            bindTrack();
         });
     }
 
@@ -182,6 +185,7 @@ public class RegisterFragment extends Fragment {
             vm.groupId = null;
             binding.inputGroup.setText("", false);
             bindGroupDropdown();
+            bindTrack();
         });
         updateCascadeEnabled();
     }
@@ -193,11 +197,43 @@ public class RegisterFragment extends Fragment {
             Group chosen = (Group) parent.getItemAtPosition(position);
             vm.groupId = chosen.id;
             binding.layoutGroup.setError(null);
+            bindTrack();
         });
         if (vm.programme != null && vm.part != 0 && groups.isEmpty()) {
             binding.layoutGroup.setError(getString(R.string.error_no_groups));
         }
         updateCascadeEnabled();
+    }
+
+    /**
+     * Track dropdown, shown only when the chosen part has tracks. If the group already follows a
+     * track (e.g. CDCS2306A is Big Data) it's filled in and locked; otherwise the student picks.
+     */
+    private void bindTrack() {
+        boolean show = vm.needsTrack();
+        binding.groupTrack.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (!show) return;
+
+        List<String> ids = vm.trackIds();
+        DropdownAdapter<String> adapter = new DropdownAdapter<>(requireContext(), ids,
+                id -> vm.programme.trackLabel(id));
+        binding.inputTrack.setAdapter(adapter);
+        String locked = vm.groupTrack();
+        android.util.Log.w("ZZTRACK", "bindTrack group=" + vm.groupId + " locked=" + locked + " groups=" + vm.allGroups.size()); // TEMP
+        if (locked != null) {
+            binding.inputTrack.setText(vm.programme.trackLabel(locked), false);
+            binding.layoutTrack.setEnabled(false);
+            binding.layoutTrack.setError(null);
+            binding.txtTrackNote.setText(R.string.track_note_group);
+            return;
+        }
+        binding.inputTrack.setText(vm.trackId != null ? vm.programme.trackLabel(vm.trackId) : "", false);
+        binding.layoutTrack.setEnabled(true);
+        binding.txtTrackNote.setText(R.string.track_note_pick);
+        binding.inputTrack.setOnItemClickListener((parent, v, position, id) -> {
+            vm.trackId = (String) parent.getItemAtPosition(position);
+            binding.layoutTrack.setError(null);
+        });
     }
 
     /** Part unlocks after a programme is chosen; Group unlocks after a part is chosen. */
@@ -257,10 +293,17 @@ public class RegisterFragment extends Fragment {
                     vm.part == 0 ? getString(R.string.error_choose_part) : null, firstError);
             firstError = check(binding.layoutGroup,
                     vm.groupId == null ? getString(R.string.error_choose_group) : null, firstError);
+            // Only asked when the part has tracks and the group doesn't already set one.
+            boolean pickTrack = vm.needsTrack() && vm.groupId != null && vm.groupTrack() == null;
+            if (vm.needsTrack()) {
+                firstError = check(binding.layoutTrack, pickTrack && vm.trackId == null
+                        ? getString(R.string.error_choose_track) : null, firstError);
+            }
             if (vm.programme != null) {
                 r.programme = vm.programme.code;
                 r.part = vm.part;
                 r.groupId = vm.groupId;
+                r.track = pickTrack ? vm.trackId : null;
             }
         }
         firstError = check(binding.layoutPassword, Validators.password(r.password), firstError);

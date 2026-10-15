@@ -46,6 +46,7 @@ public final class SeedCache {
                     Course course = c.getValue(Course.class);
                     if (course != null) {
                         course.id = c.getKey();
+                        readPartsAndTracks(c, course);
                         COURSES.put(course.id, course);
                     }
                 }
@@ -57,6 +58,25 @@ public final class SeedCache {
                 callback.onError(message);
             }
         });
+    }
+
+    /**
+     * parts and tracks are read child by child. Asking for the whole parts map would get a list
+     * back, since its keys ("2", "3", "5") look like array positions to Firebase.
+     */
+    private static void readPartsAndTracks(DataSnapshot c, Course course) {
+        for (DataSnapshot p : c.child("parts").getChildren()) {
+            if (!Boolean.TRUE.equals(p.getValue(Boolean.class))) continue;
+            try {
+                course.parts.add(Integer.parseInt(p.getKey()));
+            } catch (NumberFormatException ignored) {
+                // Not a part number, skip it
+            }
+        }
+        for (DataSnapshot t : c.child("tracks").getChildren()) {
+            Integer part = t.getValue(Integer.class);
+            if (part != null) course.tracks.put(t.getKey(), part);
+        }
     }
 
     private static void loadVenues(Callback<Void> callback) {
@@ -132,6 +152,13 @@ public final class SeedCache {
         return code == null ? null : PROGRAMMES.get(code);
     }
 
+    @Nullable
+    public static Group group(@Nullable String id) {
+        if (id == null) return null;
+        for (Group g : GROUPS) if (id.equals(g.id)) return g;
+        return null;
+    }
+
     /** Group IDs of one programme and part, sorted (e.g. CDCS2406A, B, C). */
     public static List<String> groupIdsFor(String programme, int part) {
         List<String> ids = new ArrayList<>();
@@ -160,11 +187,16 @@ public final class SeedCache {
         return id == null ? null : COURSES.get(id);
     }
 
-    /** The courses of one programme and part, e.g. CS240 Part 5 (unsorted). */
+    /**
+     * The courses a lecturer can teach in one programme and part, e.g. CS240 Part 5 (unsorted).
+     * A course in several parts (CS259 ACC407 is in 2, 3 and 5) shows up in each of them.
+     */
     public static List<Course> coursesFor(String programme, int part) {
         List<Course> list = new java.util.ArrayList<>();
         for (Course c : COURSES.values()) {
-            if (programme != null && programme.equals(c.programme) && c.part == part) list.add(c);
+            if (programme != null && programme.equals(c.programme) && c.isTeachable() && c.inPart(part)) {
+                list.add(c);
+            }
         }
         return list;
     }
