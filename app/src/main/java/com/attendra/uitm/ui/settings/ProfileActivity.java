@@ -27,6 +27,7 @@ import com.attendra.uitm.model.Registration;
 import com.attendra.uitm.ui.BaseActivity;
 import com.attendra.uitm.ui.common.Ui;
 import com.attendra.uitm.ui.lecturer.LecturerMainActivity;
+import com.attendra.uitm.util.Formats;
 import com.attendra.uitm.util.HomeRouter;
 import com.attendra.uitm.util.Names;
 import com.attendra.uitm.util.Validators;
@@ -218,16 +219,31 @@ public class ProfileActivity extends BaseActivity {
                     programme.trackLabel(group.track)));
             return;
         }
+        // The first pick is free; one change is allowed within a week of sign-up, then it's locked.
         String mine = text("track");
-        addTappable(R.string.profile_track, mine.isEmpty()
-                ? getString(R.string.profile_not_set) : programme.trackLabel(mine),
-                v -> pickTrack(programme, mine));
+        Long createdAt = profile.child("createdAt").getValue(Long.class);
+        long deadline = createdAt == null ? 0 : createdAt + UserRepository.TRACK_CHANGE_WINDOW_MS;
+        if (mine.isEmpty()) {
+            addTappable(R.string.profile_track, getString(R.string.profile_not_set),
+                    v -> pickTrack(programme, mine, deadline));
+            return;
+        }
+        boolean canChange = !profile.child("trackChangedAt").exists()
+                && System.currentTimeMillis() < deadline;
+        if (canChange) {
+            addTappable(R.string.profile_track, programme.trackLabel(mine),
+                    v -> pickTrack(programme, mine, deadline));
+        } else {
+            addInfo(R.string.profile_track, getString(R.string.profile_track_locked,
+                    programme.trackLabel(mine)));
+        }
     }
 
-    /** A simple list of the programme's tracks; picking one saves it straight away. */
-    private void pickTrack(Programme programme, String current) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) return;
+    /**
+     * A simple list of the programme's tracks. A first pick inside the change window saves straight
+     * away; anything that will lock the track asks first.
+     */
+    private void pickTrack(Programme programme, String current, long deadline) {
         List<String> ids = new ArrayList<>(new TreeMap<>(programme.tracks).keySet());
         String[] labels = new String[ids.size()];
         for (int i = 0; i < ids.size(); i++) labels[i] = programme.trackLabel(ids.get(i));
@@ -235,21 +251,43 @@ public class ProfileActivity extends BaseActivity {
                 .setTitle(R.string.track_pick_title)
                 .setSingleChoiceItems(labels, ids.indexOf(current), (dialog, which) -> {
                     dialog.dismiss();
-                    if (ids.get(which).equals(current)) return;
-                    new UserRepository().setTrack(user.getUid(), ids.get(which), new Callback<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            Snackbar.make(binding.getRoot(), R.string.track_saved,
-                                    Snackbar.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onError(String message) {
-                            showError(message);
-                        }
-                    });
+                    String picked = ids.get(which);
+                    if (picked.equals(current)) return;
+                    boolean first = current.isEmpty();
+                    if (first && System.currentTimeMillis() < deadline) {
+                        saveTrack(picked, false);
+                        return;
+                    }
+                    String label = programme.trackLabel(picked);
+                    new MaterialAlertDialogBuilder(this)
+                            .setTitle(R.string.track_change_title)
+                            .setMessage(first
+                                    ? getString(R.string.track_final_body, label)
+                                    : getString(R.string.track_change_body, label,
+                                            Formats.shortDate(deadline)))
+                            .setNegativeButton(R.string.cancel, null)
+                            .setPositiveButton(R.string.track_change_confirm,
+                                    (d, w) -> saveTrack(picked, true))
+                            .show();
                 })
                 .show();
+    }
+
+    private void saveTrack(String track, boolean isChange) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        new UserRepository().setTrack(user.getUid(), track, isChange, new Callback<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                Snackbar.make(binding.getRoot(), R.string.track_saved,
+                        Snackbar.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+            }
+        });
     }
 
     private ItemInfoRowBinding addInfo(@StringRes int label, String value) {

@@ -47,14 +47,36 @@ public class AuthRepository {
 
                         @Override
                         public void onError(String message) {
-                            user.delete().addOnCompleteListener(t -> {
-                                auth.signOut();
-                                callback.onError(str(R.string.error_save_profile, message));
+                            if (!r.isStudent()) {
+                                undoSignUp(user, str(R.string.error_save_profile, message), callback);
+                                return;
+                            }
+                            // A taken student ID is the likely cause; say so plainly.
+                            users.isStudentIdTaken(r.studentId, user.getUid(), new Callback<Boolean>() {
+                                @Override
+                                public void onSuccess(Boolean taken) {
+                                    undoSignUp(user, taken
+                                            ? str(R.string.error_student_id_taken)
+                                            : str(R.string.error_save_profile, message), callback);
+                                }
+
+                                @Override
+                                public void onError(String ignored) {
+                                    undoSignUp(user, str(R.string.error_save_profile, message), callback);
+                                }
                             });
                         }
                     });
                 })
                 .addOnFailureListener(e -> callback.onError(AuthErrors.message(e)));
+    }
+
+    /** Removes the half-made account so the email can be used again, then reports the error. */
+    private void undoSignUp(FirebaseUser user, String error, Callback<Void> callback) {
+        user.delete().addOnCompleteListener(t -> {
+            auth.signOut();
+            callback.onError(error);
+        });
     }
 
     /** Where a signed-in user should go next. */

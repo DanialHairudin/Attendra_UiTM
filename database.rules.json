@@ -38,11 +38,15 @@
           ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
         },
         "track": {
-          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true",
-          ".validate": "newData.isString() && root.child('programmes/' + newData.parent().child('programme').val() + '/tracks/' + newData.val()).exists() && !root.child('groups/' + newData.parent().child('groupId').val() + '/track').exists() && newData.parent().child('part').val() >= root.child('programmes/' + newData.parent().child('programme').val() + '/trackStartPart').val()"
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true && newData.exists() && (!data.exists() || (!data.parent().child('trackChangedAt').exists() && now < data.parent().child('createdAt').val() + 604800000))",
+          ".validate": "newData.isString() && root.child('programmes/' + newData.parent().child('programme').val() + '/tracks/' + newData.val()).exists() && !root.child('groups/' + newData.parent().child('groupId').val() + '/track').exists() && newData.parent().child('part').val() >= root.child('programmes/' + newData.parent().child('programme').val() + '/trackStartPart').val() && (!data.exists() || newData.parent().child('trackChangedAt').val() === now)"
+        },
+        "trackChangedAt": {
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true && !data.exists()",
+          ".validate": "newData.val() === now && data.parent().child('track').exists() && newData.parent().child('track').val() !== data.parent().child('track').val()"
         },
         "email": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())" },
-        "studentId": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{10}$/) && (!data.exists() || newData.val() === data.val())" },
+        "studentId": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{10}$/) && (!data.exists() || newData.val() === data.val()) && (data.exists() || newData.parent().parent().parent().child('studentIds/' + newData.val()).val() === $uid)" },
         "programme": { ".validate": "root.child('programmes/' + newData.val()).exists() && (!data.exists() || newData.val() === data.val())" },
         "part": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 6 && (!data.exists() || newData.val() === data.val())" },
         "groupId": { ".validate": "root.child('groups/' + newData.val()).exists() && (!data.exists() || newData.val() === data.val())" },
@@ -95,6 +99,14 @@
         "sentAt": { ".validate": "newData.isNumber()" },
         "attempts": { ".validate": "newData.isNumber() && (!data.exists() || newData.val() >= data.val() || newData.parent().child('codeHash').val() !== data.parent().child('codeHash').val())" },
         "$other": { ".validate": false }
+      }
+    },
+
+    "studentIds": {
+      "$studentId": {
+        ".read": "auth != null",
+        ".write": "auth != null && !data.exists() && !root.child('students/' + auth.uid).exists()",
+        ".validate": "newData.val() === auth.uid && newData.parent().parent().child('students/' + auth.uid + '/studentId').val() === $studentId"
       }
     },
 

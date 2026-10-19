@@ -58,8 +58,19 @@ android {
             buildConfigField("String", "TEST_LECTURER_PASS", localString("TEST_LECTURER_PASS"))
             buildConfigField("String", "TEST_STUDENT_EMAIL", localString("TEST_STUDENT_EMAIL"))
             buildConfigField("String", "TEST_STUDENT_PASS", localString("TEST_STUDENT_PASS"))
+
+            // Off unless built with -PuseEmulators=true: then Auth and the Realtime Database use
+            // the local Firebase emulators and no verification email is sent. 127.0.0.1 needs
+            // "adb reverse tcp:9000 tcp:9000" and "adb reverse tcp:9099 tcp:9099".
+            buildConfigField("boolean", "USE_EMULATORS",
+                (project.findProperty("useEmulators") == "true").toString())
+            buildConfigField("String", "EMULATOR_HOST",
+                "\"" + (project.findProperty("emulatorHost") ?: "127.0.0.1") + "\"")
         }
         release {
+            buildConfigField("boolean", "USE_EMULATORS", "false")
+            buildConfigField("String", "EMULATOR_HOST", "\"\"")
+
             buildConfigField("int", "CODE_TTL_MINUTES", "10")
 
             // Empty in release, so no test password is ever inside a release APK.

@@ -171,13 +171,30 @@ check "student picks another programme's track" deny PUT "students/$SU/track" "$
 check "student sets another student's track" deny PUT "students/$SU2/track" "$ST" '"CREATIVE_IT"'
 check "track when the group already has one" deny PUT "students/$TRU/track" "$TRT" '"SOFT_COMPUTING"'
 check "track before tracks start (CS240 Part 4)" deny PUT "students/$TRU2/track" "$TRT2" '"CREATIVE_IT"'
+# $SU signed up long ago (createdAt 1), so the pick above was their first and only one.
+check "track change after the 7-day window"  deny  PATCH "students/$SU" "$ST" '{"track":"BIG_DATA","trackChangedAt":{".sv":"timestamp"}}'
+check "student deletes own track"            deny  DELETE "students/$SU/track" "$ST"
+
+# One change within 7 days of sign-up, and only with trackChangedAt stamped in the same write.
+TRU3=zzTest_trk3; TRT3=$(token $TRU3)
+owner PATCH '' '{"roles/'$TRU3'":"student",
+  "students/'$TRU3'":{"name":"zzTest Track Three","email":"zztest.trk3@student.uitm.edu.my","studentId":"2025009913",
+                      "programme":"CS240","part":5,"groupId":"CDCS2405A","emailVerified":true,"createdAt":'$NOW',"track":"CREATIVE_IT"}}' > /dev/null
+check "new student changes track without stamp" deny  PUT "students/$TRU3/track" "$TRT3" '"BIG_DATA"'
+check "stamp without changing the track"        deny  PUT "students/$TRU3/trackChangedAt" "$TRT3" '{".sv":"timestamp"}'
+check "new student changes track once"          allow PATCH "students/$TRU3" "$TRT3" '{"track":"BIG_DATA","trackChangedAt":{".sv":"timestamp"}}'
+check "new student changes track a second time" deny  PATCH "students/$TRU3" "$TRT3" '{"track":"CREATIVE_IT","trackChangedAt":{".sv":"timestamp"}}'
+check "new student clears trackChangedAt"       deny  DELETE "students/$TRU3/trackChangedAt" "$TRT3"
+check "sign-up with trackChangedAt already set" deny  PATCH "" "$(token zzTest_su6)" '{"roles/zzTest_su6":"student","studentIds/2025009936":"zzTest_su6","students/zzTest_su6":{"name":"zzTest Su","email":"zztest.su6@student.uitm.edu.my","studentId":"2025009936","programme":"CS240","part":5,"groupId":"CDCS2405C","emailVerified":false,"createdAt":{".sv":"timestamp"},"track":"CREATIVE_IT","trackChangedAt":{".sv":"timestamp"}}}'
 
 # Picking a track at sign-up: role + profile in one write, the same way the app does it.
 # signup <uid> <programme> <part> <group> [track]
+# The student ID comes from the uid's last digit (zzTest_su1 -> 2025009921), claimed in the same write.
 signup() {
   local track=""; [ -n "$5" ] && track=',"track":"'$5'"'
-  echo '{"roles/'$1'":"student","students/'$1'":{"name":"zzTest Signup","email":"'$1'@student.uitm.edu.my",
-    "studentId":"20250099'$((RANDOM % 90 + 10))'","programme":"'$2'","part":'$3',"groupId":"'$4'",
+  local sid="202500992${1: -1}"
+  echo '{"roles/'$1'":"student","studentIds/'$sid'":"'$1'","students/'$1'":{"name":"zzTest Signup","email":"'$1'@student.uitm.edu.my",
+    "studentId":"'$sid'","programme":"'$2'","part":'$3',"groupId":"'$4'",
     "emailVerified":false,"createdAt":{".sv":"timestamp"}'$track'}}'
 }
 check "sign-up, picks a track (CS240 Part 5)"   allow PATCH "" "$(token zzTest_su1)" "$(signup zzTest_su1 CS240 5 CDCS2405C CREATIVE_IT)"
@@ -185,6 +202,26 @@ check "sign-up, no track (still allowed)"       allow PATCH "" "$(token zzTest_s
 check "sign-up, track but group has one"        deny  PATCH "" "$(token zzTest_su3)" "$(signup zzTest_su3 CS230 6 CDCS2306A SOFT_COMPUTING)"
 check "sign-up, track before tracks start"      deny  PATCH "" "$(token zzTest_su4)" "$(signup zzTest_su4 CS240 4 CDCS2404A CREATIVE_IT)"
 check "sign-up, another programme's track"      deny  PATCH "" "$(token zzTest_su5)" "$(signup zzTest_su5 CS240 5 CDCS2405C SOFT_COMPUTING)"
+
+# One account per student ID: sign-up claims studentIds/{id} in the same write, and only once.
+# signup_raw <uid> <profile studentId> <claimed studentId, or "none"> <claim value>
+signup_raw() {
+  local claim=""; [ "$3" != none ] && claim='"studentIds/'$3'":"'$4'",'
+  echo '{"roles/'$1'":"student",'$claim'"students/'$1'":{"name":"zzTest Dup","email":"'$1'@student.uitm.edu.my",
+    "studentId":"'$2'","programme":"CS240","part":5,"groupId":"CDCS2405C","emailVerified":false,"createdAt":{".sv":"timestamp"}}}'
+}
+DT1=$(token zzTest_d1); DT2=$(token zzTest_d2)
+check "sign-up without claiming the student ID"    deny  PATCH "" "$DT1" "$(signup_raw zzTest_d1 2025009941 none)"
+check "sign-up claims the ID for another uid"      deny  PATCH "" "$DT1" "$(signup_raw zzTest_d1 2025009941 2025009941 zzTest_d9)"
+check "sign-up claims a different ID than profile" deny  PATCH "" "$DT1" "$(signup_raw zzTest_d1 2025009941 2025009949 zzTest_d1)"
+check "sign-up claims a free student ID"           allow PATCH "" "$DT1" "$(signup_raw zzTest_d1 2025009941 2025009941 zzTest_d1)"
+check "second account, same student ID"            deny  PATCH "" "$DT2" "$(signup_raw zzTest_d2 2025009941 2025009941 zzTest_d2)"
+check "owner re-points their ID to another uid"    deny  PUT "studentIds/2025009941" "$DT1" '"zzTest_d2"'
+check "owner deletes their ID claim"               deny  DELETE "studentIds/2025009941" "$DT1"
+check "existing student claims a second ID"        deny  PUT "studentIds/2025009942" "$ST" '"'$SU'"'
+check "signed-in user checks if an ID is taken"    allow GET "studentIds/2025009941" "$DT2"
+check "signed-out user checks if an ID is taken"   deny  GET "studentIds/2025009941"
+check "anyone lists every student ID"              deny  GET "studentIds" "$DT2"
 check "student reads all students"         deny  GET students "$ST"
 
 # Teaching assignments and clubs

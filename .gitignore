@@ -22,3 +22,7 @@ app/google-services.json
 firebase-debug.log
 database-debug.log
 ui-debug.log
+
+# Report screenshots and code excerpts (local only)
+report_assets/
+report_assets.zip

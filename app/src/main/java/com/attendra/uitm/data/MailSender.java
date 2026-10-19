@@ -56,6 +56,12 @@ public class MailSender {
     /** Sends the code email in the background. */
     public void sendVerificationCode(String toEmail, String name, String role, String code,
                                      Callback<Void> callback) {
+        if (BuildConfig.USE_EMULATORS) {
+            // Debug emulator mode: demo addresses must never get real mail; read the code from logcat.
+            Log.i(TAG, "Emulator mode, email not sent. Code for " + toEmail + ": " + code);
+            MAIN.post(() -> callback.onSuccess(null));
+            return;
+        }
         EXECUTOR.execute(() -> {
             try {
                 if (BuildConfig.SMTP_USER.isEmpty() || BuildConfig.SMTP_PASS.isEmpty()) {

@@ -52,7 +52,7 @@
     <string name="hint_group">Select</string>
     <string name="label_track">Track</string>
     <string name="hint_track">Select your track</string>
-    <string name="track_note_pick">You can change this later in your profile.</string>
+    <string name="track_note_pick">You can change this once in your profile, within 7 days of signing up.</string>
     <string name="track_note_group">Set by your group.</string>
     <string name="part_n">Part %1$d</string>
     <string name="label_clubs_student">Clubs joined</string>
@@ -205,6 +205,14 @@
     <string name="profile_track_by_group">%1$s (set by your group)</string>
     <string name="track_pick_title">Choose your track</string>
     <string name="track_saved">Track saved</string>
+    <!-- %1$s is the track, e.g. "Big Data" -->
+    <string name="profile_track_locked">%1$s (locked)</string>
+    <string name="track_change_title">Lock in your track?</string>
+    <!-- %1$s is the new track, e.g. "Big Data"; %2$s is the deadline, e.g. "Tue, 29 Sep" -->
+    <string name="track_change_body">You can only change your track once, until %2$s. After you switch to %1$s, your track is locked and only the faculty can change it.</string>
+    <!-- %1$s is the track, e.g. "Big Data" -->
+    <string name="track_final_body">Your track will be set to %1$s and locked. Only the faculty can change it after this.</string>
+    <string name="track_change_confirm">Confirm</string>
     <string name="no_clubs_yet">No clubs yet · optional</string>
     <string name="profile_preferred_name">Preferred name</string>
     <string name="profile_title_row">Title</string>
@@ -462,6 +470,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="error_generic">Something went wrong. Please try again.</string>
     <string name="error_create_account">Unable to create the account. Please try again.</string>
     <string name="error_save_profile">Unable to save your profile. %1$s</string>
+    <string name="error_student_id_taken">This student ID is already registered. If it is yours, please contact your faculty.</string>
     <string name="error_login_failed">Unable to log in. Please try again.</string>
     <string name="error_no_profile">This account does not have an Attendra profile. Please register with a different email address.</string>
     <string name="error_session_ended">Your session has ended. Please log in again.</string>

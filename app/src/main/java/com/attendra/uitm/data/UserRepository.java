@@ -57,10 +57,17 @@ public class UserRepository {
         Db.write(updates, callback);
     }
 
-    /** Student only: the track they picked, e.g. "BIG_DATA" (when their group doesn't set one). */
-    public void setTrack(String uid, String track, Callback<Void> callback) {
+    /** How long after sign-up a student may change their track (once). Matches the rules. */
+    public static final long TRACK_CHANGE_WINDOW_MS = 7L * 24 * 60 * 60 * 1000;
+
+    /**
+     * Student only: the track they picked, e.g. "BIG_DATA" (when their group doesn't set one).
+     * The first pick is free; replacing a track also stamps trackChangedAt, which locks it for good.
+     */
+    public void setTrack(String uid, String track, boolean isChange, Callback<Void> callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("students/" + uid + "/track", track);
+        if (isChange) updates.put("students/" + uid + "/trackChangedAt", ServerValue.TIMESTAMP);
         Db.write(updates, callback);
     }
 
@@ -96,6 +103,8 @@ public class UserRepository {
             profile.put("part", r.part);
             profile.put("groupId", r.groupId);
             if (r.track != null) profile.put("track", r.track);
+            // Claims the student ID; the rules allow each ID to be claimed only once.
+            updates.put("studentIds/" + r.studentId, uid);
             updates.put("studentsByGroup/" + r.groupId + "/" + uid, true);
             for (String clubId : r.clubIds) {
                 updates.put("studentClubs/" + uid + "/" + clubId, true);
@@ -111,6 +120,21 @@ public class UserRepository {
         updates.put(profileNode(r.role) + "/" + uid, profile);
 
         Db.write(updates, callback);
+    }
+
+    /** True if studentIds/{studentId} is already claimed by an account other than {@code uid}. */
+    public void isStudentIdTaken(String studentId, String uid, Callback<Boolean> callback) {
+        readString("studentIds/" + studentId, new Callback<String>() {
+            @Override
+            public void onSuccess(String owner) {
+                callback.onSuccess(owner != null && !owner.equals(uid));
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
     }
 
     /** Reads roles/{uid}. */

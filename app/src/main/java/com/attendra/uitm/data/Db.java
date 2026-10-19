@@ -30,8 +30,17 @@ public final class Db {
     private Db() {
     }
 
-    public static FirebaseDatabase get() {
-        return FirebaseDatabase.getInstance(BuildConfig.DATABASE_URL);
+    /** Debug + -PuseEmulators=true only: the one instance pointed at the local emulator. */
+    private static FirebaseDatabase emulator;
+
+    public static synchronized FirebaseDatabase get() {
+        if (!BuildConfig.USE_EMULATORS) return FirebaseDatabase.getInstance(BuildConfig.DATABASE_URL);
+        // Kept, because getInstance() after useEmulator() would hand back a new live instance.
+        if (emulator == null) {
+            emulator = FirebaseDatabase.getInstance(BuildConfig.DATABASE_URL);
+            emulator.useEmulator(BuildConfig.EMULATOR_HOST, 9000);
+        }
+        return emulator;
     }
 
     public static DatabaseReference root() {
