@@ -15,6 +15,9 @@ import java.util.Set;
  */
 public class AttendanceRepository {
 
+    // ============================================================
+    // [CREATE] Lecturer marks a student's attendance by hand
+    // ============================================================
     /**
      * Manual attendance for one student (Manual Attendance Page): attendance/{sid}/{uid} {status,
      * time, method: "manual", reason, markedBy} studentAttendance/{uid}/{sid} {status, time}
@@ -30,6 +33,9 @@ public class AttendanceRepository {
         Db.write(withMirror(sessionId, studentUid, status, record), callback);
     }
 
+    // ============================================================
+    // [CREATE] Fake check-in for testing only
+    // ============================================================
     /**
      * DEBUG only ("Simulate check-in" on the Student Dashboard): writes the record a real GPS
      * check-in would, without the location checks.
@@ -54,6 +60,9 @@ public class AttendanceRepository {
         });
     }
 
+    // ============================================================
+    // [UPDATE] Make the session end later
+    // ============================================================
     /** "+10 min": moves the closing time later (counting from now if it already passed). */
     public void extendEnd(Session s, long extraMs, Callback<Void> callback) {
         long base = Math.max(s.end, System.currentTimeMillis());
@@ -62,6 +71,9 @@ public class AttendanceRepository {
         Db.write(updates, callback);
     }
 
+    // ============================================================
+    // [UPDATE] Change the check-in radius
+    // ============================================================
     /** Radius sheet: a new geofence radius (30–150 m) for this session. */
     public void setRadius(String sessionId, int radius, Callback<Void> callback) {
         Map<String, Object> updates = new HashMap<>();
@@ -69,6 +81,9 @@ public class AttendanceRepository {
         Db.write(updates, callback);
     }
 
+    // ============================================================
+    // [UPDATE] Close the session and mark the rest as absent
+    // ============================================================
     /** Closes a session (the Close button, or auto-close when the end time has passed). */
     public void close(Session s, Callback<Integer> callback) {
         SessionRepository.eligibleStudents(s, new Callback<Set<String>>() {

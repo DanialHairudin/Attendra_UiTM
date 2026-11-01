@@ -31,24 +31,19 @@
                 android:text="@string/forgot_body"
                 android:textAppearance="@style/TextAppearance.Attendra.Body.Muted" />
 
-            <TextView
-                style="@style/Widget.Attendra.FieldLabel"
-                android:layout_marginTop="16dp"
-                android:labelFor="@id/input_email"
-                android:text="@string/label_email" />
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layout_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:startIconDrawable="@drawable/ic_mail">
+                android:hint="@string/label_email"
+                android:layout_marginTop="16dp"
+                app:placeholderText="@string/hint_email">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints="emailAddress"
-                    android:hint="@string/hint_email"
                     android:imeOptions="actionDone"
                     android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>

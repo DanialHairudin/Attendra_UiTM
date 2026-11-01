@@ -82,8 +82,8 @@ public class Course {
         return code != null && !code.isEmpty() && !"TBC".equalsIgnoreCase(code);
     }
 
-    /** "ICT602 · Mobile Technology and Development", or just the name if the code is TBC. */
+    /** "ICT602 - Mobile Technology and Development", or just the name if the code is TBC. */
     public String label() {
-        return hasRealCode() ? code + " · " + name : name;
+        return hasRealCode() ? code + " - " + name : name;
     }
 }

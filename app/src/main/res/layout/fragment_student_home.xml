@@ -15,12 +15,13 @@
         android:paddingEnd="@dimen/screen_padding"
         android:paddingBottom="24dp">
 
-        <!-- Header: date, greeting, avatar -->
+        <!-- Header: greeting, date and profile button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            >
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -29,17 +30,20 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/txt_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.Attendra.Caption" />
-
-                <TextView
                     android:id="@+id/txt_greeting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:accessibilityHeading="true"
-                    android:textAppearance="@style/TextAppearance.Attendra.H2" />
+                    android:textColor="@color/ink"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txt_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/muted"
+                    android:textSize="13sp" />
             </LinearLayout>
 
             <TextView

@@ -63,7 +63,7 @@ public class LiveCheckInMap {
             m.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
             m.setIcon(MapIcons.dot(ctx, MapIcons.statusColor(p.status)));
             m.setTitle(p.name);
-            m.setSnippet(ctx.getString(label(p.status)) + " · " + Formats.time(p.time));
+            m.setSnippet(ctx.getString(label(p.status)) + " - " + Formats.time(p.time));
             m.setSubDescription(ctx.getString(R.string.live_map_distance, Math.round(p.distanceM)));
             map.getOverlays().add(m);
             markers.put(p.uid, m);

@@ -21,15 +21,11 @@
             android:text="@string/when_question"
             android:textAppearance="@style/TextAppearance.Attendra.H2" />
 
-        <TextView
-            style="@style/Widget.Attendra.FieldLabel"
-            android:layout_marginTop="16dp"
-            android:labelFor="@id/input_date"
-            android:text="@string/when_date" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/when_date"
+            android:layout_marginTop="16dp"
             app:endIconDrawable="@drawable/ic_calendar"
             app:endIconMode="custom">
 
@@ -54,14 +50,10 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <TextView
-                    style="@style/Widget.Attendra.FieldLabel"
-                    android:labelFor="@id/input_start"
-                    android:text="@string/when_opens" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:hint="@string/when_opens">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/input_start"
@@ -84,14 +76,10 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <TextView
-                    style="@style/Widget.Attendra.FieldLabel"
-                    android:labelFor="@id/input_end"
-                    android:text="@string/when_closes" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:hint="@string/when_closes">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/input_end"

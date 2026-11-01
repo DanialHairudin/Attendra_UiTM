@@ -54,6 +54,9 @@ public final class Db {
         return value == null ? null : String.valueOf(value);
     }
 
+    // ============================================================
+    // [READ] Read data one time (all READ functions use this)
+    // ============================================================
     /** Reads a path once, with a timeout. */
     public static void readOnce(Query query, Callback<DataSnapshot> callback) {
         final boolean[] done = {false};
@@ -81,6 +84,9 @@ public final class Db {
         query.addListenerForSingleValueEvent(listener);
     }
 
+    // ============================================================
+    // [WRITE] Save / update / delete data (all CREATE, UPDATE, DELETE use this)
+    // ============================================================
     /** Multi-path write (updateChildren) with the same timeout as readOnce. */
     public static void write(Map<String, Object> updates, Callback<Void> callback) {
         final boolean[] done = {false};

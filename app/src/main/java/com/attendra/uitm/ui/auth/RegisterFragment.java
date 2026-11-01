@@ -98,8 +98,9 @@ public class RegisterFragment extends Fragment {
 
         // The UiTM email domain is required for both roles, so the label and example always show
         // the right format.
-        binding.inputEmail.setHint(student ? R.string.hint_email_student : R.string.hint_email_staff);
-        binding.txtLabelEmail.setText(student ? R.string.label_email_student : R.string.label_email_staff);
+        binding.layoutEmail.setPlaceholderText(getString(student
+                ? R.string.hint_email_student : R.string.hint_email_staff));
+        binding.layoutEmail.setHint(student ? R.string.label_email_student : R.string.label_email_staff);
 
         // Errors on fields that just got hidden would be confusing later.
         binding.layoutStudentId.setError(null);

@@ -118,11 +118,15 @@ public class VerifyViewModel extends AndroidViewModel {
             @Override
             public void onSuccess(VerificationRepository.Pending p) {
                 state.loading = false;
-                if (p != null) {
-                    state.expiresAt = p.expiresAt;
-                    state.resendAt = p.sentAt + VerificationRepository.RESEND_COOLDOWN_MS;
-                    state.locked = p.attempts >= VerificationRepository.MAX_ATTEMPTS;
+                // No code yet, or the old one ran out (e.g. coming back from Log in later):
+                // send a fresh one instead of showing "expired" straight away.
+                if (p == null || System.currentTimeMillis() >= p.expiresAt) {
+                    resend();
+                    return;
                 }
+                state.expiresAt = p.expiresAt;
+                state.resendAt = p.sentAt + VerificationRepository.RESEND_COOLDOWN_MS;
+                state.locked = p.attempts >= VerificationRepository.MAX_ATTEMPTS;
                 publish();
             }
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Add Teaching Class Page (wireframe "13. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/teach_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -62,17 +63,13 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <TextView
-                    style="@style/Widget.Attendra.FieldLabel"
-                    android:layout_marginTop="16dp"
-                    android:labelFor="@id/input_semester"
-                    android:text="@string/label_semester" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/layout_semester"
                     style="@style/Widget.Attendra.TextInput.Dropdown"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:hint="@string/label_semester"
+                    android:layout_marginTop="16dp">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/input_semester"
@@ -81,44 +78,36 @@
                         android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    style="@style/Widget.Attendra.FieldLabel"
-                    android:layout_marginTop="14dp"
-                    android:labelFor="@id/input_programme"
-                    android:text="@string/label_programme" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/layout_programme"
                     style="@style/Widget.Attendra.TextInput.Dropdown"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:hint="@string/label_programme"
+                    android:layout_marginTop="14dp"
+                    app:placeholderText="@string/hint_programme">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/input_programme"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/hint_programme"
                         android:inputType="none"
                         android:maxLines="3" />
                 </com.google.android.material.textfield.TextInputLayout>
-
-                <TextView
-                    style="@style/Widget.Attendra.FieldLabel"
-                    android:layout_marginTop="14dp"
-                    android:labelFor="@id/input_part"
-                    android:text="@string/label_part" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/layout_part"
                     style="@style/Widget.Attendra.TextInput.Dropdown"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:hint="@string/label_part"
+                    android:layout_marginTop="14dp"
+                    app:placeholderText="@string/hint_part">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/input_part"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/hint_part"
                         android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -152,23 +141,19 @@
                     android:textColor="@color/rejected"
                     android:visibility="gone" />
 
-                <TextView
-                    style="@style/Widget.Attendra.FieldLabel"
-                    android:layout_marginTop="14dp"
-                    android:labelFor="@id/input_course"
-                    android:text="@string/label_course" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/layout_course"
                     style="@style/Widget.Attendra.TextInput.Dropdown"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:hint="@string/label_course"
+                    android:layout_marginTop="14dp"
+                    app:placeholderText="@string/hint_course">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
                         android:id="@+id/input_course"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/hint_course"
                         android:inputType="none"
                         android:maxLines="3" />
                 </com.google.android.material.textfield.TextInputLayout>

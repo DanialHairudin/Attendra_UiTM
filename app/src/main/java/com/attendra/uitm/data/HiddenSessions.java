@@ -30,11 +30,17 @@ public final class HiddenSessions {
         return ids;
     }
 
+    // ============================================================
+    // [CREATE] Hide a session from the student's list
+    // ============================================================
     /** Hides a closed session. */
     public static void hide(String uid, String sessionId, Callback<Void> callback) {
         set(uid, sessionId, true, callback);
     }
 
+    // ============================================================
+    // [DELETE] Show the hidden session again
+    // ============================================================
     public static void unhide(String uid, String sessionId, Callback<Void> callback) {
         set(uid, sessionId, null, callback);
     }

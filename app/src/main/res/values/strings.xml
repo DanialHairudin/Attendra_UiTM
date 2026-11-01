@@ -7,9 +7,9 @@
     <string name="retry">Retry</string>
 
     <!-- Splash -->
-    <string name="splash_eyebrow">UiTM Shah Alam · KPPIM</string>
+    <string name="splash_eyebrow">UiTM Shah Alam</string>
     <string name="splash_title">Attendra\nUiTM</string>
-    <string name="splash_body">Attendance for classes, tests and activities, verified by your location.</string>
+    <string name="splash_body">Attendance system for UiTM students and lecturers.</string>
     <string name="get_started">Get started</string>
     <string name="create_account">Create an account</string>
 
@@ -24,12 +24,12 @@
     <string name="hint_password_login">Enter your password</string>
 
     <!-- Log in -->
-    <string name="auth_login_eyebrow">Welcome back</string>
-    <string name="auth_login_title">Log in to Attendra</string>
-    <string name="forgot_password_link">Forgot your password?</string>
+    <string name="auth_login_eyebrow">Please log in to continue</string>
+    <string name="auth_login_title">Login</string>
+    <string name="forgot_password_link">Forgot password?</string>
     <string name="log_in">Log in</string>
     <string name="logging_in">Logging in…</string>
-    <string name="new_to_attendra">New to Attendra UiTM?</string>
+    <string name="new_to_attendra">Don\'t have an account?</string>
 
     <!-- Register -->
     <string name="register_title">Create an account</string>
@@ -85,7 +85,7 @@
     <string name="code_too_many">Too many attempts. Please request a new code.</string>
     <string name="code_send_failed">We could not send the email. Please check your internet connection and tap Resend code.</string>
     <!-- Plain-text version of res/raw/verification_email.html. -->
-    <string name="code_email_text">Hi %1$s,\n\nYour Attendra UiTM verification code is: %2$s\n\nEnter this code in the Attendra UiTM app to finish creating your %4$s account for %5$s. This code expires in %3$s minute(s).\n\nIf the code has expired, tap Resend code in the app to get a new one. Only the newest code will work.\n\nDid not request this? You can ignore this email. Never share this code with anyone, including lecturers or staff.\n\nAttendra UiTM · Final Year Project, KPPIM, UiTM Shah Alam · %6$s</string>
+    <string name="code_email_text">Hi %1$s,\n\nYour Attendra UiTM verification code is: %2$s\n\nEnter this code in the Attendra UiTM app to finish creating your %4$s account for %5$s. This code expires in %3$s minute(s).\n\nIf the code has expired, tap Resend code in the app to get a new one. Only the newest code will work.\n\nDid not request this? You can ignore this email. Never share this code with anyone, including lecturers or staff.\n\nAttendra UiTM - Final Year Project, KPPIM, UiTM Shah Alam - %6$s</string>
     <string name="verify_wrong_email">Incorrect email address?</string>
     <string name="verify_change_it">Change email</string>
     <string name="back_to_login">Return to log in</string>
@@ -213,7 +213,7 @@
     <!-- %1$s is the track, e.g. "Big Data" -->
     <string name="track_final_body">Your track will be set to %1$s and locked. Only the faculty can change it after this.</string>
     <string name="track_change_confirm">Confirm</string>
-    <string name="no_clubs_yet">No clubs yet · optional</string>
+    <string name="no_clubs_yet">No clubs yet - optional</string>
     <string name="profile_preferred_name">Preferred name</string>
     <string name="profile_title_row">Title</string>
     <string name="profile_not_set">Not set</string>
@@ -252,8 +252,8 @@
     <string name="text_size_large">Large</string>
     <string name="text_size_extra_large">Extra large</string>
     <string name="text_size_preview_title">Good morning</string>
-    <string name="text_size_preview_body">Software Engineering · CDCS2405A
-CS2 · Makmal 3 · closes 10:00 AM</string>
+    <string name="text_size_preview_body">Software Engineering - CDCS2405A
+CS2 - Makmal 3 - closes 10:00 AM</string>
     <string name="text_size_note">Your phone’s own text size setting still applies on top of this.</string>
     <string name="text_size_sample" translatable="false">A</string>
     <string name="text_size_apply">Apply</string>
@@ -271,13 +271,13 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="not_selected">not selected</string>
     <string name="type_question">What are you taking attendance for?</string>
     <string name="type_class">Normal class</string>
-    <string name="type_class_desc">One group · faculty room</string>
+    <string name="type_class_desc">One group - faculty room</string>
     <string name="type_test">Test</string>
-    <string name="type_test_desc">One or more groups · faculty room</string>
+    <string name="type_test_desc">One or more groups - faculty room</string>
     <string name="type_sulam">SULAM / outside</string>
-    <string name="type_sulam_desc">One or more groups · map pin</string>
+    <string name="type_sulam_desc">One or more groups - map pin</string>
     <string name="type_club">Club activity</string>
-    <string name="type_club_desc">Clubs you advise · room or map</string>
+    <string name="type_club_desc">Clubs you advise - room or map</string>
     <string name="title_pattern_class">%1$s class</string>
     <string name="title_pattern_test">%1$s test</string>
     <string name="title_pattern_sulam">%1$s SULAM activity</string>
@@ -286,13 +286,13 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="who_session_title">Session title</string>
     <string name="who_activity_name">Activity name</string>
     <string name="who_title_required">Please enter a title.</string>
-    <string name="who_class_label">Teaching class · choose one</string>
-    <string name="who_course_label">Course · choose one</string>
-    <string name="who_groups_label">Groups · tick one or more for a combined test</string>
-    <string name="who_groups_label_sulam">Your Part 6 classes · tick one or more for a combined activity</string>
+    <string name="who_class_label">Teaching class - choose one</string>
+    <string name="who_course_label">Course - choose one</string>
+    <string name="who_groups_label">Groups - tick one or more for a combined test</string>
+    <string name="who_groups_label_sulam">Your Part 6 classes - tick one or more for a combined activity</string>
     <string name="empty_sulam_title">No SULAM classes</string>
     <string name="empty_sulam_body">SULAM is for Part 6 classes. None of your teaching classes this semester is in Part 6.</string>
-    <string name="who_club_label">Club · only clubs you advise</string>
+    <string name="who_club_label">Club - only clubs you advise</string>
     <string name="who_no_clubs_body">You can only create club sessions for clubs you advise.</string>
     <string name="who_club_note">Only members who added this club in their profile can check in. The report shows who came.</string>
     <string name="where_question">Where is it?</string>
@@ -302,7 +302,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="where_building_hint">Choose a building</string>
     <string name="where_room">Room</string>
     <string name="where_room_hint">Choose a room</string>
-    <string name="room_and_floor">%1$s · %2$s</string>
+    <string name="room_and_floor">%1$s - %2$s</string>
     <string name="where_no_location_title">Building location not set</string>
     <string name="where_no_location_body">%1$s has no latitude and longitude yet, so students could not be checked against it. Add them in /buildings/%1$s in the Firebase console.</string>
     <string name="where_geofence_title">Geofence set automatically</string>
@@ -326,8 +326,8 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="review_who">Who</string>
     <string name="review_where">Where</string>
     <string name="review_geofence">Geofence</string>
-    <string name="review_geofence_pin">Map pin · %1$d m radius</string>
-    <string name="review_geofence_building">%1$s building area · %2$d m</string>
+    <string name="review_geofence_pin">Map pin - %1$d m radius</string>
+    <string name="review_geofence_building">%1$s building area - %2$d m</string>
     <string name="review_time">Time</string>
     <string name="review_late">Late after</string>
     <string name="start_session">Start session</string>
@@ -360,7 +360,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="countdown_left">left to check in</string>
     <string name="countdown_opens">check-in opens</string>
     <string name="countdown_over">check-in time is over</string>
-    <string name="closed_at">closed · ended %1$s</string>
+    <string name="closed_at">closed - ended %1$s</string>
     <string name="live_mark">Mark</string>
     <string name="live_more_time">+10 min</string>
     <string name="live_radius">Radius</string>
@@ -566,13 +566,13 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
 
     <!-- Lecturers add their own teaching classes -->
     <string name="register_lecturer_classes_note">You will add your teaching classes after you verify your email.</string>
-    <string name="teach_semester_line">Semester: %1$s · copied from your faculty timetable</string>
+    <string name="teach_semester_line">Semester: %1$s - copied from your faculty timetable</string>
     <string name="teach_add_button">Add teaching class</string>
     <string name="teach_show_previous">Show previous semesters</string>
     <string name="teach_hide_previous">Hide previous semesters</string>
     <string name="teach_edit">Edit</string>
     <string name="teach_remove">Remove</string>
-    <string name="teach_remove_confirm">Remove %1$s · %2$s from your teaching classes? Past sessions are kept.</string>
+    <string name="teach_remove_confirm">Remove %1$s - %2$s from your teaching classes? Past sessions are kept.</string>
     <string name="teach_add_title">Add teaching class</string>
     <string name="teach_edit_title">Edit teaching class</string>
     <string name="teach_setup_title">Set up your teaching classes</string>
@@ -580,7 +580,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="label_semester">Semester</string>
     <string name="label_course">Course</string>
     <string name="hint_course">Select a course</string>
-    <string name="label_groups">Groups · tick one or more</string>
+    <string name="label_groups">Groups - tick one or more</string>
     <string name="teach_groups_pick_part">Choose a programme and part first.</string>
     <string name="teach_groups_none">No groups found for this part.</string>
     <string name="teach_save">Save classes</string>
@@ -598,8 +598,8 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
 
     <!-- plurals, so the count and the noun always agree -->
     <plurals name="overall_detail">
-        <item quantity="one">This semester · %1$d of %2$d session</item>
-        <item quantity="other">This semester · %1$d of %2$d sessions</item>
+        <item quantity="one">This semester - %1$d of %2$d session</item>
+        <item quantity="other">This semester - %1$d of %2$d sessions</item>
     </plurals>
     <plurals name="n_of_total_sessions">
         <item quantity="one">%1$d of %2$d session</item>
@@ -634,7 +634,7 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <!-- Lecturer deletes a closed session; student hides one -->
     <string name="more_options">More options</string>
     <string name="delete_session">Delete session</string>
-    <!-- %1$s e.g. "Test 1 · ICT600 (13 Oct)" -->
+    <!-- %1$s e.g. "Test 1 - ICT600 (13 Oct)" -->
     <string name="delete_session_body">Delete %1$s? This removes the session and its attendance records for all students. Share the CSV first if you need a copy.</string>
     <string name="delete_session_confirm">Delete</string>
     <string name="delete_share_first">Share CSV first</string>
@@ -650,14 +650,14 @@ CS2 · Makmal 3 · closes 10:00 AM</string>
     <string name="hidden_label">Hidden</string>
     <string name="show_hidden">Show hidden sessions</string>
     <plurals name="hidden_count">
-        <item quantity="one">%d session hidden · still counted in your percentage</item>
-        <item quantity="other">%d sessions hidden · still counted in your percentage</item>
+        <item quantity="one">%d session hidden - still counted in your percentage</item>
+        <item quantity="other">%d sessions hidden - still counted in your percentage</item>
     </plurals>
     <!-- SULAM course from programmes/{code}/sulamCourse -->
     <string name="sulam_course_chip">SULAM course</string>
     <!-- Elective chip on Add Teaching Class; %1$s is the track, e.g. "Big Data" -->
     <string name="elective_chip">Elective</string>
-    <string name="elective_chip_track">Elective · %1$s</string>
+    <string name="elective_chip_track">Elective - %1$s</string>
     <plurals name="sulam_missing_groups">
         <item quantity="one">Add %1$s in Teaching Classes to include it.</item>
         <item quantity="other">Add %1$s in Teaching Classes to include them.</item>

@@ -53,6 +53,9 @@ public class MailSender {
         this.context = context.getApplicationContext();
     }
 
+    // ============================================================
+    // [EMAIL] Send the verification code by Gmail
+    // ============================================================
     /** Sends the code email in the background. */
     public void sendVerificationCode(String toEmail, String name, String role, String code,
                                      Callback<Void> callback) {

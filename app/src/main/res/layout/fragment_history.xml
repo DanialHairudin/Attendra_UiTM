@@ -20,6 +20,7 @@
             android:layout_marginEnd="@dimen/screen_padding"
             android:accessibilityHeading="true"
             android:text="@string/history_title"
+            android:visibility="gone"
             android:textAppearance="@style/TextAppearance.Attendra.H2" />
 
         <!-- All · Class · Test · Activity · This week (one line, scrolls) -->

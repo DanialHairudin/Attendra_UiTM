@@ -1,41 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Type scale: headings, body text and big numbers. -->
 <resources>
-    <!-- Headings: Plus Jakarta Sans ExtraBold -->
+    <!-- Headings: Default font -->
     <style name="TextAppearance.Attendra.H1" parent="TextAppearance.Material3.HeadlineLarge">
-        <item name="fontFamily">@font/plus_jakarta_sans_extrabold</item>
-        <item name="android:fontFamily">@font/plus_jakarta_sans_extrabold</item>
-        <item name="android:textSize">28sp</item>
-        <item name="android:letterSpacing">-0.02</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:letterSpacing">0</item>
         <item name="android:textColor">@color/ink</item>
     </style>
 
     <style name="TextAppearance.Attendra.H2" parent="TextAppearance.Material3.HeadlineMedium">
-        <item name="fontFamily">@font/plus_jakarta_sans_extrabold</item>
-        <item name="android:fontFamily">@font/plus_jakarta_sans_extrabold</item>
-        <item name="android:textSize">22sp</item>
-        <item name="android:letterSpacing">-0.015</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:letterSpacing">0</item>
         <item name="android:textColor">@color/ink</item>
     </style>
 
     <!-- Splash title: a bigger H1 -->
     <style name="TextAppearance.Attendra.Display" parent="TextAppearance.Attendra.H1">
-        <item name="android:textSize">44sp</item>
+        <item name="android:textSize">28sp</item>
     </style>
 
     <style name="TextAppearance.Attendra.CardTitle" parent="TextAppearance.Material3.TitleMedium">
-        <item name="fontFamily">@font/plus_jakarta_sans_bold</item>
-        <item name="android:fontFamily">@font/plus_jakarta_sans_bold</item>
-        <item name="android:textSize">17sp</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:letterSpacing">0</item>
         <item name="android:textColor">@color/ink</item>
     </style>
 
-    <!-- Body: Manrope -->
+    <!-- Body: Default font -->
     <style name="TextAppearance.Attendra.Body" parent="TextAppearance.Material3.BodyLarge">
-        <item name="fontFamily">@font/manrope</item>
-        <item name="android:fontFamily">@font/manrope</item>
-        <item name="android:textSize">15sp</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:letterSpacing">0</item>
         <item name="android:textColor">@color/ink</item>
     </style>
@@ -45,43 +48,44 @@
     </style>
 
     <style name="TextAppearance.Attendra.Body.SemiBold">
-        <item name="fontFamily">@font/manrope_semibold</item>
-        <item name="android:fontFamily">@font/manrope_semibold</item>
+        <item name="fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="TextAppearance.Attendra.Caption" parent="TextAppearance.Material3.BodySmall">
-        <item name="fontFamily">@font/manrope</item>
-        <item name="android:fontFamily">@font/manrope</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">13sp</item>
         <item name="android:letterSpacing">0</item>
         <item name="android:textColor">@color/muted</item>
     </style>
 
-    <!-- Small gold all-caps label above headings ("WELCOME BACK") -->
+    <!-- Small label above headings ("Welcome back") -->
     <style name="TextAppearance.Attendra.Eyebrow" parent="TextAppearance.Material3.LabelMedium">
-        <item name="fontFamily">@font/manrope_bold</item>
-        <item name="android:fontFamily">@font/manrope_bold</item>
-        <item name="android:textSize">12sp</item>
-        <item name="android:letterSpacing">0.14</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">@color/goldText</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/muted</item>
     </style>
 
-    <!-- Big numbers: Manrope ExtraBold with tabular figures ("tnum") so digits line up -->
+    <!-- Big numbers: Default font with tabular figures ("tnum") so digits line up -->
     <style name="TextAppearance.Attendra.Number" parent="TextAppearance.Material3.HeadlineMedium">
-        <item name="fontFamily">@font/manrope_extrabold</item>
-        <item name="android:fontFamily">@font/manrope_extrabold</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
         <item name="android:fontFeatureSettings">tnum</item>
-        <item name="android:textSize">26sp</item>
-        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:letterSpacing">0</item>
         <item name="android:textColor">@color/ink</item>
     </style>
 
     <style name="TextAppearance.Attendra.Button" parent="TextAppearance.Material3.LabelLarge">
-        <item name="fontFamily">@font/manrope_semibold</item>
-        <item name="android:fontFamily">@font/manrope_semibold</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:letterSpacing">0</item>
-        <item name="android:textAllCaps">false</item>
+        <item name="fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:textAllCaps">true</item>
     </style>
 </resources>

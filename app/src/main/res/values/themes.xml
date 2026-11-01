@@ -21,12 +21,19 @@
         <!-- Snackbar action text ("Retry") sits on a dark bar, so it uses gold -->
         <item name="colorPrimaryInverse">@color/gold</item>
         <item name="android:windowBackground">@color/bg</item>
+        <!-- Stop Material 3 from tinting cards, sheets and dialogs with the main colour -->
+        <item name="elevationOverlayEnabled">false</item>
+        <item name="colorSurfaceContainerLowest">@color/surface</item>
+        <item name="colorSurfaceContainerLow">@color/surface</item>
+        <item name="colorSurfaceContainer">@color/surface</item>
+        <item name="colorSurfaceContainerHigh">@color/surface</item>
+        <item name="colorSurfaceContainerHighest">@color/raised</item>
         <item name="android:textColorPrimary">@color/ink</item>
         <item name="android:textColorSecondary">@color/muted</item>
         <item name="android:textColorHint">@color/muted</item>
         <item name="android:textColorLink">@color/goldText</item>
 
-        <!-- Manrope as the default for plain TextViews. -->
+        <!-- Default font for plain TextViews. -->
         <item name="android:textViewStyle">@style/Widget.Attendra.TextView</item>
 
         <!-- Material 3 text slots pointed at our type scale (values/type.xml) -->
@@ -37,6 +44,16 @@
         <item name="textAppearanceBodyMedium">@style/TextAppearance.Attendra.Body</item>
         <item name="textAppearanceBodySmall">@style/TextAppearance.Attendra.Caption</item>
         <item name="textAppearanceLabelLarge">@style/TextAppearance.Attendra.Button</item>
+
+        <!-- No rounded corners anywhere (sheets, dialogs, menus, chips...) -->
+        <item name="shapeAppearanceCornerExtraSmall">@style/ShapeAppearance.Attendra.Square</item>
+        <item name="shapeAppearanceCornerSmall">@style/ShapeAppearance.Attendra.Square</item>
+        <item name="shapeAppearanceCornerMedium">@style/ShapeAppearance.Attendra.Square</item>
+        <item name="shapeAppearanceCornerLarge">@style/ShapeAppearance.Attendra.Square</item>
+        <item name="shapeAppearanceCornerExtraLarge">@style/ShapeAppearance.Attendra.Square</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Attendra.Square</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Attendra.Square</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Attendra.Square</item>
 
         <!-- Default component styles (values/styles.xml) -->
         <item name="materialButtonStyle">@style/Widget.Attendra.Button.Primary</item>
@@ -50,6 +67,12 @@
         <!-- Edge-to-edge: system bars are transparent and content draws behind them. -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <!-- Square corners (0dp) -->
+    <style name="ShapeAppearance.Attendra.Square" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">0dp</item>
     </style>
 
     <style name="Theme.AttendraUiTM" parent="Base.Theme.AttendraUiTM" />

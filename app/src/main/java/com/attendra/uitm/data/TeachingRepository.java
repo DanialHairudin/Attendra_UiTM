@@ -53,6 +53,9 @@ public final class TeachingRepository {
         return list;
     }
 
+    // ============================================================
+    // [CREATE] Add a class that the lecturer teaches
+    // ============================================================
     /**
      * Saves one class per group, and removes {@code oldKey} in the same update (an edit; null when
      * adding).
@@ -78,12 +81,18 @@ public final class TeachingRepository {
         Db.write(updates, callback);
     }
 
+    // ============================================================
+    // [DELETE] Remove a class from the lecturer
+    // ============================================================
     public static void remove(String uid, String key, Callback<Void> callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("teachingAssignments/" + uid + "/" + key, null);
         Db.write(updates, callback);
     }
 
+    // ============================================================
+    // [READ] Check if the lecturer has a class this semester
+    // ============================================================
     /** True if the lecturer has at least one class this semester. */
     public static void hasCurrent(String uid, Callback<Boolean> callback) {
         Db.readOnce(ref(uid), new Callback<DataSnapshot>() {

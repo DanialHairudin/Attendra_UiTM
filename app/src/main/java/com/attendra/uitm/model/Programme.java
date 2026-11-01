@@ -40,8 +40,8 @@ public class Programme {
         return label != null ? label : trackId;
     }
 
-    /** Text shown in the Programme dropdown, e.g. "CS240 · Bachelor of Information Technology (Hons.)". */
+    /** Text shown in the Programme dropdown, e.g. "CS240 - Bachelor of Information Technology (Hons.)". */
     public String label() {
-        return code + " · " + name;
+        return code + " - " + name;
     }
 }

@@ -30,7 +30,7 @@
             android:layout_marginStart="12dp"
             android:layout_weight="1"
             android:accessibilityHeading="true"
-            android:fontFamily="@font/manrope_bold"
+            android:textStyle="bold"
             android:text="@string/session_report"
             android:textColor="@color/ink"
             android:textSize="18sp" />

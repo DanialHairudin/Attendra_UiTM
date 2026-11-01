@@ -48,12 +48,12 @@ public final class SessionText {
         return c.getString(R.string.room_in_building, v.name, place);
     }
 
-    /** Joins the non-empty parts with " · ". */
+    /** Joins the non-empty parts with " - ". */
     public static String join(String... parts) {
         StringBuilder sb = new StringBuilder();
         for (String p : parts) {
             if (p == null || p.isEmpty()) continue;
-            if (sb.length() > 0) sb.append(" · ");
+            if (sb.length() > 0) sb.append(" - ");
             sb.append(p);
         }
         return sb.toString();

@@ -22,7 +22,7 @@
             android:id="@+id/row_day"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/manrope_extrabold"
+            android:textStyle="bold"
             android:fontFeatureSettings="tnum"
             android:textColor="@color/ink"
             android:textSize="22sp" />

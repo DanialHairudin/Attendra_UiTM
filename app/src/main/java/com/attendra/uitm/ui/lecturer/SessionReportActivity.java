@@ -255,7 +255,7 @@ public class SessionReportActivity extends BaseActivity {
         String date = Formats.isoDateTime(s.start).substring(0, 10); // yyyy-MM-dd
         File dir = new File(getCacheDir(), "reports");
         File file = new File(dir, Csv.fileName(SessionText.join(
-                SessionText.course(s), s.title, date).replace(" · ", "_")));
+                SessionText.course(s), s.title, date).replace(" - ", "_")));
         try {
             if (!dir.exists() && !dir.mkdirs()) throw new IOException("mkdirs " + dir);
             try (Writer w = new OutputStreamWriter(new FileOutputStream(file),

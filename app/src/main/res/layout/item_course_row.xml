@@ -33,7 +33,7 @@
         android:id="@+id/course_pct"
         android:layout_width="52dp"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/manrope_bold"
+        android:textStyle="bold"
         android:fontFeatureSettings="tnum"
         android:gravity="end"
         android:textColor="@color/ink"

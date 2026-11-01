@@ -53,6 +53,9 @@ public class VerificationRepository {
         return "verificationCodes/" + uid;
     }
 
+    // ============================================================
+    // [CREATE] Make a new 6-digit code and email it
+    // ============================================================
     /** Creates a NEW code, saves its hash and emails it. */
     public void sendNewCode(String uid, String role, Callback<Long> callback) {
         Db.readOnce(Db.root().child(UserRepository.profileNode(role)).child(uid),
@@ -115,6 +118,9 @@ public class VerificationRepository {
         });
     }
 
+    // ============================================================
+    // [READ] Get the code that is waiting (for the timer)
+    // ============================================================
     /** Reads the waiting code (for the countdown). */
     public void loadPending(String uid, Callback<Pending> callback) {
         Db.readOnce(Db.root().child(codePath(uid)), new Callback<DataSnapshot>() {
@@ -130,6 +136,9 @@ public class VerificationRepository {
         });
     }
 
+    // ============================================================
+    // [UPDATE] Check the typed code and mark the email as verified
+    // ============================================================
     /** Checks a typed code, in this order. */
     public void verify(String uid, String role, String code, Callback<Result> callback) {
         Db.readOnce(Db.root().child(codePath(uid)), new Callback<DataSnapshot>() {

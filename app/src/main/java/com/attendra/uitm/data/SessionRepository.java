@@ -18,6 +18,9 @@ import java.util.Set;
 /** Creates attendance sessions. */
 public class SessionRepository {
 
+    // ============================================================
+    // [CREATE] Create a new attendance session
+    // ============================================================
     /**
      * Starts a session with ONE multi-path updateChildren, so the session, its indexes and the
      * notifications are all written or none are.
@@ -59,6 +62,9 @@ public class SessionRepository {
         return paths;
     }
 
+    // ============================================================
+    // [READ] Get the students who can join a session
+    // ============================================================
     /**
      * Reads, once and fresh, the uids of every student who may attend the session: the group/club
      * members in the same world as the session (real or test).
@@ -100,6 +106,9 @@ public class SessionRepository {
 
     // ------------------------------------------------------------ delete
 
+    // ============================================================
+    // [DELETE] Delete a session and its records
+    // ============================================================
     /** Deletes a CLOSED session for good (the lecturer owns it). */
     public void delete(Session s, Callback<Void> callback) {
         if (!Session.STATUS_CLOSED.equals(s.status)) {

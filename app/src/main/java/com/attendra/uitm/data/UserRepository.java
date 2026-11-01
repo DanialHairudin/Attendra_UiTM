@@ -33,6 +33,9 @@ public class UserRepository {
                 : Db.root().child("studentClubs").child(uid);
     }
 
+    // ============================================================
+    // [UPDATE] Join or leave a club
+    // ============================================================
     /**
      * Joins or leaves a club (student), or starts or stops advising it (lecturer), in ONE
      * updateChildren so the indexes stay in sync.
@@ -50,6 +53,9 @@ public class UserRepository {
         Db.write(updates, callback);
     }
 
+    // ============================================================
+    // [UPDATE] Save the user's phone number
+    // ============================================================
     /** Saves {lecturers|students}/{uid}/phone, e.g. "+60123456789". */
     public void setPhone(String uid, String role, String phone, Callback<Void> callback) {
         Map<String, Object> updates = new HashMap<>();
@@ -60,6 +66,9 @@ public class UserRepository {
     /** How long after sign-up a student may change their track (once). Matches the rules. */
     public static final long TRACK_CHANGE_WINDOW_MS = 7L * 24 * 60 * 60 * 1000;
 
+    // ============================================================
+    // [UPDATE] Save the student's track (elective)
+    // ============================================================
     /**
      * Student only: the track they picked, e.g. "BIG_DATA" (when their group doesn't set one).
      * The first pick is free; replacing a track also stamps trackChangedAt, which locks it for good.
@@ -84,6 +93,9 @@ public class UserRepository {
         return ids;
     }
 
+    // ============================================================
+    // [CREATE] Save a new user's profile into the database
+    // ============================================================
     /**
      * Writes the new user's role, profile and every index node in ONE multi-path updateChildren()
      * call.
@@ -122,6 +134,9 @@ public class UserRepository {
         Db.write(updates, callback);
     }
 
+    // ============================================================
+    // [READ] Check if a student ID is already used
+    // ============================================================
     /** True if studentIds/{studentId} is already claimed by an account other than {@code uid}. */
     public void isStudentIdTaken(String studentId, String uid, Callback<Boolean> callback) {
         readString("studentIds/" + studentId, new Callback<String>() {
@@ -137,11 +152,17 @@ public class UserRepository {
         });
     }
 
+    // ============================================================
+    // [READ] Get the user's role (student or lecturer)
+    // ============================================================
     /** Reads roles/{uid}. */
     public void getRole(String uid, Callback<String> callback) {
         readString("roles/" + uid, callback);
     }
 
+    // ============================================================
+    // [READ] Get the user's name
+    // ============================================================
     /** Reads {lecturers|students}/{uid}/name (used by the placeholder home screens). */
     public void getName(String uid, String role, Callback<String> callback) {
         readString(profileNode(role) + "/" + uid + "/name", callback);
@@ -155,6 +176,9 @@ public class UserRepository {
         public boolean hasPreferredName;
     }
 
+    // ============================================================
+    // [READ] Get the user's profile after login
+    // ============================================================
     /** Reads {lecturers|students}/{uid} once. */
     public void loadAccountState(String uid, String role, Callback<AccountState> callback) {
         Db.readOnce(Db.root().child(profileNode(role)).child(uid),

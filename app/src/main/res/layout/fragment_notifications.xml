@@ -27,6 +27,7 @@
                 android:layout_weight="1"
                 android:accessibilityHeading="true"
                 android:text="@string/notifications_title"
+                android:visibility="invisible"
                 android:textAppearance="@style/TextAppearance.Attendra.H2" />
 
             <com.google.android.material.button.MaterialButton

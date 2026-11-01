@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Attendra palette, dark mode. -->
+<!-- App colours, dark mode. -->
 <resources>
-    <color name="bg">#0D0C0A</color>
-    <color name="surface">#17150F</color>
-    <color name="raised">#221E16</color>
-    <color name="line">#2E2920</color>
-    <color name="hero">#1B170F</color>
-    <color name="heroLine">#6B5520</color>
-    <color name="ink">#F4EEE2</color>
-    <color name="muted">#ABA290</color>
+    <color name="bg">#121212</color>
+    <color name="surface">#1E1E1E</color>
+    <color name="raised">#2A2A2A</color>
+    <color name="line">#333333</color>
+    <color name="hero">#1E1E1E</color>
+    <color name="heroLine">#333333</color>
+    <color name="ink">#EEEEEE</color>
+    <color name="muted">#AAAAAA</color>
+    <!-- Main colour (buttons, links, selected tab) -->
     <color name="gold">#D9B24C</color>
     <color name="goldText">#E6C466</color>
-    <color name="onGold">#15120A</color>
-    <color name="present">#52C08A</color>
-    <color name="late">#F29A48</color>
-    <color name="absent">#ABA290</color>
-    <color name="rejected">#F2685F</color>
+    <color name="onGold">#1A1A1A</color>
+    <color name="present">#66BB6A</color>
+    <color name="late">#FFA726</color>
+    <color name="absent">#AAAAAA</color>
+    <color name="rejected">#EF5350</color>
     <!-- Blue "you are here" dot on the student check-in map -->
     <color name="my_location">#8AB4F8</color>
 </resources>

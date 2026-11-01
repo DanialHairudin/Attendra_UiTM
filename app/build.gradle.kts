@@ -51,7 +51,7 @@ android {
     buildTypes {
         debug {
             // How long a verification code stays valid.
-            buildConfigField("int", "CODE_TTL_MINUTES", "1")
+            buildConfigField("int", "CODE_TTL_MINUTES", "5")
 
             // Test account logins for the hidden tester panel.
             buildConfigField("String", "TEST_LECTURER_EMAIL", localString("TEST_LECTURER_EMAIL"))
@@ -71,7 +71,7 @@ android {
             buildConfigField("boolean", "USE_EMULATORS", "false")
             buildConfigField("String", "EMULATOR_HOST", "\"\"")
 
-            buildConfigField("int", "CODE_TTL_MINUTES", "10")
+            buildConfigField("int", "CODE_TTL_MINUTES", "5")
 
             // Empty in release, so no test password is ever inside a release APK.
             buildConfigField("String", "TEST_LECTURER_EMAIL", "\"\"")

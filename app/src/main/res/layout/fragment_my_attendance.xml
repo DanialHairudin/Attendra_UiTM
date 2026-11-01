@@ -19,6 +19,7 @@
             android:layout_height="wrap_content"
             android:accessibilityHeading="true"
             android:text="@string/my_attendance_title"
+            android:visibility="gone"
             android:textAppearance="@style/TextAppearance.Attendra.H2" />
 
         <!-- 92% · 41 present · 5 late · 4 absent · of 50 -->

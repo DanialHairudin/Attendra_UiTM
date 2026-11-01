@@ -26,10 +26,16 @@ public class AuthRepository {
         return auth.getCurrentUser();
     }
 
+    // ============================================================
+    // [LOGOUT] Sign the user out
+    // ============================================================
     public void signOut() {
         auth.signOut();
     }
 
+    // ============================================================
+    // [CREATE] Sign up: make the account, then save the profile
+    // ============================================================
     /** Register flow. */
     public void register(Registration r, Callback<Void> callback) {
         auth.createUserWithEmailAndPassword(r.email, r.password)
@@ -71,6 +77,9 @@ public class AuthRepository {
                 .addOnFailureListener(e -> callback.onError(AuthErrors.message(e)));
     }
 
+    // ============================================================
+    // [DELETE] Remove a half-made account if saving the profile failed
+    // ============================================================
     /** Removes the half-made account so the email can be used again, then reports the error. */
     private void undoSignUp(FirebaseUser user, String error, Callback<Void> callback) {
         user.delete().addOnCompleteListener(t -> {
@@ -95,6 +104,9 @@ public class AuthRepository {
         }
     }
 
+    // ============================================================
+    // [LOGIN] Sign in with email and password
+    // ============================================================
     /** Log in, then work out where to go (see resolveHome). */
     public void login(String email, String password, Callback<Route> callback) {
         auth.signInWithEmailAndPassword(email, password)
@@ -109,6 +121,9 @@ public class AuthRepository {
                 .addOnFailureListener(e -> callback.onError(AuthErrors.message(e)));
     }
 
+    // ============================================================
+    // [READ] Decide which screen to open after login
+    // ============================================================
     /**
      * Works out where a signed-in user should go: Verify screen, Preferred Name Page, or the
      * dashboard for their role.
@@ -140,6 +155,9 @@ public class AuthRepository {
         });
     }
 
+    // ============================================================
+    // [READ] Get the role and make sure it is valid
+    // ============================================================
     /** Reads the signed-in user's role from roles/{uid}. */
     public void loadRole(FirebaseUser user, Callback<String> callback) {
         users.getRole(user.getUid(), new Callback<String>() {
@@ -160,6 +178,9 @@ public class AuthRepository {
         });
     }
 
+    // ============================================================
+    // [EMAIL] Send the reset password email
+    // ============================================================
     /** Sends a password reset link. */
     public void sendPasswordReset(String email, Callback<Void> callback) {
         auth.sendPasswordResetEmail(email)

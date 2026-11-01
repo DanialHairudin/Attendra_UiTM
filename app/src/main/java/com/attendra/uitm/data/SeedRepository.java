@@ -14,6 +14,9 @@ import java.util.List;
  */
 public class SeedRepository {
 
+    // ============================================================
+    // [READ] Get the list of programmes
+    // ============================================================
     public void loadProgrammes(Callback<List<Programme>> callback) {
         Db.readOnce(Db.root().child("programmes"), new Callback<DataSnapshot>() {
             @Override
@@ -36,6 +39,9 @@ public class SeedRepository {
         });
     }
 
+    // ============================================================
+    // [READ] Get the list of groups
+    // ============================================================
     public void loadGroups(Callback<List<Group>> callback) {
         Db.readOnce(Db.root().child("groups"), new Callback<DataSnapshot>() {
             @Override
@@ -58,6 +64,9 @@ public class SeedRepository {
         });
     }
 
+    // ============================================================
+    // [READ] Get the list of clubs
+    // ============================================================
     public void loadClubs(Callback<List<Club>> callback) {
         Db.readOnce(Db.root().child("clubs"), new Callback<DataSnapshot>() {
             @Override

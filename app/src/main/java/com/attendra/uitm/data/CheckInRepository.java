@@ -13,6 +13,9 @@ import java.util.Map;
 /** Database side of the student's GPS check-in. */
 public class CheckInRepository {
 
+    // ============================================================
+    // [READ] Check if the student is allowed to check in
+    // ============================================================
     /** Is this student allowed into this session? */
     public void isEligible(Session s, String uid, Callback<Boolean> callback) {
         TestWorld.mine(Registration.ROLE_STUDENT, new Callback<Boolean>() {
@@ -63,6 +66,9 @@ public class CheckInRepository {
                 });
     }
 
+    // ============================================================
+    // [READ] Check if the student already checked in
+    // ============================================================
     /** The student's existing record for this session, or null if there is none. */
     public void existingRecord(String sessionId, String uid,
                                Callback<AttendanceRecord> callback) {
@@ -81,6 +87,9 @@ public class CheckInRepository {
                 });
     }
 
+    // ============================================================
+    // [CREATE] Save the student's check-in (present / late)
+    // ============================================================
     /** Accepted check-in. */
     public void writeAccepted(Session s, String uid, String status, double lat, double lng,
                               double distance, double accuracy, Callback<Long> callback) {
@@ -127,6 +136,9 @@ public class CheckInRepository {
         });
     }
 
+    // ============================================================
+    // [CREATE] Save a failed check-in attempt
+    // ============================================================
     /**
      * Rejected attempt (MOCK_LOCATION or OUTSIDE_RADIUS): logged in attempts only, so the lecturer
      * sees it on the Live Monitor.

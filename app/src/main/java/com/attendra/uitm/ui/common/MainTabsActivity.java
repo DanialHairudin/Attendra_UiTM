@@ -1,7 +1,9 @@
 package com.attendra.uitm.ui.common;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.Nullable;
@@ -42,11 +44,12 @@ public abstract class MainTabsActivity extends BaseActivity {
     protected void setUpTabs(View content, BottomNavigationView nav,
                              @Nullable Bundle savedInstanceState) {
         this.nav = nav;
-        padTopForStatusBar(content);
+        padTopForStatusBar(findViewById(R.id.top_bar));
         nav.setOnItemSelectedListener(item -> {
             showTab(item.getItemId());
             return true;
         });
+        if (savedInstanceState != null) setTopTitle(nav.getSelectedItemId());
         nav.setOnItemReselectedListener(item -> {
             // Already on this tab: nothing to do.
         });
@@ -61,13 +64,25 @@ public abstract class MainTabsActivity extends BaseActivity {
     }
 
     private void showTab(@IdRes int itemId) {
+        setTopTitle(itemId);
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(R.id.main_container, createTab(itemId))
                 .commit();
     }
 
-    /** Pads the tab area below the status bar. */
+    /** Top bar title: the app name on Home, otherwise the tab's name ("Settings"). */
+    private void setTopTitle(@IdRes int itemId) {
+        TextView title = findViewById(R.id.txt_top_title);
+        MenuItem item = nav.getMenu().findItem(itemId);
+        if (itemId == R.id.nav_home || item == null) {
+            title.setText(R.string.app_name);
+        } else {
+            title.setText(item.getTitle());
+        }
+    }
+
+    /** Pads the gold top bar below the status bar, so the gold also fills the status bar area. */
     private void padTopForStatusBar(View content) {
         ViewCompat.setOnApplyWindowInsetsListener(content, (v, windowInsets) -> {
             Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()

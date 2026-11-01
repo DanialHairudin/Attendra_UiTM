@@ -21,77 +21,54 @@
             android:contentDescription="@string/logo_description"
             android:src="@drawable/attendra_logo" />
 
-        <!-- Hero card -->
-        <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.Attendra.Card.Hero"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_marginTop="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="bottom"
-                android:orientation="vertical"
-                android:padding="24dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/auth_login_eyebrow"
-                    android:textAppearance="@style/TextAppearance.Attendra.Eyebrow" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:accessibilityHeading="true"
-                    android:text="@string/auth_login_title"
-                    android:textAppearance="@style/TextAppearance.Attendra.H1" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:accessibilityHeading="true"
+            android:text="@string/auth_login_title"
+            android:textAppearance="@style/TextAppearance.Attendra.H2" />
 
         <TextView
-            style="@style/Widget.Attendra.FieldLabel"
-            android:layout_marginTop="24dp"
-            android:labelFor="@id/input_email"
-            android:text="@string/label_email" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="4dp"
+            android:text="@string/auth_login_eyebrow"
+            android:textAppearance="@style/TextAppearance.Attendra.Eyebrow" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layout_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:startIconDrawable="@drawable/ic_mail">
+            android:hint="@string/label_email"
+            android:layout_marginTop="24dp"
+            app:placeholderText="@string/hint_email">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:autofillHints="emailAddress"
-                android:hint="@string/hint_email"
                 android:imeOptions="actionNext"
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            style="@style/Widget.Attendra.FieldLabel"
-            android:layout_marginTop="16dp"
-            android:labelFor="@id/input_password"
-            android:text="@string/label_password" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layout_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:endIconMode="password_toggle"
-            app:startIconDrawable="@drawable/ic_lock">
+            android:hint="@string/label_password"
+            android:layout_marginTop="16dp"
+            app:endIconMode="password_toggle">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:autofillHints="password"
-                android:hint="@string/hint_password_login"
                 android:imeOptions="actionDone"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>

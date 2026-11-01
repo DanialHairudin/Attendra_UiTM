@@ -162,7 +162,7 @@ public class WhoStepFragment extends BaseStepFragment {
         for (CreateSessionViewModel.Assignment a : vm.assignments) {
             boolean on = a.courseId.equals(vm.courseId) && vm.groups.contains(a.groupId);
             ItemPickRowBinding row = addPick(binding.listPick, false, on,
-                    courseCode(a.courseId) + " · " + a.groupId,
+                    courseCode(a.courseId) + " - " + a.groupId,
                     SessionText.join(courseName(a.courseId), studentsText(a.groupId)));
             row.getRoot().setOnClickListener(v -> {
                 vm().courseId = a.courseId;
@@ -175,8 +175,8 @@ public class WhoStepFragment extends BaseStepFragment {
     }
 
     /**
-     * SULAM: every Part 6 class the lecturer teaches, as one tick list (e.g. ICT652 · CDCS2406A and
-     * ICT652 · CDCS2406B, if those are the classes assigned).
+     * SULAM: every Part 6 class the lecturer teaches, as one tick list (e.g. ICT652 - CDCS2406A and
+     * ICT652 - CDCS2406B, if those are the classes assigned).
      */
     private void renderSulam() {
         CreateSessionViewModel vm = vm();
@@ -202,7 +202,7 @@ public class WhoStepFragment extends BaseStepFragment {
         for (CreateSessionViewModel.Assignment a : classes) {
             boolean on = a.courseId.equals(vm.courseId) && vm.groups.contains(a.groupId);
             ItemPickRowBinding row = addPick(binding.listPick, true, on,
-                    courseCode(a.courseId) + " · " + a.groupId,
+                    courseCode(a.courseId) + " - " + a.groupId,
                     SessionText.join(courseName(a.courseId), studentsText(a.groupId)));
             row.getRoot().setOnClickListener(v -> {
                 CreateSessionViewModel m = vm();
@@ -296,7 +296,7 @@ public class WhoStepFragment extends BaseStepFragment {
         }
     }
 
-    /** "CDCS2405A · 32 students", "3 groups · 96 students" or "ITEC · 48 members". */
+    /** "CDCS2405A - 32 students", "3 groups - 96 students" or "ITEC - 48 members". */
     private void renderSummary() {
         CreateSessionViewModel vm = vm();
         String text = null;
@@ -346,7 +346,7 @@ public class WhoStepFragment extends BaseStepFragment {
         row.pickTitle.setText(title);
         row.pickMeta.setText(meta);
         row.getRoot().setSelected(on);
-        // TalkBack reads e.g. "ICT602 · CDCS2405A, selected".
+        // TalkBack reads e.g. "ICT602 - CDCS2405A, selected".
         row.getRoot().setContentDescription(title + ", " + meta + ", "
                 + getString(on ? R.string.selected : R.string.not_selected));
         Ui.addRow(list, row.getRoot());

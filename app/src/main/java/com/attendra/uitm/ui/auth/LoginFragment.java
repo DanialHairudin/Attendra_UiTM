@@ -109,6 +109,9 @@ public class LoginFragment extends Fragment {
         login(TestAccounts.email(role), TestAccounts.password(role));
     }
 
+    // ============================================================
+    // [LOGIN] Check the email and password boxes first
+    // ============================================================
     private void attemptLogin() {
         String email = text(binding.inputEmail.getText());
         // Passwords are NOT trimmed: a space can be part of a password.
@@ -123,6 +126,9 @@ public class LoginFragment extends Fragment {
         login(email, password);
     }
 
+    // ============================================================
+    // [LOGIN] Sign in, then open the right screen
+    // ============================================================
     /**
      * Signs in and routes: Verify screen if unverified, the Preferred Name Page if no name was
      * picked yet, otherwise the role's dashboard.
