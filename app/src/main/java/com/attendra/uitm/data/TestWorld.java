@@ -12,6 +12,7 @@ import com.google.firebase.database.DatabaseReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,8 @@ public final class TestWorld {
 
     /** Uid → isTest, for the signed-in user and every student looked up. */
     private static final Map<String, Boolean> flags = new HashMap<>();
+    /** Uids with no profile at all: index entries left behind by a removed account. */
+    private static final Set<String> orphans = new HashSet<>();
 
     private TestWorld() {
     }
@@ -110,7 +113,7 @@ public final class TestWorld {
 
     private static Set<String> pick(Collection<String> uids, boolean test) {
         Set<String> out = new LinkedHashSet<>();
-        for (String uid : uids) if (cached(uid) == test) out.add(uid);
+        for (String uid : uids) if (cached(uid) == test && !orphans.contains(uid)) out.add(uid);
         return out;
     }
 
@@ -120,10 +123,12 @@ public final class TestWorld {
             callback.onSuccess(known);
             return;
         }
-        Db.readOnce(profile.child("isTest"), new Callback<DataSnapshot>() {
+        Db.readOnce(profile, new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
-                boolean isTest = Boolean.TRUE.equals(snapshot.getValue(Boolean.class));
+                boolean isTest = Boolean.TRUE.equals(
+                        snapshot.child("isTest").getValue(Boolean.class));
+                if (!snapshot.exists()) orphans.add(uid);
                 flags.put(uid, isTest);
                 callback.onSuccess(isTest);
             }
