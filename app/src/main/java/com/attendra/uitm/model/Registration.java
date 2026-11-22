@@ -29,6 +29,7 @@ public class Registration {
     /** Clubs the student joins, or the clubs the lecturer advises. */
     public List<String> clubIds = new ArrayList<>();
 
+    /** True if a student is signing up. */
     public boolean isStudent() {
         return ROLE_STUDENT.equals(role);
     }

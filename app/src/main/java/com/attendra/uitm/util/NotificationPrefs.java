@@ -20,6 +20,7 @@ public final class NotificationPrefs {
                 .getBoolean(KEY_ON, true);
     }
 
+    /** Remembers the switch. */
     public static void save(Context context, boolean on) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .edit().putBoolean(KEY_ON, on).apply();

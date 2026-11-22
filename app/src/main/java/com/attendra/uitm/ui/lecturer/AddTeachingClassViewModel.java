@@ -8,8 +8,8 @@ import androidx.lifecycle.ViewModel;
 import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
-import com.attendra.uitm.data.SeedRepository;
-import com.attendra.uitm.data.TeachingRepository;
+import com.attendra.uitm.data.SeedJava;
+import com.attendra.uitm.data.TeachingJava;
 import com.attendra.uitm.model.Course;
 import com.attendra.uitm.model.Group;
 import com.attendra.uitm.model.Programme;
@@ -18,6 +18,7 @@ import com.google.firebase.database.DataSnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,22 +47,30 @@ public class AddTeachingClassViewModel extends ViewModel {
     public Course course;
     public final TreeSet<String> groups = new TreeSet<>();
 
+    /** Loading, ready or error. */
     public LiveData<LoadState> getLoadState() {
         return loadState;
     }
 
+    /** Why the data did not load. */
     public String getLoadError() {
         return loadError;
     }
 
+    /** Loads everything the form needs. */
     public void load(String uid) {
         if (started) return;
         started = true;
-        new SeedRepository().loadProgrammes(new Callback<List<Programme>>() {
+        new SeedJava().loadProgrammes(new Callback<List<Programme>>() {
             @Override
             public void onSuccess(List<Programme> list) {
                 programmes.addAll(list);
-                Collections.sort(programmes, (a, b) -> a.code.compareTo(b.code));
+                Collections.sort(programmes, new Comparator<Programme>() {
+                    @Override
+                    public int compare(Programme a, Programme b) {
+                        return a.code.compareTo(b.code);
+                    }
+                });
                 loadGroups(uid);
             }
 
@@ -72,12 +81,18 @@ public class AddTeachingClassViewModel extends ViewModel {
         });
     }
 
+    /** Loads the groups, then the courses. */
     private void loadGroups(String uid) {
-        new SeedRepository().loadGroups(new Callback<List<Group>>() {
+        new SeedJava().loadGroups(new Callback<List<Group>>() {
             @Override
             public void onSuccess(List<Group> list) {
                 allGroups.addAll(list);
-                Collections.sort(allGroups, (a, b) -> a.id.compareTo(b.id));
+                Collections.sort(allGroups, new Comparator<Group>() {
+                    @Override
+                    public int compare(Group a, Group b) {
+                        return a.id.compareTo(b.id);
+                    }
+                });
                 loadCourses(uid);
             }
 
@@ -88,6 +103,7 @@ public class AddTeachingClassViewModel extends ViewModel {
         });
     }
 
+    /** Loads the courses, then the saved classes. */
     private void loadCourses(String uid) {
         SeedCache.load(new Callback<Void>() {
             @Override
@@ -102,11 +118,12 @@ public class AddTeachingClassViewModel extends ViewModel {
         });
     }
 
+    /** Loads the classes the lecturer already has. */
     private void loadExisting(String uid) {
-        Db.readOnce(TeachingRepository.ref(uid), new Callback<DataSnapshot>() {
+        Db.readOnce(TeachingJava.ref(uid), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
-                for (TeachingAssignment a : TeachingRepository.parse(snapshot)) {
+                for (TeachingAssignment a : TeachingJava.parse(snapshot)) {
                     existingKeys.add(a.key());
                 }
                 loadState.setValue(LoadState.READY);
@@ -119,6 +136,7 @@ public class AddTeachingClassViewModel extends ViewModel {
         });
     }
 
+    /** Remembers why loading failed. */
     private void fail(String message) {
         loadError = message;
         loadState.setValue(LoadState.ERROR);
@@ -130,16 +148,25 @@ public class AddTeachingClassViewModel extends ViewModel {
         if (course == null) return;
         // Take the part from the group: the course alone can be in more than one part.
         Group group = findGroup(groupId);
-        part = group != null ? group.part : course.part;
+        if (group != null) {
+            part = group.part;
+        } else {
+            part = course.part;
+        }
         for (Programme p : programmes) {
-            if (p.code.equals(course.programme)) programme = p;
+            if (p.code.equals(course.programme)) {
+                programme = p;
+            }
         }
         groups.add(groupId);
     }
 
     /** Parts 1..n of the chosen programme. */
     public int partCount() {
-        return programme == null ? 0 : programme.parts;
+        if (programme == null) {
+            return 0;
+        }
+        return programme.parts;
     }
 
     /**
@@ -150,11 +177,15 @@ public class AddTeachingClassViewModel extends ViewModel {
         if (programme == null || part == 0) return new ArrayList<>();
         List<Course> list = SeedCache.coursesFor(programme.code, part);
         String track = groupTrack();
-        Collections.sort(list, (a, b) -> {
-            boolean aFirst = a.inTrack(track, part);
-            boolean bFirst = b.inTrack(track, part);
-            if (aFirst != bFirst) return aFirst ? -1 : 1;
-            return a.label().compareToIgnoreCase(b.label());
+        Collections.sort(list, new Comparator<Course>() {
+            @Override
+            public int compare(Course a, Course b) {
+                boolean aFirst = a.inTrack(track, part);
+                boolean bFirst = b.inTrack(track, part);
+                if (aFirst && !bFirst) return -1;
+                if (bFirst && !aFirst) return 1;
+                return a.label().compareToIgnoreCase(b.label());
+            }
         });
         return list;
     }
@@ -184,14 +215,19 @@ public class AddTeachingClassViewModel extends ViewModel {
         if (c == null || !c.isElective() || programme == null) return null;
         List<String> labels = new ArrayList<>();
         for (String trackId : new TreeSet<>(c.tracks.keySet())) {
-            if (c.inTrack(trackId, part)) labels.add(programme.trackLabel(trackId));
+            if (c.inTrack(trackId, part)) {
+                labels.add(programme.trackLabel(trackId));
+            }
         }
         return labels;
     }
 
+    /** One group by its ID, or null. */
     @Nullable
     private Group findGroup(String id) {
-        for (Group g : allGroups) if (g.id.equals(id)) return g;
+        for (Group g : allGroups) {
+            if (g.id.equals(id)) return g;
+        }
         return null;
     }
 
@@ -200,7 +236,9 @@ public class AddTeachingClassViewModel extends ViewModel {
         List<Group> list = new ArrayList<>();
         if (programme == null || part == 0) return list;
         for (Group g : allGroups) {
-            if (programme.code.equals(g.programme) && g.part == part) list.add(g);
+            if (programme.code.equals(g.programme) && g.part == part) {
+                list.add(g);
+            }
         }
         return list;
     }

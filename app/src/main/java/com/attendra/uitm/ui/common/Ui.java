@@ -29,9 +29,21 @@ public final class Ui {
     /** Shows one of: the "Loading…" text, the empty-state message, or the list. */
     public static void showListState(ListState state, View loading, ViewEmptyBinding empty,
                                      View list) {
-        loading.setVisibility(state == ListState.LOADING ? View.VISIBLE : View.GONE);
-        empty.getRoot().setVisibility(state == ListState.EMPTY ? View.VISIBLE : View.GONE);
-        list.setVisibility(state == ListState.CONTENT ? View.VISIBLE : View.GONE);
+        if (state == ListState.LOADING) {
+            loading.setVisibility(View.VISIBLE);
+        } else {
+            loading.setVisibility(View.GONE);
+        }
+        if (state == ListState.EMPTY) {
+            empty.getRoot().setVisibility(View.VISIBLE);
+        } else {
+            empty.getRoot().setVisibility(View.GONE);
+        }
+        if (state == ListState.CONTENT) {
+            list.setVisibility(View.VISIBLE);
+        } else {
+            list.setVisibility(View.GONE);
+        }
     }
 
     /** Fills the "Empty State Page" style message inside a card. */
@@ -78,12 +90,18 @@ public final class Ui {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(now);
         int hour = cal.get(Calendar.HOUR_OF_DAY);
-        int res = hour < 12 ? R.string.greeting_morning
-                : hour < 18 ? R.string.greeting_afternoon
-                : R.string.greeting_evening;
+        int res;
+        if (hour < 12) {
+            res = R.string.greeting_morning;
+        } else if (hour < 18) {
+            res = R.string.greeting_afternoon;
+        } else {
+            res = R.string.greeting_evening;
+        }
         return c.getString(res, name);
     }
 
+    /** Changes dp to pixels. */
     public static int dp(Context c, int dp) {
         return Math.round(dp * c.getResources().getDisplayMetrics().density);
     }

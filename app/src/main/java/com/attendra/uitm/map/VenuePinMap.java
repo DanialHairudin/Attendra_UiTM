@@ -50,7 +50,12 @@ public class VenuePinMap {
         circle.getFillPaint().setColor((gold & 0x00FFFFFF) | 0x33000000);  // 20% opacity fill
         circle.getOutlinePaint().setColor(gold);
         circle.getOutlinePaint().setStrokeWidth(4f);
-        circle.setOnClickListener((poly, mv, pos) -> false);                 // Let taps go through to the map
+        circle.setOnClickListener(new Polygon.OnClickListener() {
+            @Override
+            public boolean onClick(Polygon poly, MapView mv, GeoPoint pos) {
+                return false;
+            }
+        });                 // Let taps go through to the map
 
         // Venue pin.
         pin = new Marker(map);
@@ -58,7 +63,12 @@ public class VenuePinMap {
         pin.setDraggable(true);
         pin.setInfoWindow(null);
         pin.setIcon(ContextCompat.getDrawable(ctx, R.drawable.ic_map_pin));  // Gold app pin
-        pin.setOnMarkerClickListener((m, mv) -> true);                        // No popup, no auto-centre
+        pin.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker m, MapView mv) {
+                return true;
+            }
+        });                        // No popup, no auto-centre
         pin.setOnMarkerDragListener(new Marker.OnMarkerDragListener() {
             @Override public void onMarkerDrag(Marker m) { drawCircle(m.getPosition()); }
             @Override public void onMarkerDragEnd(Marker m) { notifyMoved(m.getPosition()); }
@@ -83,6 +93,7 @@ public class VenuePinMap {
         map.getController().setCenter(new GeoPoint(lat, lng));
     }
 
+    /** Sets who is told when the pin moves. */
     public void setListener(Listener l) { this.listener = l; }
 
     /**
@@ -99,7 +110,9 @@ public class VenuePinMap {
         GeoPoint p = new GeoPoint(lat, lng);
         pin.setPosition(p);
         drawCircle(p);
-        if (animate) map.getController().animateTo(p, 17.5, 600L);
+        if (animate) {
+            map.getController().animateTo(p, 17.5, 600L);
+        }
         notifyMoved(p);
     }
 
@@ -109,8 +122,11 @@ public class VenuePinMap {
         drawCircle(pin.getPosition());
     }
 
+    /** Latitude of the pin. */
     public double getLat() { return pin.getPosition().getLatitude(); }
+    /** Longitude of the pin. */
     public double getLng() { return pin.getPosition().getLongitude(); }
+    /** Radius of the circle in metres. */
     public double getRadius() { return radiusM; }
 
     /** Shows the lecturer's own location as a blue dot. */
@@ -144,17 +160,30 @@ public class VenuePinMap {
             onNoFixYet.run();
             // Move as soon as the first GPS fix arrives (runs on a background thread, so post to
             // the UI thread).
-            myLocation.runOnFirstFix(() -> map.post(() -> {
-                GeoPoint g = myLocation.getMyLocation();
-                if (g != null) setPin(g.getLatitude(), g.getLongitude(), true);
-            }));
+            myLocation.runOnFirstFix(new Runnable() {
+                @Override
+                public void run() {
+                    map.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            GeoPoint g = myLocation.getMyLocation();
+                            if (g != null) {
+                                setPin(g.getLatitude(), g.getLongitude(), true);
+                            }
+                        }
+                    });
+                }
+            });
         }
     }
 
     /** The blue dot's position, or null before showMyLocation() or before the first GPS fix. */
     @Nullable
     public GeoPoint getMyLocation() {
-        return myLocation == null ? null : myLocation.getMyLocation();
+        if (myLocation == null) {
+            return null;
+        }
+        return myLocation.getMyLocation();
     }
 
     /** Student map: zooms out so the whole radius circle and the blue dot fit. */
@@ -164,32 +193,68 @@ public class VenuePinMap {
             fitVenueAnd(myLocation.getMyLocation());
         } else {
             // runOnFirstFix runs on a background thread, so post to the UI thread.
-            myLocation.runOnFirstFix(() -> map.post(() -> {
-                GeoPoint g = myLocation.getMyLocation();
-                if (g != null) fitVenueAnd(g);
-            }));
+            myLocation.runOnFirstFix(new Runnable() {
+                @Override
+                public void run() {
+                    map.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            GeoPoint g = myLocation.getMyLocation();
+                            if (g != null) {
+                                fitVenueAnd(g);
+                            }
+                        }
+                    });
+                }
+            });
         }
     }
 
+    /** Zooms so the venue and this point are both visible. */
     private void fitVenueAnd(GeoPoint me) {
         List<GeoPoint> pts = new ArrayList<>(Polygon.pointsAsCircle(pin.getPosition(), radiusM));
         pts.add(me);
         BoundingBox box = BoundingBox.fromGeoPointsSafe(pts).increaseByScale(1.3f);
-        map.post(() -> map.zoomToBoundingBox(box, true));
+        map.post(new Runnable() {
+            @Override
+            public void run() {
+                map.zoomToBoundingBox(box, true);
+            }
+        });
     }
 
     // ---- lifecycle: call from the Fragment / Activity
-    public void onResume() { map.onResume(); if (myLocation != null) myLocation.enableMyLocation(); }
-    public void onPause()  { if (myLocation != null) myLocation.disableMyLocation(); map.onPause(); }
-    public void onDestroyView() { map.onDetach(); }
+    public void onResume() {
+        map.onResume();
+        if (myLocation != null) {
+            myLocation.enableMyLocation();
+        }
+    }
 
+    /** Call from the page's onPause. */
+    public void onPause() {
+        if (myLocation != null) {
+            myLocation.disableMyLocation();
+        }
+        map.onPause();
+    }
+
+    /** Call when the page closes. */
+    public void onDestroyView() {
+        map.onDetach();
+    }
+
+    /** Draws the check-in circle around the pin. */
     private void drawCircle(GeoPoint centre) {
         circle.setPoints(Polygon.pointsAsCircle(centre, radiusM));
         map.invalidate();
     }
 
+    /** Tells the page where the pin is now. */
     private void notifyMoved(GeoPoint p) {
         map.invalidate();
-        if (listener != null) listener.onPinMoved(p.getLatitude(), p.getLongitude());
+        if (listener != null) {
+            listener.onPinMoved(p.getLatitude(), p.getLongitude());
+        }
     }
 }

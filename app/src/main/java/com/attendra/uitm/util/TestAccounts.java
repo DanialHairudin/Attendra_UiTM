@@ -19,13 +19,19 @@ public final class TestAccounts {
         return enabled() && !email(role).isEmpty() && !password(role).isEmpty();
     }
 
+    /** The tester account's email. */
     public static String email(String role) {
-        return Registration.ROLE_LECTURER.equals(role)
-                ? BuildConfig.TEST_LECTURER_EMAIL : BuildConfig.TEST_STUDENT_EMAIL;
+        if (Registration.ROLE_LECTURER.equals(role)) {
+            return BuildConfig.TEST_LECTURER_EMAIL;
+        }
+        return BuildConfig.TEST_STUDENT_EMAIL;
     }
 
+    /** The tester account's password. */
     public static String password(String role) {
-        return Registration.ROLE_LECTURER.equals(role)
-                ? BuildConfig.TEST_LECTURER_PASS : BuildConfig.TEST_STUDENT_PASS;
+        if (Registration.ROLE_LECTURER.equals(role)) {
+            return BuildConfig.TEST_LECTURER_PASS;
+        }
+        return BuildConfig.TEST_STUDENT_PASS;
     }
 }

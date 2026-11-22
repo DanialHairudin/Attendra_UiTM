@@ -15,6 +15,7 @@ import com.attendra.uitm.R;
 public final class MapIcons {
     private MapIcons() { }
 
+    /** A round dot in the given colour. */
     public static Drawable dot(Context ctx, int colorRes) {
         GradientDrawable g = new GradientDrawable();
         g.setShape(GradientDrawable.OVAL);
@@ -36,12 +37,14 @@ public final class MapIcons {
         return b;
     }
 
+    /** The colour for a status. */
     public static int statusColor(String status) {
         if ("present".equals(status)) return R.color.present;
         if ("late".equals(status)) return R.color.late;
         return R.color.rejected;
     }
 
+    /** Changes dp to pixels. */
     static int dp(Context ctx, int v) {
         return Math.round(v * ctx.getResources().getDisplayMetrics().density);
     }

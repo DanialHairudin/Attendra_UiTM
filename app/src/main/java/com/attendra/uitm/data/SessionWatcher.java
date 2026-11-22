@@ -48,7 +48,9 @@ public class SessionWatcher {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
                 Set<String> ids = new HashSet<>();
-                for (DataSnapshot child : snapshot.getChildren()) ids.add(child.getKey());
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    ids.add(child.getKey());
+                }
                 idsByIndex.put(name, ids);
                 sync();
             }
@@ -66,7 +68,9 @@ public class SessionWatcher {
     /** Stops following an index node (e.g. the student left a club). */
     public void unwatchIndex(String name) {
         Subscriptions.Handle h = indexHandles.remove(name);
-        if (h != null) h.remove();
+        if (h != null) {
+            h.remove();
+        }
         idsByIndex.remove(name);
         sync();
     }
@@ -90,7 +94,9 @@ public class SessionWatcher {
     private void sync() {
         Set<String> wanted = new HashSet<>();
         for (Set<String> ids : idsByIndex.values()) {
-            if (ids != null) wanted.addAll(ids);
+            if (ids != null) {
+                wanted.addAll(ids);
+            }
         }
         for (String id : new HashSet<>(sessionHandles.keySet())) {
             if (!wanted.contains(id)) {
@@ -100,11 +106,14 @@ public class SessionWatcher {
             }
         }
         for (String id : wanted) {
-            if (!sessionHandles.containsKey(id)) listenToSession(id);
+            if (!sessionHandles.containsKey(id)) {
+                listenToSession(id);
+            }
         }
         publish();
     }
 
+    /** Follows one session. */
     private void listenToSession(String id) {
         sessionHandles.put(id, subs.listen(Db.root().child("sessions").child(id),
                 new Callback<DataSnapshot>() {
@@ -130,6 +139,7 @@ public class SessionWatcher {
                 }));
     }
 
+    /** Tells the page about the newest list. */
     private void publish() {
         boolean ready = !idsByIndex.containsValue(null)
                 && loaded.containsAll(sessionHandles.keySet());

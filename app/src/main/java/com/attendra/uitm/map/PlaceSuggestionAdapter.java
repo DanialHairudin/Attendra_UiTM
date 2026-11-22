@@ -43,8 +43,17 @@ public class PlaceSuggestionAdapter extends RecyclerView.Adapter<PlaceSuggestion
         PlaceResult p = items.get(position);
         h.title.setText(p.title);
         h.subtitle.setText(p.subtitle);
-        h.subtitle.setVisibility(p.subtitle.isEmpty() ? View.GONE : View.VISIBLE);
-        h.itemView.setOnClickListener(v -> onPick.onPick(p));
+        if (p.subtitle.isEmpty()) {
+            h.subtitle.setVisibility(View.GONE);
+        } else {
+            h.subtitle.setVisibility(View.VISIBLE);
+        }
+        h.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPick.onPick(p);
+            }
+        });
     }
 
     @Override public int getItemCount() { return items.size(); }

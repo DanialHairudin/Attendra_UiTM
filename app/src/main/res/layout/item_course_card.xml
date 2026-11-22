@@ -66,5 +66,15 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+
+        <!-- "Below 80% - please attend the next classes" -->
+        <TextView
+            android:id="@+id/course_warning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption"
+            android:textColor="@color/rejected"
+            android:visibility="gone" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

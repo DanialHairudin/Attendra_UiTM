@@ -54,27 +54,33 @@ public final class TestWorld {
             callback.onSuccess(false);
             return;
         }
-        read(user.getUid(), UserRepository.profileRef(user.getUid(), role), callback);
+        read(user.getUid(), UserJava.profileRef(user.getUid(), role), callback);
     }
 
     /** Keeps only the students in the given world (test or real), in the same order. */
     public static void filter(Collection<String> uids, boolean test,
                               Callback<Set<String>> callback) {
         List<String> todo = new ArrayList<>();
-        for (String uid : uids) if (!flags.containsKey(uid)) todo.add(uid);
+        for (String uid : uids) {
+            if (!flags.containsKey(uid)) {
+                todo.add(uid);
+            }
+        }
         if (todo.isEmpty()) {
             callback.onSuccess(pick(uids, test));
             return;
         }
         // Read the missing ones in parallel; answer once the last one is back.
+        // Arrays of one, because a variable used inside a callback can't be changed there.
         final int[] left = {todo.size()};
         final boolean[] failed = {false};
         for (String uid : todo) {
-            read(uid, UserRepository.profileRef(uid, Registration.ROLE_STUDENT),
+            read(uid, UserJava.profileRef(uid, Registration.ROLE_STUDENT),
                     new Callback<Boolean>() {
                         @Override
                         public void onSuccess(Boolean isTest) {
-                            if (--left[0] == 0 && !failed[0]) {
+                            left[0]--;
+                            if (left[0] == 0 && !failed[0]) {
                                 callback.onSuccess(pick(uids, test));
                             }
                         }
@@ -107,16 +113,24 @@ public final class TestWorld {
     /** The uids (children) of an index snapshot such as studentsByGroup/{group}. */
     public static List<String> keys(DataSnapshot snapshot) {
         List<String> uids = new ArrayList<>();
-        for (DataSnapshot child : snapshot.getChildren()) uids.add(child.getKey());
+        for (DataSnapshot child : snapshot.getChildren()) {
+            uids.add(child.getKey());
+        }
         return uids;
     }
 
+    /** The students from this world, without removed accounts. */
     private static Set<String> pick(Collection<String> uids, boolean test) {
         Set<String> out = new LinkedHashSet<>();
-        for (String uid : uids) if (cached(uid) == test && !orphans.contains(uid)) out.add(uid);
+        for (String uid : uids) {
+            if (cached(uid) == test && !orphans.contains(uid)) {
+                out.add(uid);
+            }
+        }
         return out;
     }
 
+    /** Reads isTest once and remembers it. */
     private static void read(String uid, DatabaseReference profile, Callback<Boolean> callback) {
         Boolean known = flags.get(uid);
         if (known != null) {
@@ -128,7 +142,9 @@ public final class TestWorld {
             public void onSuccess(DataSnapshot snapshot) {
                 boolean isTest = Boolean.TRUE.equals(
                         snapshot.child("isTest").getValue(Boolean.class));
-                if (!snapshot.exists()) orphans.add(uid);
+                if (!snapshot.exists()) {
+                    orphans.add(uid);
+                }
                 flags.put(uid, isTest);
                 callback.onSuccess(isTest);
             }

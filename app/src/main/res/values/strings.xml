@@ -664,4 +664,56 @@ CS2 - Makmal 3 - closes 10:00 AM</string>
     </plurals>
     <string name="delete_notification">Delete notification</string>
     <string name="notification_deleted">Notification deleted</string>
+
+    <!-- One phone per student -->
+    <string name="phone_linked_title">Phone already linked</string>
+    <string name="phone_linked_body">This phone is already linked to another student account. Each student account can only be used on one phone.</string>
+    <string name="phone_move_question">This account is linked to another phone. Move it to this phone? We will send a 6-digit code to your email.</string>
+    <string name="phone_move_yes">Move to this phone</string>
+    <string name="phone_move_wait_title">Account linked to another phone</string>
+    <string name="phone_move_wait_body">You already moved this account to another phone recently. You can move it again after %1$s. If you lost your phone, please tell your lecturer.</string>
+    <string name="phone_error_title">Could not check this phone</string>
+
+    <!-- Semester summary and attendance alert -->
+    <string name="semester_summary">Semester summary</string>
+    <string name="below_limit">Below %1$d%%</string>
+    <string name="below_limit_student">Below %1$d%% - please attend the next classes</string>
+    <string name="summary_empty_title">No closed sessions yet</string>
+    <string name="summary_empty_body">No closed sessions yet for this class.</string>
+    <string name="summary_none_title">Nobody is below the limit</string>
+    <string name="summary_none_body">Every student with records has enough attendance.</string>
+    <string name="alert_title">Attendance below %1$d%%</string>
+    <string name="alert_body">Your %1$s attendance is %2$d%% (%3$d of %4$d sessions).</string>
+    <string-array name="summary_csv_columns">
+        <item>Name</item>
+        <item>Student ID</item>
+        <item>Present</item>
+        <item>Late</item>
+        <item>Absent</item>
+        <item>Percent</item>
+    </string-array>
+
+    <!-- Weekly sessions -->
+    <string name="repeat_weekly">Repeat weekly</string>
+    <string name="repeat_until">Until</string>
+    <string name="repeat_week">Week %1$d</string>
+    <string name="repeat_week_date">W%1$d - %2$s %3$s</string>
+    <string name="repeat_skip_hint">Untick a week to skip it, for example the mid-semester break.</string>
+    <string name="repeat_summary">%1$d sessions, every %2$s, %3$s</string>
+    <string name="repeat_too_few">Tick at least 2 weeks.</string>
+    <string name="review_repeat">Repeats weekly</string>
+    <string name="review_repeat_value">%1$d sessions, %2$s to %3$s</string>
+    <string name="weekly_created">%1$d weekly sessions created</string>
+    <string name="week_n_of_m">Week %1$d of %2$d</string>
+    <string name="filter_upcoming">Upcoming</string>
+    <string name="cancel_this_week">Cancel this week</string>
+    <string name="cancel_all_weeks">Cancel all future weeks</string>
+    <plurals name="weeks_cancelled">
+        <item quantity="one">%1$d week cancelled</item>
+        <item quantity="other">%1$d weeks cancelled</item>
+    </plurals>
+    <plurals name="past_sessions_closed">
+        <item quantity="one">%1$d past session closed</item>
+        <item quantity="other">%1$d past sessions closed</item>
+    </plurals>
 </resources>

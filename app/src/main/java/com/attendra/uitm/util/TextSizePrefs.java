@@ -29,17 +29,23 @@ public final class TextSizePrefs {
     /** The saved level (0–3), or DEFAULT if never changed. */
     public static int get(Context context) {
         int level = prefs(context).getInt(KEY_TEXT_SIZE, DEFAULT);
-        return level < SMALL || level > EXTRA_LARGE ? DEFAULT : level;
+        if (level < SMALL || level > EXTRA_LARGE) {
+            return DEFAULT;
+        }
+        return level;
     }
 
+    /** Remembers the text size. */
     public static void save(Context context, int level) {
         prefs(context).edit().putInt(KEY_TEXT_SIZE, level).apply();
     }
 
+    /** How much bigger or smaller the text is. */
     public static float scale(int level) {
         return SCALES[level];
     }
 
+    /** The name of a text size. */
     @StringRes
     public static int label(int level) {
         return LABELS[level];
@@ -54,6 +60,7 @@ public final class TextSizePrefs {
         return base.createConfigurationContext(config);
     }
 
+    /** Where the setting is saved on the phone. */
     private static SharedPreferences prefs(Context context) {
         return context.getApplicationContext()
                 .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

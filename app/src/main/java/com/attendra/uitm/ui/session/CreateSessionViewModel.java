@@ -8,8 +8,9 @@ import androidx.lifecycle.ViewModel;
 import com.attendra.uitm.data.Callback;
 import com.attendra.uitm.data.Db;
 import com.attendra.uitm.data.SeedCache;
-import com.attendra.uitm.data.TeachingRepository;
-import com.attendra.uitm.data.UserRepository;
+import com.attendra.uitm.data.SessionJava;
+import com.attendra.uitm.data.TeachingJava;
+import com.attendra.uitm.data.UserJava;
 import com.attendra.uitm.model.Building;
 import com.attendra.uitm.model.Course;
 import com.attendra.uitm.model.Registration;
@@ -21,6 +22,7 @@ import com.google.firebase.database.DataSnapshot;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,6 +50,9 @@ public class CreateSessionViewModel extends ViewModel {
     public static final int RADIUS_MIN = 30;
     public static final int RADIUS_MAX = 150;
     public static final int RADIUS_DEFAULT = 60;
+    /** A semester has 14 teaching weeks; 16 leaves room for breaks. */
+    public static final int DEFAULT_WEEKS = 14;
+    public static final int MAX_WEEKS = 16;
     /** Map start point when nothing else is known: UiTM Shah Alam main campus. */
     public static final double DEFAULT_LAT = 3.0698;
     public static final double DEFAULT_LNG = 101.5037;
@@ -85,6 +90,12 @@ public class CreateSessionViewModel extends ViewModel {
     public int startMinute;
     public int endMinute;
     public int lateMinutes = 15; // default: late 15 minutes after the start
+    /** "Repeat weekly" on the Time step. */
+    public boolean repeatWeekly;
+    /** Last week that can be ticked (week 1 is the chosen date). */
+    public int untilWeek = DEFAULT_WEEKS;
+    /** Weeks the lecturer unticked, e.g. the mid-semester break. */
+    public final TreeSet<Integer> skippedWeeks = new TreeSet<>();
     /** Live eligible-student count from the Participants step, for the Review step. */
     public int eligibleCount;
 
@@ -101,10 +112,12 @@ public class CreateSessionViewModel extends ViewModel {
         day = c.getTimeInMillis();
     }
 
+    /** Loading, ready or error. */
     public LiveData<LoadState> getLoadState() {
         return loadState;
     }
 
+    /** Why the data did not load. */
     public String getLoadError() {
         return loadError;
     }
@@ -126,12 +139,13 @@ public class CreateSessionViewModel extends ViewModel {
         });
     }
 
+    /** Loads the lecturer's classes, then the clubs. */
     private void loadAssignments() {
-        Db.readOnce(TeachingRepository.ref(uid), new Callback<DataSnapshot>() {
+        Db.readOnce(TeachingJava.ref(uid), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
                 // Only this semester's classes can have sessions.
-                for (TeachingAssignment a : TeachingRepository.current(TeachingRepository.parse(snapshot))) {
+                for (TeachingAssignment a : TeachingJava.current(TeachingJava.parse(snapshot))) {
                     assignments.add(new Assignment(a.courseId, a.groupId));
                 }
                 loadClubs();
@@ -144,12 +158,13 @@ public class CreateSessionViewModel extends ViewModel {
         });
     }
 
+    /** Loads the clubs the lecturer advises, then the buildings. */
     private void loadClubs() {
         String role = Registration.ROLE_LECTURER;
-        Db.readOnce(UserRepository.clubsQuery(uid, role), new Callback<DataSnapshot>() {
+        Db.readOnce(UserJava.clubsQuery(uid, role), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
-                advisedClubs.addAll(UserRepository.clubIds(snapshot, uid, role));
+                advisedClubs.addAll(UserJava.clubIds(snapshot, uid, role));
                 loadBuildings();
             }
 
@@ -160,6 +175,7 @@ public class CreateSessionViewModel extends ViewModel {
         });
     }
 
+    /** Loads the buildings, then the data is ready. */
     private void loadBuildings() {
         Db.readOnce(Db.root().child("buildings"), new Callback<DataSnapshot>() {
             @Override
@@ -182,6 +198,7 @@ public class CreateSessionViewModel extends ViewModel {
         });
     }
 
+    /** Remembers why loading failed. */
     private void fail(String message) {
         loadError = message;
         loadState.setValue(LoadState.ERROR);
@@ -189,6 +206,7 @@ public class CreateSessionViewModel extends ViewModel {
 
     // ---------------------------------------------------------- rules / helpers
 
+    /** True if this session type was chosen. */
     public boolean isType(String t) {
         return t.equals(type);
     }
@@ -200,7 +218,9 @@ public class CreateSessionViewModel extends ViewModel {
         courseId = null;
         groups.clear();
         clubId = null;
-        if (!titleEdited) title = "";
+        if (!titleEdited) {
+            title = "";
+        }
     }
 
     /**
@@ -219,7 +239,11 @@ public class CreateSessionViewModel extends ViewModel {
     /** The distinct courses the lecturer teaches, in order (Test step). */
     public List<String> courses() {
         List<String> list = new ArrayList<>();
-        for (Assignment a : assignments) if (!list.contains(a.courseId)) list.add(a.courseId);
+        for (Assignment a : assignments) {
+            if (!list.contains(a.courseId)) {
+                list.add(a.courseId);
+            }
+        }
         return list;
     }
 
@@ -241,7 +265,9 @@ public class CreateSessionViewModel extends ViewModel {
         if (course == null) return missing;
         List<String> mine = groupsFor(courseId);
         for (String g : SeedCache.groupIdsFor(course.programme, course.part)) {
-            if (!mine.contains(g)) missing.add(g);
+            if (!mine.contains(g)) {
+                missing.add(g);
+            }
         }
         return missing;
     }
@@ -249,14 +275,22 @@ public class CreateSessionViewModel extends ViewModel {
     /** Every assigned class (course + group) the lecturer may use for SULAM. */
     public List<Assignment> sulamClasses() {
         List<Assignment> list = new ArrayList<>();
-        for (Assignment a : assignments) if (isSulamCourse(a.courseId)) list.add(a);
+        for (Assignment a : assignments) {
+            if (isSulamCourse(a.courseId)) {
+                list.add(a);
+            }
+        }
         return list;
     }
 
     /** The lecturer's groups for one course. */
     public List<String> groupsFor(String course) {
         List<String> list = new ArrayList<>();
-        for (Assignment a : assignments) if (a.courseId.equals(course)) list.add(a.groupId);
+        for (Assignment a : assignments) {
+            if (a.courseId.equals(course)) {
+                list.add(a.groupId);
+            }
+        }
         return list;
     }
 
@@ -267,16 +301,27 @@ public class CreateSessionViewModel extends ViewModel {
         return courseId != null && !groups.isEmpty();
     }
 
+    /** The chosen building, or null. */
     @Nullable
     public Building selectedBuilding() {
-        return building == null ? null : buildings.get(building);
+        if (building == null) {
+            return null;
+        }
+        return buildings.get(building);
     }
 
     /** Rooms of a building, sorted by `order`. */
     public List<Venue> roomsIn(String buildingId) {
         List<Venue> rooms = new ArrayList<>();
-        for (Venue v : SeedCache.venuesIn(buildingId)) rooms.add(v);
-        Collections.sort(rooms, (a, b) -> Integer.compare(a.order, b.order));
+        for (Venue v : SeedCache.venuesIn(buildingId)) {
+            rooms.add(v);
+        }
+        Collections.sort(rooms, new Comparator<Venue>() {
+            @Override
+            public int compare(Venue a, Venue b) {
+                return Integer.compare(a.order, b.order);
+            }
+        });
         return rooms;
     }
 
@@ -287,14 +332,33 @@ public class CreateSessionViewModel extends ViewModel {
         return b != null && b.hasLocation() && venueId != null;
     }
 
+    /** Start of the session in milliseconds. */
     public long startTime() {
         return day + startMinute * 60_000L;
     }
 
+    /** End of the session in milliseconds. */
     public long endTime() {
         return day + endMinute * 60_000L;
     }
 
+    /** The ticked weeks, e.g. 1, 2, 3, 5. */
+    public List<Integer> tickedWeeks() {
+        List<Integer> weeks = new ArrayList<>();
+        for (int week = 1; week <= untilWeek; week++) {
+            if (!skippedWeeks.contains(week)) {
+                weeks.add(week);
+            }
+        }
+        return weeks;
+    }
+
+    /** Start of the session in this week. */
+    public long startInWeek(int week) {
+        return startTime() + (week - 1) * SessionJava.ONE_WEEK_MS;
+    }
+
+    /** Check-ins after this time are Late. */
     public long lateAfterTime() {
         return startTime() + lateMinutes * 60_000L;
     }
@@ -310,7 +374,9 @@ public class CreateSessionViewModel extends ViewModel {
         } else {
             s.courseId = courseId;
             s.groups = new HashMap<>();
-            for (String g : groups) s.groups.put(g, true);
+            for (String g : groups) {
+                s.groups.put(g, true);
+            }
         }
         if (usesPin()) {
             s.where = "pin";

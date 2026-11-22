@@ -11,6 +11,7 @@ import com.google.firebase.database.DataSnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,10 +76,13 @@ public final class SeedCache {
         }
         for (DataSnapshot t : c.child("tracks").getChildren()) {
             Integer part = t.getValue(Integer.class);
-            if (part != null) course.tracks.put(t.getKey(), part);
+            if (part != null) {
+                course.tracks.put(t.getKey(), part);
+            }
         }
     }
 
+    /** Loads the rooms, then the clubs. */
     private static void loadVenues(Callback<Void> callback) {
         Db.readOnce(Db.root().child("venues"), new Callback<DataSnapshot>() {
             @Override
@@ -100,11 +104,14 @@ public final class SeedCache {
         });
     }
 
+    /** Loads the clubs, then the programmes. */
     private static void loadClubs(Callback<Void> callback) {
-        new SeedRepository().loadClubs(new Callback<List<Club>>() {
+        new SeedJava().loadClubs(new Callback<List<Club>>() {
             @Override
             public void onSuccess(List<Club> clubs) {
-                for (Club club : clubs) CLUBS.put(club.id, club);
+                for (Club club : clubs) {
+                    CLUBS.put(club.id, club);
+                }
                 loadProgrammes(callback);
             }
 
@@ -115,11 +122,14 @@ public final class SeedCache {
         });
     }
 
+    /** Loads the programmes, then the groups. */
     private static void loadProgrammes(Callback<Void> callback) {
-        new SeedRepository().loadProgrammes(new Callback<List<Programme>>() {
+        new SeedJava().loadProgrammes(new Callback<List<Programme>>() {
             @Override
             public void onSuccess(List<Programme> programmes) {
-                for (Programme p : programmes) PROGRAMMES.put(p.code, p);
+                for (Programme p : programmes) {
+                    PROGRAMMES.put(p.code, p);
+                }
                 loadGroups(callback);
             }
 
@@ -130,8 +140,9 @@ public final class SeedCache {
         });
     }
 
+    /** Loads the groups. This is the last step. */
     private static void loadGroups(Callback<Void> callback) {
-        new SeedRepository().loadGroups(new Callback<List<Group>>() {
+        new SeedJava().loadGroups(new Callback<List<Group>>() {
             @Override
             public void onSuccess(List<Group> groups) {
                 GROUPS.clear();
@@ -147,15 +158,22 @@ public final class SeedCache {
         });
     }
 
+    /** One programme by its code, or null. */
     @Nullable
     public static Programme programme(@Nullable String code) {
-        return code == null ? null : PROGRAMMES.get(code);
+        if (code == null) {
+            return null;
+        }
+        return PROGRAMMES.get(code);
     }
 
+    /** One group by its ID, or null. */
     @Nullable
     public static Group group(@Nullable String id) {
         if (id == null) return null;
-        for (Group g : GROUPS) if (id.equals(g.id)) return g;
+        for (Group g : GROUPS) {
+            if (id.equals(g.id)) return g;
+        }
         return null;
     }
 
@@ -163,7 +181,9 @@ public final class SeedCache {
     public static List<String> groupIdsFor(String programme, int part) {
         List<String> ids = new ArrayList<>();
         for (Group g : GROUPS) {
-            if (programme != null && programme.equals(g.programme) && g.part == part) ids.add(g.id);
+            if (programme != null && programme.equals(g.programme) && g.part == part) {
+                ids.add(g.id);
+            }
         }
         Collections.sort(ids);
         return ids;
@@ -178,13 +198,22 @@ public final class SeedCache {
             // A course code, or the course ID while the code is still TBC.
             return p.sulamCourse.equalsIgnoreCase(course.code) || p.sulamCourse.equals(course.id);
         }
-        int part = p != null && p.sulamPart > 0 ? p.sulamPart : DEFAULT_SULAM_PART;
+        int part;
+        if (p != null && p.sulamPart > 0) {
+            part = p.sulamPart;
+        } else {
+            part = DEFAULT_SULAM_PART;
+        }
         return course.part == part;
     }
 
+    /** One course by its ID, or null. */
     @Nullable
     public static Course course(@Nullable String id) {
-        return id == null ? null : COURSES.get(id);
+        if (id == null) {
+            return null;
+        }
+        return COURSES.get(id);
     }
 
     /**
@@ -201,30 +230,45 @@ public final class SeedCache {
         return list;
     }
 
+    /** One room by its ID, or null. */
     @Nullable
     public static Venue venue(@Nullable String id) {
-        return id == null ? null : VENUES.get(id);
+        if (id == null) {
+            return null;
+        }
+        return VENUES.get(id);
     }
 
     /** Every room in one building (unsorted). */
     public static List<Venue> venuesIn(String buildingId) {
         List<Venue> list = new java.util.ArrayList<>();
         for (Venue v : VENUES.values()) {
-            if (buildingId != null && buildingId.equals(v.building)) list.add(v);
+            if (buildingId != null && buildingId.equals(v.building)) {
+                list.add(v);
+            }
         }
         return list;
     }
 
+    /** One club by its ID, or null. */
     @Nullable
     public static Club club(@Nullable String id) {
-        return id == null ? null : CLUBS.get(id);
+        if (id == null) {
+            return null;
+        }
+        return CLUBS.get(id);
     }
 
     /** Every club, sorted by short name (My Clubs Page). */
     public static List<Club> allClubs() {
         List<Club> list = new ArrayList<>(CLUBS.values());
-        Collections.sort(list, (a, b) -> String.valueOf(a.shortName)
-                .compareToIgnoreCase(String.valueOf(b.shortName)));
+        Collections.sort(list, new Comparator<Club>() {
+            @Override
+            public int compare(Club a, Club b) {
+                return String.valueOf(a.shortName)
+                        .compareToIgnoreCase(String.valueOf(b.shortName));
+            }
+        });
         return list;
     }
 }

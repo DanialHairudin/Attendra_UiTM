@@ -26,6 +26,7 @@ public class Subscriptions {
             this.listener = listener;
         }
 
+        /** Stops this listener. */
         public void remove() {
             query.removeEventListener(listener);
             handles.remove(this);
@@ -57,6 +58,8 @@ public class Subscriptions {
 
     /** Removes every listener added through this object. */
     public void clear() {
-        for (Handle h : new ArrayList<>(handles)) h.remove();
+        for (Handle h : new ArrayList<>(handles)) {
+            h.remove();
+        }
     }
 }

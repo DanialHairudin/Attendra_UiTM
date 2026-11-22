@@ -27,6 +27,7 @@ public class TeachingAssignment {
         return courseId + "_" + groupId;
     }
 
+    /** The database key: courseId_groupId. */
     public String key() {
         return key(courseId, groupId);
     }

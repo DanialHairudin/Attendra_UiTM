@@ -62,23 +62,42 @@ public class MailSender {
         if (BuildConfig.USE_EMULATORS) {
             // Debug emulator mode: demo addresses must never get real mail; read the code from logcat.
             Log.i(TAG, "Emulator mode, email not sent. Code for " + toEmail + ": " + code);
-            MAIN.post(() -> callback.onSuccess(null));
+            MAIN.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onSuccess(null);
+                }
+            });
             return;
         }
-        EXECUTOR.execute(() -> {
-            try {
-                if (BuildConfig.SMTP_USER.isEmpty() || BuildConfig.SMTP_PASS.isEmpty()) {
-                    throw new IllegalStateException("SMTP_USER / SMTP_PASS missing in local.properties");
+        EXECUTOR.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (BuildConfig.SMTP_USER.isEmpty() || BuildConfig.SMTP_PASS.isEmpty()) {
+                        throw new IllegalStateException("SMTP_USER / SMTP_PASS missing in local.properties");
+                    }
+                    send(buildMessage(toEmail, name, role, code));
+                    MAIN.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onSuccess(null);
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "Could not send the verification email", e);
+                    MAIN.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError(context.getString(R.string.code_send_failed));
+                        }
+                    });
                 }
-                send(buildMessage(toEmail, name, role, code));
-                MAIN.post(() -> callback.onSuccess(null));
-            } catch (Exception e) {
-                Log.e(TAG, "Could not send the verification email", e);
-                MAIN.post(() -> callback.onError(context.getString(R.string.code_send_failed)));
             }
         });
     }
 
+    /** The connection settings for the Gmail server. */
     private Session session() {
         Properties props = new Properties();
         props.put("mail.smtp.host", HOST);
@@ -147,20 +166,26 @@ public class MailSender {
         return message;
     }
 
+    /** Sends the email. */
     private void send(MimeMessage message) throws MessagingException {
         Transport.send(message);
     }
 
+    /** Reads a text file from res/raw. */
     private String readRaw(int resId) throws IOException {
         return new String(readBytes(resId), StandardCharsets.UTF_8);
     }
 
+    /** Reads all bytes of a resource file. */
     private byte[] readBytes(int resId) throws IOException {
         try (InputStream in = context.getResources().openRawResource(resId)) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[8192];
-            int n;
-            while ((n = in.read(buffer)) != -1) out.write(buffer, 0, n);
+            int n = in.read(buffer);
+            while (n != -1) {
+                out.write(buffer, 0, n);
+                n = in.read(buffer);
+            }
             return out.toByteArray();
         }
     }

@@ -11,6 +11,8 @@ public class Attempt {
     /** Attendance.RESULT_ACCEPTED or Attendance.RESULT_REJECTED */
     public String result;
     public String reason;
+    /** The phone used (SHA-256). */
+    public String deviceHash;
     public Double distance;
     public Double accuracy;
     /** Where the check-in fix was (5 decimals, about 1 m). */
@@ -20,6 +22,7 @@ public class Attempt {
     public Attempt() {
     }
 
+    /** True if this attempt was rejected. */
     public boolean isRejected() {
         return Attendance.RESULT_REJECTED.equals(result);
     }

@@ -3,6 +3,7 @@ package com.attendra.uitm.map;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.attendra.uitm.BuildConfig;
 
@@ -49,10 +50,13 @@ public final class OsmSetup {
         // OpenStreetMap data is free but must show the attribution.
         map.getOverlays().add(new CopyrightOverlay(map.getContext()));
         // When the map sits inside a ScrollView, stop the ScrollView from stealing map gestures.
-        map.setOnTouchListener((v, e) -> {
-            int a = e.getActionMasked();
-            v.getParent().requestDisallowInterceptTouchEvent(a != MotionEvent.ACTION_UP && a != MotionEvent.ACTION_CANCEL);
-            return false;
+        map.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent e) {
+                int a = e.getActionMasked();
+                v.getParent().requestDisallowInterceptTouchEvent(a != MotionEvent.ACTION_UP && a != MotionEvent.ACTION_CANCEL);
+                return false;
+            }
         });
     }
 }

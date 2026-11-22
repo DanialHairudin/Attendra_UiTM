@@ -21,6 +21,7 @@ public final class Validators {
     private Validators() {
     }
 
+    /** Checks the full name. */
     @Nullable
     public static String name(String s) {
         if (s.isEmpty()) return str(R.string.error_name_required);
@@ -55,7 +56,9 @@ public final class Validators {
     /** Turns what the user typed after "+60" into digits only. */
     public static String phoneDigits(String s) {
         String digits = s.replaceAll("[^0-9]", "");
-        if (digits.startsWith("0")) digits = digits.substring(1);
+        if (digits.startsWith("0")) {
+            digits = digits.substring(1);
+        }
         return digits;
     }
 
@@ -83,6 +86,7 @@ public final class Validators {
         return null;
     }
 
+    /** Checks that both passwords are the same. */
     @Nullable
     public static String confirmPassword(String password, String confirm) {
         if (confirm.isEmpty()) return str(R.string.error_confirm_required);
@@ -98,6 +102,7 @@ public final class Validators {
         return null;
     }
 
+    /** Checks the staff ID. */
     @Nullable
     public static String staffId(String s) {
         if (s.isEmpty()) return str(R.string.error_staff_id_required);

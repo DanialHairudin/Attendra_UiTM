@@ -68,6 +68,8 @@ SID=zzTest_s1
 # Closed sessions for the delete / hide tests: CSID and CSID3 are LU's, CSID2 is LU2's.
 CSID=zzTest_c1; CSID2=zzTest_c2; CSID3=zzTest_c3
 NOW=$(( $(date +%s) * 1000 ))
+# Phone hashes (64 characters). SU uses phone HX, SU2 has no phone yet, HY is a phone nobody uses.
+HX=$(printf 'a%.0s' $(seq 64)); HY=$(printf 'b%.0s' $(seq 64)); HZ=$(printf 'c%.0s' $(seq 64))
 START=$((NOW - 600000)); LATE=$((NOW + 1800000)); END=$((NOW + 3600000))
 LAT=3.0695; LNG=101.5   # Fake CS1 position, emulator only
 
@@ -78,7 +80,8 @@ FIXTURE=$(cat <<EOF
   "buildings/CS1/lat": $LAT, "buildings/CS1/lng": $LNG,
   "roles/$TSU": "student", "roles/$TLU": "lecturer", "roles/$SU": "student", "roles/$SU2": "student", "roles/$LU": "lecturer", "roles/$LU2": "lecturer",
   "students/$SU":  {"name":"zzTest Student","email":"zztest.stu@student.uitm.edu.my","phone":"0","studentId":"2025009901",
-                    "programme":"CS240","part":5,"groupId":"CDCS2405A","emailVerified":true,"createdAt":1},
+                    "programme":"CS240","part":5,"groupId":"CDCS2405A","emailVerified":true,"createdAt":1,"deviceHash":"$HX"},
+  "devices/$HX": {"uid":"$SU","linkedAt":1},
   "students/$TSU": {"name":"zzTest Tester","email":"zztest.tstu@student.uitm.edu.my","phone":"0","studentId":"2025009903",
                     "programme":"CS240","part":5,"groupId":"CDCS2405A","emailVerified":true,"isTest":true,"createdAt":1},
   "lecturers/$TLU": {"name":"zzTest Test Lecturer","email":"zztest.tlec@uitm.edu.my","phone":"0","staffId":"zzTest3","emailVerified":true,"isTest":true,"createdAt":1},
@@ -266,6 +269,41 @@ check "lecturer creates session, unassigned group" deny  PATCH "" "$LT" "$(new_s
 check "other lecturer edits the session"   deny  PATCH "sessions/$SID" "$LT2" '{"title":"zzTest hijack"}'
 check "lecturer deletes own session"       deny  DELETE "sessions/$SID" "$LT"
 
+# One phone per student account (feature A). SU uses phone HX.
+link() {
+  echo '{"devices/'$2'":{"uid":"'$1'","linkedAt":{".sv":"timestamp"}},"students/'$1'/deviceHash":"'$2'"}'
+}
+# move <uid> <old> <new>: the same write the app makes when the email code is right
+move() {
+  echo '{"devices/'$2'":null,"devices/'$3'":{"uid":"'$1'","linkedAt":{".sv":"timestamp"}},"students/'$1'/deviceHash":"'$3'",
+    "students/'$1'/deviceMovedAt":{".sv":"timestamp"},"students/'$1'/emailVerified":true,"verificationCodes/'$1'":null}'
+}
+code_for() { owner PATCH '' '{"verificationCodes/'$1'":{"codeHash":"'$HX'","expiresAt":9999999999999,"sentAt":1,"attempts":0}}' > /dev/null; }
+gps_in() { echo '{"attendance/'$2'/'$1'":{"status":"present","time":{".sv":"timestamp"},"method":"gps","distance":10,"accuracy":8,"lat":3.0695,"lng":101.5'$3'},
+    "studentAttendance/'$1'/'$2'":{"status":"present","time":{".sv":"timestamp"}}}'; }
+check "student reads who uses a phone"           allow GET "devices/$HX" "$ST2"
+check "signed out reads devices"                 deny  GET "devices/$HX"
+check "student lists every phone"                deny  GET "devices" "$ST"
+check "B links A's phone X"                      deny  PATCH "" "$ST2" "$(link $SU2 $HX)"
+check "B links a phone for A"                    deny  PATCH "" "$ST2" '{"devices/'$HY'":{"uid":"'$SU'","linkedAt":{".sv":"timestamp"}}}'
+check "B saves devices only, not the profile"    deny  PATCH "" "$ST2" '{"devices/'$HY'":{"uid":"'$SU2'","linkedAt":{".sv":"timestamp"}}}'
+check "B saves the profile only, not devices"    deny  PUT "students/$SU2/deviceHash" "$ST2" '"'$HY'"'
+check "lecturer links a phone"                   deny  PATCH "" "$LT" "$(link $LU $HY)"
+check "B links free phone Y"                     allow PATCH "" "$ST2" "$(link $SU2 $HY)"
+check "B links a second phone Z without a code"  deny  PATCH "" "$ST2" "$(move $SU2 $HY $HZ)"
+check "B deletes A's phone"                      deny  DELETE "devices/$HX" "$ST2"
+check "B deletes own phone, keeps the profile"   deny  DELETE "devices/$HY" "$ST2"
+check "A checks in from phone Y"                 deny  PATCH "" "$ST" "$(gps_in $SU $SID ',"deviceHash":"'$HY'"')"
+check "A checks in without a phone"              deny  PATCH "" "$ST" "$(gps_in $SU $SID)"
+code_for $SU2
+check "B moves but keeps the old phone"          deny  PATCH "" "$ST2" '{"devices/'$HZ'":{"uid":"'$SU2'","linkedAt":{".sv":"timestamp"}},"students/'$SU2'/deviceHash":"'$HZ'","students/'$SU2'/deviceMovedAt":{".sv":"timestamp"}}'
+check "B moves without the move time"            deny  PATCH "" "$ST2" '{"devices/'$HY'":null,"devices/'$HZ'":{"uid":"'$SU2'","linkedAt":{".sv":"timestamp"}},"students/'$SU2'/deviceHash":"'$HZ'"}'
+check "B moves to A's phone X"                   deny  PATCH "" "$ST2" "$(move $SU2 $HY $HX)"
+check "B moves to free phone Z with a code"      allow PATCH "" "$ST2" "$(move $SU2 $HY $HZ)"
+code_for $SU2
+check "B moves again within 7 days"              deny  PATCH "" "$ST2" "$(move $SU2 $HZ $HY)"
+owner DELETE "verificationCodes/$SU2" '' > /dev/null
+
 # Check-in and attendance
 check "student checks in as late before lateAfter" deny PATCH "" "$ST" \
   '{"attendance/'$SID'/'$SU'":{"status":"late","time":'$TS',"method":"gps","distance":10,"accuracy":8,"lat":3.0695,"lng":101.5},
@@ -274,9 +312,9 @@ check "student from another group checks in" deny PATCH "" "$ST2" \
   '{"attendance/'$SID'/'$SU2'":{"status":"present","time":'$TS',"method":"gps","distance":10,"accuracy":8,"lat":3.0695,"lng":101.5},
     "studentAttendance/'$SU2'/'$SID'":{"status":"present","time":'$TS'}}'
 check "student checks in (gps, present)"   allow PATCH "" "$ST" \
-  '{"attendance/'$SID'/'$SU'":{"status":"present","time":'$TS',"method":"gps","distance":10,"accuracy":8,"lat":3.0695,"lng":101.5},
+  '{"attendance/'$SID'/'$SU'":{"status":"present","time":'$TS',"method":"gps","distance":10,"accuracy":8,"lat":3.0695,"lng":101.5,"deviceHash":"'$HX'"},
     "studentAttendance/'$SU'/'$SID'":{"status":"present","time":'$TS'},
-    "attempts/'$SID'/zzTest_a1":{"uid":"'$SU'","time":'$TS',"result":"accepted","distance":10,"accuracy":8,"lat":3.0695,"lng":101.5}}'
+    "attempts/'$SID'/zzTest_a1":{"uid":"'$SU'","deviceHash":"'$HX'","time":'$TS',"result":"accepted","distance":10,"accuracy":8,"lat":3.0695,"lng":101.5}}'
 check "lecturer reads own session attendance" allow GET "attendance/$SID" "$LT"
 check "student reads whole attendance"     deny  GET "attendance/$SID" "$ST"
 check "student reads own record"           allow GET "attendance/$SID/$SU" "$ST"
@@ -303,6 +341,50 @@ check "mirror with no status"              deny  PUT "studentAttendance/$SU/zzTe
 check "mirror without a matching record"   deny  PUT "studentAttendance/$SU/zzTest_none" "$ST" '{"status":"present","time":'$TS'}'
 check "mirror for someone else"            deny  PUT "studentAttendance/$LU/zzTest_none" "$ST" '{"status":"present","time":'$TS'}'
 
+
+# Weekly sessions (feature B).
+DAY=86400000; FS=$((NOW + 7*DAY)); FE=$((FS + 3600000))
+# series <seriesId> <lecturer>
+series() { echo '"sessionSeries/'$1'":{"lecturerUid":"'$2'","title":"zzTest weekly","courseId":"CS240_ICT600","groups":{"CDCS2405A":true},
+  "where":"building","startTime":'$FS',"endTime":'$FE',"lateAfter":'$FS',"weeks":3,"skippedWeeks":{"w2":true},"createdAt":'$TS'}'; }
+# week <sessionId> <seriesId> <weekNo> <lecturer>
+week() { echo '"sessions/'$1'":{"lecturerUid":"'$4'","type":"class","title":"zzTest weekly","courseId":"CS240_ICT600",
+  "groups":{"CDCS2405A":true},"where":"building","building":"CS1","lat":'$LAT',"lng":'$LNG',"radius":60,
+  "start":'$FS',"end":'$FE',"lateAfter":'$FS',"status":"open","createdAt":'$TS',"seriesId":"'$2'","weekNo":'$3',"weekTotal":2},
+  "sessionsByLecturer/'$4'/'$1'":true,"sessionsByGroup/CDCS2405A/'$1'":true'; }
+wnotif() { echo '"notifications/'$SU'/'$1'":{"title":"zzTest","body":"zzTest","sessionId":"'$1'","time":'$TS',"read":false,"showAt":'$2'}'; }
+wcancel() { echo '{"sessions/'$1'":null,"sessionsByLecturer/'$LU'/'$1'":null,"sessionsByGroup/CDCS2405A/'$1'":null,"notifications/'$SU'/'$1'":null,"notifications/'$SU2'/'$1'":null}'; }
+check "lecturer creates a series with 2 weeks"    allow PATCH "" "$LT" "{$(series zzTest_ser1 $LU),$(week zzTest_w1 zzTest_ser1 1 $LU),$(week zzTest_w2 zzTest_ser1 2 $LU),$(wnotif zzTest_w1 $FS),$(wnotif zzTest_w2 $FS)}"
+check "student creates a series"                  deny  PATCH "" "$ST" "{$(series zzTest_ser2 $SU)}"
+check "lecturer creates a series for another"     deny  PATCH "" "$LT" "{$(series zzTest_ser3 $LU2)}"
+check "other lecturer reads the series"           deny  GET "sessionSeries/zzTest_ser1" "$LT2"
+check "other lecturer edits the series"           deny  PATCH "sessionSeries/zzTest_ser1" "$LT2" '{"title":"zzTest hijack"}'
+check "week in another lecturer's series"         deny  PATCH "" "$TLT" "{$(week zzTest_w3 zzTest_ser1 3 $TLU | sed 's/"weekTotal":2/"weekTotal":2,"isTest":true/')}"
+check "week without its series"                   deny  PATCH "" "$LT" "{$(week zzTest_w4 zzTest_none 1 $LU)}"
+check "week number 17"                            deny  PATCH "" "$LT" "{$(week zzTest_w5 zzTest_ser1 17 $LU)}"
+check "notification with a wrong showAt"          deny  PATCH "" "$LT" "{$(week zzTest_w6 zzTest_ser1 3 $LU),$(wnotif zzTest_w6 1)}"
+check "student checks in to a future week"        deny  PATCH "" "$ST" "$(gps_in $SU zzTest_w1 ',"deviceHash":"'$HX'"')"
+check "student marks a weekly notification read"  allow PUT "notifications/$SU/zzTest_w1/read" "$ST" 'true'
+check "other lecturer cancels a future week"      deny  PATCH "" "$LT2" '{"sessions/zzTest_w1":null}'
+check "student cancels a future week"             deny  PATCH "" "$ST" '{"sessions/zzTest_w1":null}'
+check "lecturer cancels future weeks"             allow PATCH "" "$LT" "$(wcancel zzTest_w1)"
+check "lecturer cancels a week that has started"  deny  PATCH "" "$LT" '{"sessions/'$SID'":null,"sessionsByLecturer/'$LU'/'$SID'":null}'
+
+# Attendance alerts (feature C). LU teaches SU's group in ICT600; SU2 is in another group.
+alert() { echo '{"alerts/'$1'/CS240_ICT600":70,"notifications/'$1'/zzTest_al":{"type":"'${3:-alert}'","title":"zzTest","body":"zzTest","sessionId":"'$2'","time":'$TS',"read":false}}'; }
+check "lecturer alerts own student"               allow PATCH "" "$LT" "$(alert $SU $SID)"
+check "lecturer reads the last alert"             allow GET "alerts/$SU/CS240_ICT600" "$LT"
+check "student reads own alerts"                  allow GET "alerts/$SU" "$ST"
+check "student marks an alert read"               allow PUT "notifications/$SU/zzTest_al/read" "$ST" 'true'
+check "student changes own alert"                 deny  PUT "alerts/$SU/CS240_ICT600" "$ST" '100'
+check "other student reads the alerts"            deny  GET "alerts/$SU" "$ST2"
+check "lecturer alerts another group's student"   deny  PATCH "" "$LT" "$(alert $SU2 $SID)"
+check "alert notification to another group only"  deny  PATCH "" "$LT" '{"notifications/'$SU2'/zzTest_al":{"type":"alert","title":"zzTest","body":"zzTest","sessionId":"'$SID'","time":'$TS',"read":false}}'
+check "lecturer who does not teach the group"     deny  PATCH "" "$LT2" '{"alerts/'$SU'/CS240_ICT600":50}'
+check "unknown notification type"                 deny  PATCH "" "$LT" '{"notifications/'$SU'/zzTest_al2":{"type":"zzTest","title":"zzTest","body":"zzTest","sessionId":"'$SID'","time":'$TS',"read":false}}'
+check "alert above 100"                           deny  PUT "alerts/$SU/CS240_ICT600" "$LT" '101'
+check "lecturer clears the alert"                 allow DELETE "alerts/$SU/CS240_ICT600" "$LT"
+check "student deletes own alert notification"    allow DELETE "notifications/$SU/zzTest_al" "$ST"
 
 # Delete closed sessions (lecturer) and hide sessions (student).
 delete_paths() {

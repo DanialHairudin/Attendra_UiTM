@@ -2,6 +2,7 @@ package com.attendra.uitm.ui.common;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.StringRes;
@@ -26,6 +27,7 @@ public final class LocationPermission {
     private LocationPermission() {
     }
 
+    /** True if the app may use the location. */
     public static boolean granted(Context c) {
         return ContextCompat.checkSelfPermission(c, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
@@ -36,7 +38,12 @@ public final class LocationPermission {
         new MaterialAlertDialogBuilder(c)
                 .setTitle(R.string.location_permission_title)
                 .setMessage(body)
-                .setPositiveButton(R.string.location_permission_continue, (d, w) -> onContinue.run())
+                .setPositiveButton(R.string.location_permission_continue, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int w) {
+                        onContinue.run();
+                    }
+                })
                 .setNegativeButton(R.string.location_permission_not_now, null)
                 .show();
     }

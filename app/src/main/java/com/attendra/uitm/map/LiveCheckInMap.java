@@ -38,7 +38,12 @@ public class LiveCheckInMap {
         circle.getFillPaint().setColor((gold & 0x00FFFFFF) | 0x26000000);
         circle.getOutlinePaint().setColor(gold);
         circle.getOutlinePaint().setStrokeWidth(4f);
-        circle.setOnClickListener((poly, mv, pos) -> false);
+        circle.setOnClickListener(new Polygon.OnClickListener() {
+            @Override
+            public boolean onClick(Polygon poly, MapView mv, GeoPoint pos) {
+                return false;
+            }
+        });
         map.getOverlays().add(circle);
         map.getController().setZoom(17.0);
     }
@@ -76,7 +81,9 @@ public class LiveCheckInMap {
     public boolean focusStudent(String uid) {
         Marker m = markers.get(uid);
         if (m == null) return false;
-        for (Marker other : markers.values()) other.closeInfoWindow();
+        for (Marker other : markers.values()) {
+            other.closeInfoWindow();
+        }
         map.getController().animateTo(m.getPosition(), 18.5, 700L);
         m.showInfoWindow();
         return true;
@@ -85,17 +92,37 @@ public class LiveCheckInMap {
     /** Zoom out so the venue and every dot fit on screen. */
     public void showAll() {
         List<GeoPoint> pts = new ArrayList<>(allPoints);
-        if (venue != null) pts.add(venue);
-        if (pts.size() < 2) { if (venue != null) map.getController().animateTo(venue, 17.0, 500L); return; }
+        if (venue != null) {
+            pts.add(venue);
+        }
+        if (pts.size() < 2) { if (venue != null) {
+            map.getController().animateTo(venue, 17.0, 500L);
+        } return; }
         BoundingBox box = BoundingBox.fromGeoPointsSafe(pts).increaseByScale(1.3f);
-        map.post(() -> map.zoomToBoundingBox(box, true));
+        map.post(new Runnable() {
+            @Override
+            public void run() {
+                map.zoomToBoundingBox(box, true);
+            }
+        });
     }
 
     // ---- lifecycle
-    public void onResume() { map.onResume(); }
-    public void onPause() { map.onPause(); }
-    public void onDestroyView() { map.onDetach(); }
+    public void onResume() {
+        map.onResume();
+    }
 
+    /** Call from the page's onPause. */
+    public void onPause() {
+        map.onPause();
+    }
+
+    /** Call when the page closes. */
+    public void onDestroyView() {
+        map.onDetach();
+    }
+
+    /** The text for a status. */
     private static int label(String status) {
         if ("present".equals(status)) return R.string.status_present;
         if ("late".equals(status)) return R.string.status_late;
@@ -132,10 +159,26 @@ public class LiveCheckInMap {
         return new ArrayList<>(byUid.values());
     }
 
+    /** The student's name, or "Student" if not loaded. */
     private static String nameOf(Map<String, String> names, String uid) {
         String n = names.get(uid);
-        return n == null ? "Student" : n;
+        if (n == null) {
+            return "Student";
+        }
+        return n;
     }
-    private static double num(DataSnapshot s) { Double d = s.getValue(Double.class); return d == null ? 0 : d; }
-    private static long longOf(DataSnapshot s) { Long l = s.getValue(Long.class); return l == null ? 0 : l; }
+
+    /** A decimal number from the database, or 0 if it is missing. */
+    private static double num(DataSnapshot s) {
+        Double d = s.getValue(Double.class);
+        if (d == null) return 0;
+        return d;
+    }
+
+    /** A whole number from the database, or 0 if it is missing. */
+    private static long longOf(DataSnapshot s) {
+        Long l = s.getValue(Long.class);
+        if (l == null) return 0;
+        return l;
+    }
 }

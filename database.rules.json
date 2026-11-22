@@ -45,6 +45,14 @@
           ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true && !data.exists()",
           ".validate": "newData.val() === now && data.parent().child('track').exists() && newData.parent().child('track').val() !== data.parent().child('track').val()"
         },
+        "deviceHash": {
+          ".write": "auth != null && auth.uid === $uid && root.child('roles/' + $uid).val() === 'student' && data.parent().child('emailVerified').val() === true && newData.exists() && (!data.exists() || (root.child('verificationCodes/' + $uid).exists() && (!data.parent().child('deviceMovedAt').exists() || now > data.parent().child('deviceMovedAt').val() + 604800000)))",
+          ".validate": "newData.isString() && newData.val().length === 64 && newData.parent().parent().parent().child('devices/' + newData.val() + '/uid').val() === $uid && (!data.exists() || newData.val() === data.val() || (newData.parent().child('deviceMovedAt').val() === now && newData.parent().parent().parent().child('devices/' + data.val() + '/uid').val() !== $uid))"
+        },
+        "deviceMovedAt": {
+          ".write": "auth != null && auth.uid === $uid && data.parent().child('emailVerified').val() === true && newData.exists() && root.child('verificationCodes/' + $uid).exists() && (!data.exists() || now > data.val() + 604800000)",
+          ".validate": "newData.val() === data.val() || (newData.val() === now && data.parent().child('deviceHash').exists() && newData.parent().child('deviceHash').val() !== data.parent().child('deviceHash').val())"
+        },
         "email": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())" },
         "studentId": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{10}$/) && (!data.exists() || newData.val() === data.val()) && (data.exists() || newData.parent().parent().parent().child('studentIds/' + newData.val()).val() === $uid)" },
         "programme": { ".validate": "root.child('programmes/' + newData.val()).exists() && (!data.exists() || newData.val() === data.val())" },
@@ -85,6 +93,17 @@
         "staffId": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())" },
         "createdAt": { ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()" },
         "isTest": { ".validate": "newData.val() === data.val()" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "devices": {
+      "$hash": {
+        ".read": "auth != null",
+        ".write": "auth != null && ((!data.exists() && newData.exists()) || (data.child('uid').val() === auth.uid && !newData.exists() && newData.parent().parent().child('students/' + auth.uid + '/deviceHash').val() !== $hash))",
+        ".validate": "newData.hasChildren(['uid', 'linkedAt']) && $hash.length === 64 && root.child('roles/' + auth.uid).val() === 'student' && root.child('students/' + auth.uid + '/emailVerified').val() === true && root.child('students/' + auth.uid + '/isTest').val() !== true && newData.parent().parent().child('students/' + auth.uid + '/deviceHash').val() === $hash",
+        "uid": { ".validate": "newData.val() === auth.uid" },
+        "linkedAt": { ".validate": "newData.val() === now" },
         "$other": { ".validate": false }
       }
     },
@@ -169,7 +188,7 @@
     "sessions": {
       "$sid": {
         ".read": "auth != null",
-        ".write": "auth != null && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true && ((newData.exists() && ((data.exists() && data.child('lecturerUid').val() === auth.uid) || (!data.exists() && newData.child('lecturerUid').val() === auth.uid))) || (!newData.exists() && data.child('status').val() === 'closed' && data.child('lecturerUid').val() === auth.uid))",
+        ".write": "auth != null && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true && ((newData.exists() && ((data.exists() && data.child('lecturerUid').val() === auth.uid) || (!data.exists() && newData.child('lecturerUid').val() === auth.uid))) || (!newData.exists() && data.child('lecturerUid').val() === auth.uid && (data.child('status').val() === 'closed' || (now < data.child('start').val() && !root.child('attendance/' + $sid).exists()))))",
         ".validate": "newData.hasChildren(['lecturerUid', 'type', 'title', 'where', 'lat', 'lng', 'radius', 'start', 'end', 'lateAfter', 'status']) && ((newData.child('type').val() === 'club' && newData.child('clubId').exists() && !newData.child('groups').exists()) || (newData.child('type').val() !== 'club' && newData.child('courseId').exists() && newData.child('groups').exists())) && (data.exists() || newData.child('isTest').val() === true || root.child('lecturers/' + auth.uid + '/isTest').val() !== true)",
 
         "lecturerUid": { ".validate": "newData.val() === auth.uid && (!data.exists() || newData.val() === data.val())" },
@@ -195,7 +214,31 @@
         "status": { ".validate": "(newData.val() === 'open' && !data.exists()) || newData.val() === 'closed'" },
         "createdAt": { ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()" },
         "closedAt": { ".validate": "newData.val() === now" },
+        "seriesId": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val()) && newData.parent().parent().parent().child('sessionSeries/' + newData.val() + '/lecturerUid').val() === newData.parent().child('lecturerUid').val()" },
+        "weekNo": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 16 && newData.parent().child('seriesId').exists()" },
+        "weekTotal": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 16 && newData.parent().child('seriesId').exists()" },
         "isTest": { ".validate": "newData.val() === true && root.child('lecturers/' + auth.uid + '/isTest').val() === true && (!data.exists() || newData.val() === data.val())" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "sessionSeries": {
+      "$seriesId": {
+        ".read": "auth != null && data.child('lecturerUid').val() === auth.uid",
+        ".write": "auth != null && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true && (!data.exists() || data.child('lecturerUid').val() === auth.uid)",
+        ".validate": "newData.hasChildren(['lecturerUid', 'title', 'where', 'startTime', 'endTime', 'lateAfter', 'weeks'])",
+        "lecturerUid": { ".validate": "newData.val() === auth.uid" },
+        "title": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 100" },
+        "courseId": { ".validate": "root.child('courses/' + newData.val()).exists()" },
+        "clubId": { ".validate": "root.child('clubs/' + newData.val()).exists()" },
+        "groups": { "$groupId": { ".validate": "newData.val() === true && root.child('groups/' + $groupId).exists()" } },
+        "where": { ".validate": "newData.val() === 'building' || newData.val() === 'pin'" },
+        "startTime": { ".validate": "newData.isNumber()" },
+        "endTime": { ".validate": "newData.isNumber() && newData.val() > newData.parent().child('startTime').val()" },
+        "lateAfter": { ".validate": "newData.isNumber()" },
+        "weeks": { ".validate": "newData.isNumber() && newData.val() >= 2 && newData.val() <= 16" },
+        "skippedWeeks": { "$week": { ".validate": "newData.val() === true" } },
+        "createdAt": { ".validate": "newData.val() === data.val() || newData.val() === now" },
         "$other": { ".validate": false }
       }
     },
@@ -204,7 +247,7 @@
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
         "$sid": {
-          ".write": "auth != null && auth.uid === $uid && ((!data.exists() && newData.parent().parent().parent().child('sessions/' + $sid + '/lecturerUid').val() === auth.uid) || (!newData.exists() && root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && root.child('sessions/' + $sid + '/status').val() === 'closed'))",
+          ".write": "auth != null && auth.uid === $uid && ((!data.exists() && newData.parent().parent().parent().child('sessions/' + $sid + '/lecturerUid').val() === auth.uid) || (!newData.exists() && root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && (root.child('sessions/' + $sid + '/status').val() === 'closed' || now < root.child('sessions/' + $sid + '/start').val())))",
           ".validate": "newData.val() === true"
         }
       }
@@ -214,7 +257,7 @@
       "$groupId": {
         ".read": "auth != null && (root.child('students/' + auth.uid + '/groupId').val() === $groupId || (root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true))",
         "$sid": {
-          ".write": "auth != null && ((!data.exists() && newData.parent().parent().parent().child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && newData.parent().parent().parent().child('sessions/' + $sid + '/groups/' + $groupId).val() === true) || (!newData.exists() && root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && root.child('sessions/' + $sid + '/status').val() === 'closed'))",
+          ".write": "auth != null && ((!data.exists() && newData.parent().parent().parent().child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && newData.parent().parent().parent().child('sessions/' + $sid + '/groups/' + $groupId).val() === true) || (!newData.exists() && root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && (root.child('sessions/' + $sid + '/status').val() === 'closed' || now < root.child('sessions/' + $sid + '/start').val())))",
           ".validate": "newData.val() === true"
         }
       }
@@ -224,7 +267,7 @@
       "$clubId": {
         ".read": "auth != null && (root.child('clubMembers/' + $clubId + '/' + auth.uid).val() === true || (root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true))",
         "$sid": {
-          ".write": "auth != null && ((!data.exists() && newData.parent().parent().parent().child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && newData.parent().parent().parent().child('sessions/' + $sid + '/clubId').val() === $clubId) || (!newData.exists() && root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && root.child('sessions/' + $sid + '/status').val() === 'closed'))",
+          ".write": "auth != null && ((!data.exists() && newData.parent().parent().parent().child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && newData.parent().parent().parent().child('sessions/' + $sid + '/clubId').val() === $clubId) || (!newData.exists() && root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && (root.child('sessions/' + $sid + '/status').val() === 'closed' || now < root.child('sessions/' + $sid + '/start').val())))",
           ".validate": "newData.val() === true"
         }
       }
@@ -236,7 +279,7 @@
         ".write": "auth != null && !newData.exists() && root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && root.child('sessions/' + $sid + '/status').val() === 'closed'",
         "$uid": {
           ".read": "auth != null && auth.uid === $uid",
-          ".write": "auth != null && !data.exists() && newData.exists() && root.child('sessions/' + $sid + '/status').val() === 'open' && (root.child('students/' + $uid + '/isTest').val() === true) === (root.child('sessions/' + $sid + '/isTest').val() === true) && ((auth.uid === $uid && root.child('roles/' + $uid).val() === 'student' && root.child('students/' + $uid + '/emailVerified').val() === true && now >= root.child('sessions/' + $sid + '/start').val() && now < root.child('sessions/' + $sid + '/end').val() && (root.child('sessions/' + $sid + '/groups/' + root.child('students/' + $uid + '/groupId').val()).val() === true || root.child('clubMembers/' + root.child('sessions/' + $sid + '/clubId').val() + '/' + $uid).val() === true) && (newData.child('method').val() === 'gps' || (newData.child('method').val() === 'debug' && root.child('students/' + $uid + '/isTest').val() === true))) || (root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && (newData.child('method').val() === 'manual' || newData.child('method').val() === 'auto')))",
+          ".write": "auth != null && !data.exists() && newData.exists() && root.child('sessions/' + $sid + '/status').val() === 'open' && (root.child('students/' + $uid + '/isTest').val() === true) === (root.child('sessions/' + $sid + '/isTest').val() === true) && ((auth.uid === $uid && root.child('roles/' + $uid).val() === 'student' && root.child('students/' + $uid + '/emailVerified').val() === true && now >= root.child('sessions/' + $sid + '/start').val() && now < root.child('sessions/' + $sid + '/end').val() && (root.child('sessions/' + $sid + '/groups/' + root.child('students/' + $uid + '/groupId').val()).val() === true || root.child('clubMembers/' + root.child('sessions/' + $sid + '/clubId').val() + '/' + $uid).val() === true) && ((newData.child('method').val() === 'gps' && (root.child('students/' + $uid + '/isTest').val() === true || (newData.child('deviceHash').isString() && newData.child('deviceHash').val() === root.child('students/' + $uid + '/deviceHash').val() && root.child('devices/' + newData.child('deviceHash').val() + '/uid').val() === $uid))) || (newData.child('method').val() === 'debug' && root.child('students/' + $uid + '/isTest').val() === true))) || (root.child('sessions/' + $sid + '/lecturerUid').val() === auth.uid && (newData.child('method').val() === 'manual' || newData.child('method').val() === 'auto')))",
           ".validate": "newData.hasChildren(['status', 'time', 'method'])",
           "method": { ".validate": "newData.val() === 'gps' || newData.val() === 'manual' || newData.val() === 'auto' || newData.val() === 'debug'" },
           "status": { ".validate": "((newData.parent().child('method').val() === 'gps' || newData.parent().child('method').val() === 'debug') && ((now <= root.child('sessions/' + $sid + '/lateAfter').val() && newData.val() === 'present') || (now > root.child('sessions/' + $sid + '/lateAfter').val() && newData.val() === 'late'))) || (newData.parent().child('method').val() === 'manual' && (newData.val() === 'present' || newData.val() === 'late')) || (newData.parent().child('method').val() === 'auto' && newData.val() === 'absent')" },
@@ -245,6 +288,7 @@
           "accuracy": { ".validate": "newData.isNumber() && newData.val() >= 0" },
           "lat": { ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90" },
           "lng": { ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180" },
+          "deviceHash": { ".validate": "newData.isString() && newData.val().length === 64" },
           "reason": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
           "markedBy": { ".validate": "newData.val() === auth.uid" },
           "$other": { ".validate": false }
@@ -270,6 +314,7 @@
           ".write": "auth != null && !data.exists() && newData.exists() && newData.child('uid').val() === auth.uid && root.child('roles/' + auth.uid).val() === 'student' && root.child('sessions/' + $sid + '/status').val() === 'open'",
           ".validate": "newData.hasChildren(['uid', 'time', 'result', 'lat', 'lng'])",
           "result": { ".validate": "newData.val() === 'rejected' || (newData.val() === 'accepted' && newData.parent().parent().parent().parent().child('attendance/' + $sid + '/' + auth.uid).exists())" },
+          "deviceHash": { ".validate": "newData.isString() && newData.val().length === 64" },
           "reason": { ".validate": "newData.val() === 'MOCK_LOCATION' || newData.val() === 'OUTSIDE_RADIUS'" },
           "uid": { ".validate": "newData.val() === auth.uid" },
           "time": { ".validate": "newData.val() === now" },
@@ -287,17 +332,30 @@
         ".read": "auth != null && (auth.uid === $uid || (query.orderByChild === 'sessionId' && query.equalTo != null && root.child('sessions/' + query.equalTo + '/lecturerUid').val() === auth.uid))",
         ".indexOn": ["sessionId"],
         "$nid": {
-          ".write": "auth != null && ((!data.exists() && newData.exists() && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true && newData.parent().parent().parent().child('sessions/' + newData.child('sessionId').val() + '/lecturerUid').val() === auth.uid) || (data.exists() && !newData.exists() && (auth.uid === $uid || root.child('sessions/' + data.child('sessionId').val() + '/lecturerUid').val() === auth.uid)))",
+          ".write": "auth != null && ((!data.exists() && !newData.exists()) || (!data.exists() && newData.exists() && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true && newData.parent().parent().parent().child('sessions/' + newData.child('sessionId').val() + '/lecturerUid').val() === auth.uid) || (data.exists() && !newData.exists() && (auth.uid === $uid || root.child('sessions/' + data.child('sessionId').val() + '/lecturerUid').val() === auth.uid)))",
           ".validate": "newData.hasChildren(['title', 'body', 'sessionId', 'time', 'read'])",
           "title": { ".validate": "newData.isString() && newData.val().length <= 200" },
           "body": { ".validate": "newData.isString() && newData.val().length <= 500" },
           "sessionId": { ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())" },
+          "type": { ".validate": "newData.val() === data.val() || (newData.val() === 'alert' && root.child('teachingAssignments/' + auth.uid + '/' + root.child('sessions/' + newData.parent().child('sessionId').val() + '/courseId').val() + '_' + root.child('students/' + $uid + '/groupId').val()).exists())" },
+          "showAt": { ".validate": "newData.isNumber() && (newData.val() === data.val() || newData.val() === newData.parent().parent().parent().parent().child('sessions/' + newData.parent().child('sessionId').val() + '/start').val())" },
           "time": { ".validate": "(!data.exists() && newData.val() === now) || newData.val() === data.val()" },
           "read": {
             ".write": "auth != null && auth.uid === $uid",
             ".validate": "newData.isBoolean()"
           },
           "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "alerts": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        "$courseId": {
+          ".read": "auth != null && root.child('teachingAssignments/' + auth.uid + '/' + $courseId + '_' + root.child('students/' + $uid + '/groupId').val()).exists()",
+          ".write": "auth != null && root.child('roles/' + auth.uid).val() === 'lecturer' && root.child('lecturers/' + auth.uid + '/emailVerified').val() === true && root.child('teachingAssignments/' + auth.uid + '/' + $courseId + '_' + root.child('students/' + $uid + '/groupId').val()).exists()",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
         }
       }
     },

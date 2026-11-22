@@ -17,6 +17,7 @@ public final class HiddenSessions {
     private HiddenSessions() {
     }
 
+    /** The student's hidden sessions: hiddenSessions/{uid}. */
     public static DatabaseReference ref(String uid) {
         return Db.root().child("hiddenSessions").child(uid);
     }
@@ -25,7 +26,9 @@ public final class HiddenSessions {
     public static Set<String> ids(DataSnapshot snapshot) {
         Set<String> ids = new HashSet<>();
         for (DataSnapshot child : snapshot.getChildren()) {
-            if (Boolean.TRUE.equals(child.getValue(Boolean.class))) ids.add(child.getKey());
+            if (Boolean.TRUE.equals(child.getValue(Boolean.class))) {
+                ids.add(child.getKey());
+            }
         }
         return ids;
     }
@@ -45,6 +48,7 @@ public final class HiddenSessions {
         set(uid, sessionId, null, callback);
     }
 
+    /** Saves true (hidden) or null (shown again). */
     private static void set(String uid, String sessionId, Object value, Callback<Void> callback) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("hiddenSessions/" + uid + "/" + sessionId, value);

@@ -47,34 +47,69 @@ public class PhotonSearch {
 
     /** Call from a TextWatcher on every change. */
     public void searchDebounced(String query, Callback cb) {
-        if (pending != null) main.removeCallbacks(pending);
-        final String q = query == null ? "" : query.trim();
+        if (pending != null) {
+            main.removeCallbacks(pending);
+        }
+        String q;
+        if (query == null) {
+            q = "";
+        } else {
+            q = query.trim();
+        }
         if (q.length() < MIN_CHARS) {
             latestRequest++;                       // Cancel any older answer
             cb.onResults(Collections.emptyList());
             return;
         }
-        pending = () -> run(q, cb);
+        pending = new Runnable() {
+            @Override
+            public void run() {
+                startSearch(q, cb);
+            }
+        };
         main.postDelayed(pending, DEBOUNCE_MS);
     }
 
+    /** Stops searching when the page closes. */
     public void shutdown() {
-        if (pending != null) main.removeCallbacks(pending);
+        if (pending != null) {
+            main.removeCallbacks(pending);
+        }
         io.shutdownNow();
     }
 
-    private void run(String q, Callback cb) {
-        final int id = ++latestRequest;
-        io.execute(() -> {
-            try {
-                List<PlaceResult> list = fetch(q);
-                main.post(() -> { if (id == latestRequest) cb.onResults(list); });
-            } catch (Exception e) {
-                main.post(() -> { if (id == latestRequest) cb.onError("Search is not available. Check your internet connection."); });
+    /** Asks the server on a background thread, then answers on the main thread. */
+    private void startSearch(String q, Callback cb) {
+        latestRequest++;
+        final int id = latestRequest;
+        io.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    List<PlaceResult> list = fetch(q);
+                    main.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (id == latestRequest) {
+                                cb.onResults(list);
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    main.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (id == latestRequest) {
+                                cb.onError("Search is not available. Check your internet connection.");
+                            }
+                        }
+                    });
+                }
             }
         });
     }
 
+    /** Asks the Photon server and reads its answer. */
     private List<PlaceResult> fetch(String q) throws Exception {
         // lat/lon bias: results near UiTM Shah Alam come first.
         String url = BASE + "?q=" + URLEncoder.encode(q, "UTF-8")
@@ -87,8 +122,11 @@ public class PhotonSearch {
             if (con.getResponseCode() != 200) throw new Exception("HTTP " + con.getResponseCode());
             StringBuilder sb = new StringBuilder();
             try (BufferedReader r = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = r.readLine()) != null) sb.append(line);
+                String line = r.readLine();
+                while (line != null) {
+                    sb.append(line);
+                    line = r.readLine();
+                }
             }
             return parse(sb.toString());
         } finally {
@@ -104,21 +142,37 @@ public class PhotonSearch {
         for (int i = 0; i < features.length(); i++) {
             JSONObject f = features.getJSONObject(i);
             JSONObject p = f.optJSONObject("properties");
-            JSONArray c = f.optJSONObject("geometry") == null ? null : f.getJSONObject("geometry").optJSONArray("coordinates");
+            JSONObject geometry = f.optJSONObject("geometry");
+            JSONArray c;
+            if (geometry == null) {
+                c = null;
+            } else {
+                c = geometry.optJSONArray("coordinates");
+            }
             if (p == null || c == null || c.length() < 2) continue;
             if (!"MY".equalsIgnoreCase(p.optString("countrycode", "MY"))) continue; // Malaysia only
 
             String name = p.optString("name", "");
             String street = p.optString("street", "");
             String house = p.optString("housenumber", "");
-            String title = !name.isEmpty() ? name : (house.isEmpty() ? street : house + " " + street).trim();
+            // The place name, or the address if it has no name.
+            String title = name;
+            if (name.isEmpty()) {
+                String address = street;
+                if (!house.isEmpty()) {
+                    address = house + " " + street;
+                }
+                title = address.trim();
+            }
             if (title.isEmpty()) continue;
 
             // Subtitle: street, district, city, state without repeats.
             Set<String> parts = new LinkedHashSet<>();
             for (String k : new String[]{"street", "district", "locality", "city", "state"}) {
                 String v = p.optString(k, "");
-                if (!v.isEmpty() && !v.equalsIgnoreCase(title)) parts.add(v);
+                if (!v.isEmpty() && !v.equalsIgnoreCase(title)) {
+                    parts.add(v);
+                }
             }
             out.add(new PlaceResult(title, String.join(", ", parts), c.getDouble(1), c.getDouble(0)));
             if (out.size() == 8) break;

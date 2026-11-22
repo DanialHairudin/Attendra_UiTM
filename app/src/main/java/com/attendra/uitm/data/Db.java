@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 
 import com.attendra.uitm.BuildConfig;
 import com.attendra.uitm.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -33,6 +35,7 @@ public final class Db {
     /** Debug + -PuseEmulators=true only: the one instance pointed at the local emulator. */
     private static FirebaseDatabase emulator;
 
+    /** The database (the local emulator in emulator builds). */
     public static synchronized FirebaseDatabase get() {
         if (!BuildConfig.USE_EMULATORS) return FirebaseDatabase.getInstance(BuildConfig.DATABASE_URL);
         // Kept, because getInstance() after useEmulator() would hand back a new live instance.
@@ -43,6 +46,7 @@ public final class Db {
         return emulator;
     }
 
+    /** The top of the database tree. */
     public static DatabaseReference root() {
         return get().getReference();
     }
@@ -51,7 +55,10 @@ public final class Db {
     @Nullable
     public static String text(DataSnapshot snapshot) {
         Object value = snapshot.getValue();
-        return value == null ? null : String.valueOf(value);
+        if (value == null) {
+            return null;
+        }
+        return String.valueOf(value);
     }
 
     // ============================================================
@@ -75,11 +82,14 @@ public final class Db {
                 callback.onError(AuthErrors.database(error));
             }
         };
-        MAIN.postDelayed(() -> {
-            if (done[0]) return;
-            done[0] = true;
-            query.removeEventListener(listener);
-            callback.onError(str(R.string.error_network));
+        MAIN.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (done[0]) return;
+                done[0] = true;
+                query.removeEventListener(listener);
+                callback.onError(str(R.string.error_network));
+            }
         }, READ_TIMEOUT_MS);
         query.addListenerForSingleValueEvent(listener);
     }
@@ -90,20 +100,30 @@ public final class Db {
     /** Multi-path write (updateChildren) with the same timeout as readOnce. */
     public static void write(Map<String, Object> updates, Callback<Void> callback) {
         final boolean[] done = {false};
-        MAIN.postDelayed(() -> {
-            if (done[0]) return;
-            done[0] = true;
-            get().purgeOutstandingWrites();
-            callback.onError(str(R.string.error_network));
+        MAIN.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (done[0]) return;
+                done[0] = true;
+                get().purgeOutstandingWrites();
+                callback.onError(str(R.string.error_network));
+            }
         }, READ_TIMEOUT_MS);
-        root().updateChildren(updates).addOnCompleteListener(task -> {
-            if (done[0]) return;
-            done[0] = true;
-            if (task.isSuccessful()) {
-                callback.onSuccess(null);
-            } else {
-                Exception e = task.getException();
-                callback.onError(e != null ? AuthErrors.message(e) : str(R.string.error_generic));
+        root().updateChildren(updates).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(Task<Void> task) {
+                if (done[0]) return;
+                done[0] = true;
+                if (task.isSuccessful()) {
+                    callback.onSuccess(null);
+                } else {
+                    Exception e = task.getException();
+                    if (e != null) {
+                        callback.onError(AuthErrors.message(e));
+                    } else {
+                        callback.onError(str(R.string.error_generic));
+                    }
+                }
             }
         });
     }

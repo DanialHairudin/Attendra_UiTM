@@ -21,7 +21,7 @@
         android:name=".AttendraApp"
         android:theme="@style/Theme.AttendraUiTM">
         <activity
-            android:name=".ui.splash.SplashActivity"
+            android:name=".ui.splash.SplashPage"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,46 +30,52 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.auth.AuthActivity"
+            android:name=".ui.auth.AuthPage"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.lecturer.LecturerMainActivity"
+            android:name=".ui.lecturer.LecturerMainPage"
             android:exported="false" />
         <activity
-            android:name=".ui.student.StudentMainActivity"
+            android:name=".ui.student.StudentMainPage"
             android:exported="false" />
         <activity
-            android:name=".ui.lecturer.ClassDetailActivity"
+            android:name=".ui.lecturer.ClassDetailPage"
             android:exported="false" />
         <activity
-            android:name=".ui.lecturer.AddTeachingClassActivity"
+            android:name=".ui.lecturer.AddTeachingClassPage"
             android:exported="false" />
         <activity
-            android:name=".ui.settings.ProfileActivity"
+            android:name=".ui.settings.ProfilePage"
             android:exported="false" />
         <activity
-            android:name=".ui.settings.MyClubsActivity"
+            android:name=".ui.settings.MyClubsPage"
             android:exported="false" />
         <activity
-            android:name=".ui.settings.PreferredNameActivity"
+            android:name=".ui.settings.PreferredNamePage"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.session.CreateSessionActivity"
+            android:name=".ui.session.CreateSessionPage"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.lecturer.LiveMonitorActivity"
+            android:name=".ui.lecturer.LiveMonitorPage"
             android:exported="false" />
         <activity
-            android:name=".ui.lecturer.SessionReportActivity"
+            android:name=".ui.lecturer.SessionReportPage"
             android:exported="false" />
         <activity
-            android:name=".ui.student.CheckInActivity"
+            android:name=".ui.lecturer.SemesterSummaryPage"
             android:exported="false" />
         <activity
-            android:name=".ui.student.CheckInResultActivity"
+            android:name=".ui.student.PhoneCheckPage"
+            android:exported="false" />
+        <activity
+            android:name=".ui.student.CheckInPage"
+            android:exported="false" />
+        <activity
+            android:name=".ui.student.CheckInResultPage"
             android:exported="false" />
 
         <!-- Shares the Session Report CSV with other apps (email, Drive) without any storage permission. -->

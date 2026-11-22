@@ -31,9 +31,16 @@ public final class Names {
 
     /** The name to greet someone with: "{title} {preferredName}", e.g. "Dr. Aina". */
     public static String greetingName(String fullName, String preferredName, String title) {
-        String name = preferredName == null || preferredName.trim().isEmpty()
-                ? NameSuggestions.first(fullName) : preferredName.trim();
-        return title == null || title.trim().isEmpty() ? name : title.trim() + " " + name;
+        String name;
+        if (preferredName == null || preferredName.trim().isEmpty()) {
+            name = NameSuggestions.first(fullName);
+        } else {
+            name = preferredName.trim();
+        }
+        if (title == null || title.trim().isEmpty()) {
+            return name;
+        }
+        return title.trim() + " " + name;
     }
 
     /** greetingName() read straight from a lecturers/{uid} or students/{uid} snapshot. */
@@ -47,20 +54,27 @@ public final class Names {
     public static String initials(String fullName) {
         List<String> real = new ArrayList<>();
         for (String w : words(fullName)) {
-            if (!isTitle(w) && !JOINERS.contains(w.toLowerCase(Locale.ROOT))) real.add(w);
+            if (!isTitle(w) && !JOINERS.contains(w.toLowerCase(Locale.ROOT))) {
+                real.add(w);
+            }
         }
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < real.size() && sb.length() < 2; i++) {
             sb.append(Character.toUpperCase(real.get(i).charAt(0)));
         }
-        return sb.length() == 0 ? "?" : sb.toString();
+        if (sb.length() == 0) {
+            return "?";
+        }
+        return sb.toString();
     }
 
+    /** Splits a name into words. */
     private static String[] words(String s) {
         if (s == null || s.trim().isEmpty()) return new String[0];
         return s.trim().split("\\s+");
     }
 
+    /** True if the word is a title such as Dr. */
     private static boolean isTitle(String word) {
         return TITLES.contains(word.toLowerCase(Locale.ROOT).replace(".", ""));
     }

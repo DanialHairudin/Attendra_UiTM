@@ -23,6 +23,7 @@ public final class ThemePrefs {
         return prefs(context).getString(KEY_THEME_MODE, MODE_SYSTEM);
     }
 
+    /** Remembers the theme. */
     public static void save(Context context, String mode) {
         prefs(context).edit().putString(KEY_THEME_MODE, mode).apply();
     }
@@ -32,6 +33,7 @@ public final class ThemePrefs {
         AppCompatDelegate.setDefaultNightMode(toNightMode(mode));
     }
 
+    /** Changes our value to Android's night mode value. */
     private static int toNightMode(String mode) {
         if (MODE_LIGHT.equals(mode)) {
             return AppCompatDelegate.MODE_NIGHT_NO;
@@ -42,6 +44,7 @@ public final class ThemePrefs {
         return AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
     }
 
+    /** Where the setting is saved on the phone. */
     private static SharedPreferences prefs(Context context) {
         return context.getApplicationContext()
                 .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

@@ -10,7 +10,9 @@ public final class Csv {
     /** Adds one line. */
     public Csv row(String... fields) {
         for (int i = 0; i < fields.length; i++) {
-            if (i > 0) out.append(',');
+            if (i > 0) {
+                out.append(',');
+            }
             out.append(escape(fields[i]));
         }
         out.append("\r\n");
@@ -22,17 +24,24 @@ public final class Csv {
         return out.toString();
     }
 
+    /** Puts quotes around a value that needs them. */
     public static String escape(String field) {
         if (field == null) return "";
         boolean quote = field.contains(",") || field.contains("\"")
                 || field.contains("\n") || field.contains("\r");
-        return quote ? "\"" + field.replace("\"", "\"\"") + "\"" : field;
+        if (quote) {
+            return "\"" + field.replace("\"", "\"\"") + "\"";
+        }
+        return field;
     }
 
     /** A safe file name: letters, digits, dash and underscore only. */
     public static String fileName(String base) {
         String clean = base.replaceAll("[^A-Za-z0-9_-]+", "_").replaceAll("_+", "_");
         clean = clean.replaceAll("^_|_$", "");
-        return (clean.isEmpty() ? "attendance" : clean) + ".csv";
+        if (clean.isEmpty()) {
+            clean = "attendance";
+        }
+        return clean + ".csv";
     }
 }

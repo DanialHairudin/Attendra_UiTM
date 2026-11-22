@@ -18,6 +18,8 @@ public class AttendanceRecord {
     public Double lat;
     public Double lng;
     public String method;
+    /** The phone used to check in (SHA-256), GPS check-ins only. */
+    public String deviceHash;
     /** Why the lecturer marked it manually. */
     public String reason;
     public String markedBy;

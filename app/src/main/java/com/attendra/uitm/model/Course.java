@@ -52,7 +52,10 @@ public class Course {
     /** Is the course taught in this part? Old data without a parts map falls back to part. */
     @Exclude
     public boolean inPart(int p) {
-        return parts.isEmpty() ? part == p : parts.contains(p);
+        if (parts.isEmpty()) {
+            return part == p;
+        }
+        return parts.contains(p);
     }
 
     /** Something a lecturer teaches as a class. Old data without a slotType counts too. */
@@ -62,6 +65,7 @@ public class Course {
                 || SLOT_UNIVERSITY.equals(slotType) || SLOT_ELECTIVE.equals(slotType);
     }
 
+    /** True if the course is an elective. */
     @Exclude
     public boolean isElective() {
         return SLOT_ELECTIVE.equals(slotType);
@@ -73,7 +77,12 @@ public class Course {
      */
     @Exclude
     public boolean inTrack(@Nullable String trackId, int p) {
-        Integer trackPart = trackId == null ? null : tracks.get(trackId);
+        Integer trackPart;
+        if (trackId == null) {
+            trackPart = null;
+        } else {
+            trackPart = tracks.get(trackId);
+        }
         return trackPart != null && trackPart == p;
     }
 
@@ -84,6 +93,9 @@ public class Course {
 
     /** "ICT602 - Mobile Technology and Development", or just the name if the code is TBC. */
     public String label() {
-        return hasRealCode() ? code + " - " + name : name;
+        if (hasRealCode()) {
+            return code + " - " + name;
+        }
+        return name;
     }
 }

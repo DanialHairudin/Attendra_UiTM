@@ -28,6 +28,13 @@ public final class SemesterUtil {
         return label(indexOf(Calendar.getInstance()));
     }
 
+    /** The semester this time is in (sessions do not save a semester). */
+    public static String semesterOf(long time) {
+        Calendar day = Calendar.getInstance();
+        day.setTimeInMillis(time);
+        return label(indexOf(day));
+    }
+
     /** For the Semester dropdown: the current session and the next one. */
     public static List<String> options() {
         int now = indexOf(Calendar.getInstance());
@@ -51,6 +58,7 @@ public final class SemesterUtil {
     // Each session gets a number, so sessions can be compared and counted: year * 2 for
     // March–August, year * 2 + 1 for September–February.
 
+    /** The number of the semester this day is in. */
     private static int indexOf(Calendar day) {
         int year = day.get(Calendar.YEAR);
         int month = day.get(Calendar.MONTH);
@@ -59,11 +67,13 @@ public final class SemesterUtil {
         return (year - 1) * 2 + 1; // January–February: still last September's session
     }
 
+    /** The text for a semester number. */
     private static String label(int index) {
         int year = index / 2;
-        return index % 2 == 0
-                ? "March–August " + year
-                : "September " + year + " – February " + (year + 1);
+        if (index % 2 == 0) {
+            return "March–August " + year;
+        }
+        return "September " + year + " – February " + (year + 1);
     }
 
     /** The number of a saved label, or -1 if it can't be read. */
@@ -72,6 +82,9 @@ public final class SemesterUtil {
         Matcher m = YEAR.matcher(semester);
         if (!m.find()) return -1;
         int year = Integer.parseInt(m.group(1));
-        return semester.startsWith("September") ? year * 2 + 1 : year * 2;
+        if (semester.startsWith("September")) {
+            return year * 2 + 1;
+        }
+        return year * 2;
     }
 }

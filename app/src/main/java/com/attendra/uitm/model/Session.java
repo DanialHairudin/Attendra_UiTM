@@ -42,10 +42,16 @@ public class Session {
     public long createdAt;
     /** Made by the Test Lecturer: only test students see it (data/TestWorld). */
     public boolean isTest;
+    /** Weekly sessions only: the series in sessionSeries/{seriesId}. */
+    public String seriesId;
+    /** Weekly sessions only: "Week 3 of 14". */
+    public long weekNo;
+    public long weekTotal;
 
     public Session() {
     }
 
+    /** True until the session is closed. */
     @Exclude
     public boolean isOpen() {
         return STATUS_OPEN.equals(status);
@@ -57,6 +63,13 @@ public class Session {
         return isOpen() && now >= start && now < end;
     }
 
+    /** True for a weekly session that has not started yet. */
+    @Exclude
+    public boolean isFutureWeek(long now) {
+        return seriesId != null && isOpen() && now < start;
+    }
+
+    /** True for a club session. */
     @Exclude
     public boolean isClub() {
         return TYPE_CLUB.equals(type);
@@ -68,7 +81,9 @@ public class Session {
         List<String> ids = new ArrayList<>();
         if (groups != null) {
             for (Map.Entry<String, Boolean> e : groups.entrySet()) {
-                if (Boolean.TRUE.equals(e.getValue())) ids.add(e.getKey());
+                if (Boolean.TRUE.equals(e.getValue())) {
+                    ids.add(e.getKey());
+                }
             }
         }
         Collections.sort(ids);

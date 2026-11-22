@@ -34,7 +34,9 @@ public final class Formats {
         String b = time(end);
         String amPmA = a.substring(a.length() - 2);
         String amPmB = b.substring(b.length() - 2);
-        if (amPmA.equals(amPmB)) a = a.substring(0, a.length() - 3);
+        if (amPmA.equals(amPmB)) {
+            a = a.substring(0, a.length() - 3);
+        }
         return a + "–" + b;
     }
 
@@ -88,13 +90,20 @@ public final class Formats {
         for (int i = 1; i < ids.size(); i++) {
             String id = ids.get(i);
             boolean sameStem = id.length() == first.length() && id.startsWith(stem);
-            parts.add(sameStem ? id.substring(id.length() - 1) : id);
+            if (sameStem) {
+                parts.add(id.substring(id.length() - 1));
+            } else {
+                parts.add(id);
+            }
         }
         return String.join(", ", parts);
     }
 
     /** Percentage 0–100 rounded, e.g. 46 of 50 → 92. */
     public static int percent(int part, int total) {
-        return total == 0 ? 0 : Math.round(part * 100f / total);
+        if (total == 0) {
+            return 0;
+        }
+        return Math.round(part * 100f / total);
     }
 }

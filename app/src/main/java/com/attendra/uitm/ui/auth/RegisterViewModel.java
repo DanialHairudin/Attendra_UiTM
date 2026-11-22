@@ -5,9 +5,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.attendra.uitm.data.AuthRepository;
+import com.attendra.uitm.data.AuthJava;
 import com.attendra.uitm.data.Callback;
-import com.attendra.uitm.data.SeedRepository;
+import com.attendra.uitm.data.SeedJava;
 import com.attendra.uitm.model.Club;
 import com.attendra.uitm.model.Group;
 import com.attendra.uitm.model.Programme;
@@ -27,7 +27,7 @@ public class RegisterViewModel extends ViewModel {
     /** Seed loading state for the screen to observe. */
     public enum SeedState { LOADING, READY, ERROR }
 
-    private final SeedRepository seed = new SeedRepository();
+    private final SeedJava seed = new SeedJava();
 
     private final MutableLiveData<SeedState> seedState = new MutableLiveData<>();
     private String seedError;
@@ -53,7 +53,7 @@ public class RegisterViewModel extends ViewModel {
     /** Latest register error. */
     private final MutableLiveData<String> registerError = new MutableLiveData<>();
 
-    private final AuthRepository auth = new AuthRepository();
+    private final AuthJava auth = new AuthJava();
 
     /** Runs the register flow here instead of in the Fragment. */
     public void register(Registration r) {
@@ -74,26 +74,32 @@ public class RegisterViewModel extends ViewModel {
         });
     }
 
+    /** True while the account is being created. */
     public LiveData<Boolean> getSubmitting() {
         return submitting;
     }
 
+    /** The email once the account is created. */
     public LiveData<String> getRegisteredEmail() {
         return registeredEmail;
     }
 
+    /** The sign-up error to show, or null. */
     public LiveData<String> getRegisterError() {
         return registerError;
     }
 
+    /** Forgets the error after it was shown. */
     public void clearRegisterError() {
         registerError.setValue(null);
     }
 
+    /** Loading, ready or error, for programmes and clubs. */
     public LiveData<SeedState> getSeedState() {
         return seedState;
     }
 
+    /** Why the data did not load. */
     public String getSeedError() {
         return seedError;
     }
@@ -144,6 +150,7 @@ public class RegisterViewModel extends ViewModel {
         });
     }
 
+    /** Remembers why loading failed. */
     private void fail(String message) {
         seedError = message;
         seedState.setValue(SeedState.ERROR);
@@ -151,7 +158,10 @@ public class RegisterViewModel extends ViewModel {
 
     /** Parts 1..N for the chosen programme (N comes from /programmes/{code}/parts). */
     public int partCount() {
-        return programme == null ? 0 : programme.parts;
+        if (programme == null) {
+            return 0;
+        }
+        return programme.parts;
     }
 
     /** True when the chosen programme splits into tracks at the chosen part. */
@@ -161,14 +171,18 @@ public class RegisterViewModel extends ViewModel {
 
     /** The track the chosen group follows, e.g. "BIG_DATA", or null if the student picks. */
     public String groupTrack() {
-        for (Group g : allGroups) if (g.id.equals(groupId)) return g.track;
+        for (Group g : allGroups) {
+            if (g.id.equals(groupId)) return g.track;
+        }
         return null;
     }
 
     /** Track IDs of the chosen programme, sorted (e.g. BIG_DATA, CREATIVE_IT, IT_INFRASTRUCTURE). */
     public List<String> trackIds() {
         List<String> ids = new ArrayList<>();
-        if (programme != null && programme.tracks != null) ids.addAll(programme.tracks.keySet());
+        if (programme != null && programme.tracks != null) {
+            ids.addAll(programme.tracks.keySet());
+        }
         java.util.Collections.sort(ids);
         return ids;
     }

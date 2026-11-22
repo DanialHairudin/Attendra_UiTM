@@ -25,6 +25,7 @@ public class Programme {
     public Programme() {
     }
 
+    /** True if students choose a track in this programme. */
     public boolean hasTracks() {
         return tracks != null && !tracks.isEmpty();
     }
@@ -36,8 +37,16 @@ public class Programme {
 
     /** "Big Data" for BIG_DATA, or the ID itself if the label is missing. */
     public String trackLabel(String trackId) {
-        String label = tracks == null ? null : tracks.get(trackId);
-        return label != null ? label : trackId;
+        String label;
+        if (tracks == null) {
+            label = null;
+        } else {
+            label = tracks.get(trackId);
+        }
+        if (label != null) {
+            return label;
+        }
+        return trackId;
     }
 
     /** Text shown in the Programme dropdown, e.g. "CS240 - Bachelor of Information Technology (Hons.)". */

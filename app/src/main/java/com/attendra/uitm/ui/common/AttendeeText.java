@@ -50,16 +50,28 @@ public final class AttendeeText {
         if (r == null) {
             meta = SessionText.join(p.studentId, p.groupId);
         } else if (AttendanceRecord.METHOD_MANUAL.equals(r.method)) {
-            meta = SessionText.join(p.studentId, Formats.time(r.time),
-                    c.getString(R.string.manual_meta, r.reason == null ? "" : r.reason));
+            if (r.reason == null) {
+                meta = SessionText.join(p.studentId, Formats.time(r.time),
+                        c.getString(R.string.manual_meta, ""));
+            } else {
+                meta = SessionText.join(p.studentId, Formats.time(r.time),
+                        c.getString(R.string.manual_meta, r.reason));
+            }
         } else if (AttendanceRecord.METHOD_AUTO.equals(r.method)) {
             meta = SessionText.join(p.studentId, p.groupId);
         } else {
-            meta = SessionText.join(p.studentId, Formats.time(r.time),
-                    r.distance == null ? null : meters(c, r.distance));
+            if (r.distance == null) {
+                meta = SessionText.join(p.studentId, Formats.time(r.time), null);
+            } else {
+                meta = SessionText.join(p.studentId, Formats.time(r.time), meters(c, r.distance));
+            }
         }
         row.rowMeta.setText(meta);
-        statusChip(row.rowChip, r == null ? null : r.status);
+        if (r == null) {
+            statusChip(row.rowChip, null);
+        } else {
+            statusChip(row.rowChip, r.status);
+        }
         Ui.addRow(list, row.getRoot());
         return row.getRoot();
     }
@@ -71,10 +83,17 @@ public final class AttendeeText {
         ItemAttendeeRowBinding row = ItemAttendeeRowBinding.inflate(
                 android.view.LayoutInflater.from(c), list, false);
         row.rowAvatar.setText(Names.initials(p.name));
-        row.rowName.setText(p.name.isEmpty() ? a.uid : p.name);
-        row.rowMeta.setText(SessionText.join(Formats.time(a.time),
-                a.distance == null ? null : c.getString(R.string.meters_away,
-                        (int) Math.round(a.distance))));
+        if (p.name.isEmpty()) {
+            row.rowName.setText(a.uid);
+        } else {
+            row.rowName.setText(p.name);
+        }
+        if (a.distance == null) {
+            row.rowMeta.setText(SessionText.join(Formats.time(a.time), null));
+        } else {
+            row.rowMeta.setText(SessionText.join(Formats.time(a.time),
+                    c.getString(R.string.meters_away, (int) Math.round(a.distance))));
+        }
         row.rowChip.setText(reasonLabel(a.reason));
         Ui.tintBadge(row.rowChip, R.color.rejected, R.color.rejected_tint);
         Ui.addRow(list, row.getRoot());
@@ -88,6 +107,7 @@ public final class AttendeeText {
         return R.string.status_rejected;
     }
 
+    /** "12 m". */
     private static String meters(Context c, double m) {
         return c.getString(R.string.meters, (int) Math.round(m));
     }

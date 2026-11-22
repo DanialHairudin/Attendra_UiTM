@@ -37,9 +37,21 @@ public class SessionAttendanceWatcher {
         public final String groupId;
 
         Person(String name, String studentId, String groupId) {
-            this.name = name == null ? "" : name;
-            this.studentId = studentId == null ? "" : studentId;
-            this.groupId = groupId == null ? "" : groupId;
+            if (name == null) {
+                this.name = "";
+            } else {
+                this.name = name;
+            }
+            if (studentId == null) {
+                this.studentId = "";
+            } else {
+                this.studentId = studentId;
+            }
+            if (groupId == null) {
+                this.groupId = "";
+            } else {
+                this.groupId = groupId;
+            }
         }
     }
 
@@ -74,7 +86,15 @@ public class SessionAttendanceWatcher {
         this.listener = listener;
     }
 
+    /** Starts following the session. */
     public void start() {
+        listenToSession();
+        listenToAttendance();
+        listenToAttempts();
+    }
+
+    /** Follows the session itself (time, radius, status). */
+    private void listenToSession() {
         subs.listen(Db.root().child("sessions").child(sessionId), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
@@ -91,6 +111,10 @@ public class SessionAttendanceWatcher {
                 listener.onError(message);
             }
         });
+    }
+
+    /** Follows the attendance records of the session. */
+    private void listenToAttendance() {
         subs.listen(Db.root().child("attendance").child(sessionId), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
@@ -112,6 +136,10 @@ public class SessionAttendanceWatcher {
                 listener.onError(message);
             }
         });
+    }
+
+    /** Follows the check-in attempts of the session. */
+    private void listenToAttempts() {
         subs.listen(Db.root().child("attempts").child(sessionId), new Callback<DataSnapshot>() {
             @Override
             public void onSuccess(DataSnapshot snapshot) {
@@ -135,6 +163,7 @@ public class SessionAttendanceWatcher {
         });
     }
 
+    /** Stops every listener. */
     public void stop() {
         subs.clear();
         indexesAttached = false;
@@ -145,7 +174,7 @@ public class SessionAttendanceWatcher {
     private void attachIndexes(Session s) {
         if (indexesAttached) return;
         indexesAttached = true;
-        for (String path : SessionRepository.eligibleIndexPaths(s)) {
+        for (String path : SessionJava.eligibleIndexPaths(s)) {
             eligibleByIndex.put(path, null);
             subs.listen(Db.root().child(path), new Callback<DataSnapshot>() {
                 @Override
@@ -156,7 +185,9 @@ public class SessionAttendanceWatcher {
                                 @Override
                                 public void onSuccess(Set<String> uids) {
                                     if (!eligibleByIndex.containsKey(path)) return; // stopped
-                                    for (String uid : uids) lookUp(uid);
+                                    for (String uid : uids) {
+                                        lookUp(uid);
+                                    }
                                     eligibleByIndex.put(path, uids);
                                     listener.onChanged();
                                 }
@@ -206,21 +237,41 @@ public class SessionAttendanceWatcher {
     /** Everyone who may attend, plus anyone with a record (e.g. marked before leaving a group). */
     public Set<String> eligible() {
         Set<String> all = new LinkedHashSet<>();
-        for (Set<String> uids : eligibleByIndex.values()) if (uids != null) all.addAll(uids);
-        if (records != null) all.addAll(records.keySet());
+        for (Set<String> uids : eligibleByIndex.values()) {
+            if (uids != null) {
+                all.addAll(uids);
+            }
+        }
+        if (records != null) {
+            all.addAll(records.keySet());
+        }
         return all;
     }
 
+    /** The student's status (present, late, absent), or null if none yet. */
     @Nullable
     public String statusOf(String uid) {
-        AttendanceRecord r = records == null ? null : records.get(uid);
-        return r == null ? null : r.status;
+        AttendanceRecord r;
+        if (records == null) {
+            r = null;
+        } else {
+            r = records.get(uid);
+        }
+        if (r == null) {
+            return null;
+        }
+        return r.status;
     }
 
+    /** How many records have this status. */
     public int count(String status) {
         int n = 0;
         if (records != null) {
-            for (AttendanceRecord r : records.values()) if (status.equals(r.status)) n++;
+            for (AttendanceRecord r : records.values()) {
+                if (status.equals(r.status)) {
+                    n++;
+                }
+            }
         }
         return n;
     }
@@ -228,7 +279,11 @@ public class SessionAttendanceWatcher {
     /** Eligible students with no record yet ("Not yet"). */
     public List<String> notYet() {
         List<String> list = new ArrayList<>();
-        for (String uid : eligible()) if (statusOf(uid) == null) list.add(uid);
+        for (String uid : eligible()) {
+            if (statusOf(uid) == null) {
+                list.add(uid);
+            }
+        }
         return list;
     }
 
@@ -236,7 +291,11 @@ public class SessionAttendanceWatcher {
     public List<Attempt> rejectedAttempts() {
         List<Attempt> list = new ArrayList<>();
         if (attempts != null) {
-            for (Attempt a : attempts) if (a.isRejected()) list.add(0, a);
+            for (Attempt a : attempts) {
+                if (a.isRejected()) {
+                    list.add(0, a);
+                }
+            }
         }
         return list;
     }
@@ -248,13 +307,19 @@ public class SessionAttendanceWatcher {
     public int rejectedCount() {
         Set<String> uids = new HashSet<>();
         for (Attempt a : rejectedAttempts()) {
-            if (a.uid != null && !Attendance.attended(statusOf(a.uid))) uids.add(a.uid);
+            if (a.uid != null && !Attendance.attended(statusOf(a.uid))) {
+                uids.add(a.uid);
+            }
         }
         return uids.size();
     }
 
+    /** The student's name and ID (empty while loading). */
     public Person person(String uid) {
         Person p = people.get(uid);
-        return p != null ? p : new Person("", "", "");
+        if (p != null) {
+            return p;
+        }
+        return new Person("", "", "");
     }
 }

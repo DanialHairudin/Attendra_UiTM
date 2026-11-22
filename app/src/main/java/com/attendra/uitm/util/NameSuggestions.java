@@ -31,7 +31,9 @@ public final class NameSuggestions {
     /** The suggestions, best first. */
     public static List<String> suggest(String fullName) {
         List<String> words = words(fullName);
-        while (words.size() > 1 && isTitle(words.get(0))) words.remove(0);
+        while (words.size() > 1 && isTitle(words.get(0))) {
+            words.remove(0);
+        }
         if (words.isEmpty()) return new ArrayList<>();
 
         // 3. Given name: the words before the first separator.
@@ -44,14 +46,18 @@ public final class NameSuggestions {
             }
             given.add(w);
         }
-        if (given.isEmpty()) given = words; // Name started with a separator: use everything
+        if (given.isEmpty()) {
+            given = words; // Name started with a separator: use everything
+        }
 
         Set<String> out = new LinkedHashSet<>();
         boolean startsWithPrefix = isPrefix(given.get(0));
         if (hasSeparator || startsWithPrefix || given.size() == 1) {
             // 4a. Malay-style: skip leading prefixes for the single-word suggestion.
             int first = 0;
-            while (first < given.size() - 1 && isPrefix(given.get(first))) first++;
+            while (first < given.size() - 1 && isPrefix(given.get(first))) {
+                first++;
+            }
             out.add(given.get(first));
             out.add(join(given, 0, given.size()));
             out.add(given.get(0));
@@ -60,7 +66,9 @@ public final class NameSuggestions {
             out.add(join(given, 1, given.size()));
             out.add(given.get(given.size() - 1));
             out.add(join(given, 0, given.size()));
-            if (given.size() == 2) out.add(given.get(0)); // e.g. "Kavitha Ramasamy"
+            if (given.size() == 2) {
+                out.add(given.get(0)); // e.g. "Kavitha Ramasamy"
+            }
         }
         return new ArrayList<>(out);
     }
@@ -68,7 +76,10 @@ public final class NameSuggestions {
     /** The first suggestion, used when no preferred name has been chosen yet. */
     public static String first(String fullName) {
         List<String> s = suggest(fullName);
-        return s.isEmpty() ? "" : s.get(0);
+        if (s.isEmpty()) {
+            return "";
+        }
+        return s.get(0);
     }
 
     /** "2–20 letters and spaces" for the "Other" field. */
@@ -82,11 +93,14 @@ public final class NameSuggestions {
 
     // ----------------------------------------------------------------- helpers
 
+    /** Splits a name into words. */
     private static List<String> words(String s) {
         List<String> list = new ArrayList<>();
         if (s == null) return list;
         for (String w : s.trim().split("\\s+")) {
-            if (!w.isEmpty()) list.add(tidyCase(w));
+            if (!w.isEmpty()) {
+                list.add(tidyCase(w));
+            }
         }
         return list;
     }
@@ -101,14 +115,17 @@ public final class NameSuggestions {
         return lower.substring(0, 1).toUpperCase(Locale.ROOT) + lower.substring(1);
     }
 
+    /** True if the word is a prefix such as Muhammad. */
     private static boolean isPrefix(String w) {
         return PREFIXES.contains(w.toLowerCase(Locale.ROOT));
     }
 
+    /** True if the word is a title such as Dr. */
     private static boolean isTitle(String w) {
         return TITLES.contains(w.toLowerCase(Locale.ROOT).replace(".", ""));
     }
 
+    /** Joins the words with spaces. */
     private static String join(List<String> words, int from, int to) {
         return String.join(" ", words.subList(from, to));
     }

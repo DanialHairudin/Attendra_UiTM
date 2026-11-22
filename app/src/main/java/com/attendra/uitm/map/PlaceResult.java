@@ -16,6 +16,9 @@ public class PlaceResult {
 
     /** Text saved in the session as the place name, e.g. "i-City, Seksyen 7, Shah Alam". */
     public String fullName() {
-        return subtitle == null || subtitle.isEmpty() ? title : title + ", " + subtitle;
+        if (subtitle == null || subtitle.isEmpty()) {
+            return title;
+        }
+        return title + ", " + subtitle;
     }
 }

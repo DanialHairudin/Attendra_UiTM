@@ -23,11 +23,23 @@ public final class SessionText {
     public static String course(Session s) {
         if (s.isClub()) {
             Club club = SeedCache.club(s.clubId);
-            return club != null ? club.shortName : nullToEmpty(s.clubId);
+            if (club != null) {
+                return club.shortName;
+            }
+            return nullToEmpty(s.clubId);
         }
         Course course = SeedCache.course(s.courseId);
         if (course == null) return nullToEmpty(s.courseId);
-        return course.hasRealCode() ? course.code : course.name;
+        if (course.hasRealCode()) {
+            return course.code;
+        }
+        return course.name;
+    }
+
+    /** "Week 3 of 14", or null if the session does not repeat. */
+    public static String week(Context c, Session s) {
+        if (s.seriesId == null) return null;
+        return c.getString(R.string.week_n_of_m, s.weekNo, s.weekTotal);
     }
 
     /** "CDCS2405A, B, C" (empty for club sessions). */
@@ -38,13 +50,19 @@ public final class SessionText {
     /** Where it happens: "DK1, CS1 1st floor" for a room. */
     public static String room(Context c, Session s) {
         if ("pin".equals(s.where)) {
-            return s.placeName != null && !s.placeName.isEmpty()
-                    ? s.placeName : c.getString(R.string.room_pin);
+            if (s.placeName != null && !s.placeName.isEmpty()) {
+                return s.placeName;
+            }
+            return c.getString(R.string.room_pin);
         }
         Venue v = SeedCache.venue(s.venueId);
         if (v == null) return nullToEmpty(s.building);
-        String place = v.floor == null || v.floor.isEmpty()
-                ? v.building : c.getString(R.string.building_floor, v.building, v.floor);
+        String place;
+        if (v.floor == null || v.floor.isEmpty()) {
+            place = v.building;
+        } else {
+            place = c.getString(R.string.building_floor, v.building, v.floor);
+        }
         return c.getString(R.string.room_in_building, v.name, place);
     }
 
@@ -53,12 +71,15 @@ public final class SessionText {
         StringBuilder sb = new StringBuilder();
         for (String p : parts) {
             if (p == null || p.isEmpty()) continue;
-            if (sb.length() > 0) sb.append(" - ");
+            if (sb.length() > 0) {
+                sb.append(" - ");
+            }
             sb.append(p);
         }
         return sb.toString();
     }
 
+    /** The icon for the session type. */
     @DrawableRes
     public static int icon(Session s) {
         if (Session.TYPE_TEST.equals(s.type)) return R.drawable.ic_clipboard;
@@ -84,7 +105,11 @@ public final class SessionText {
         }
     }
 
+    /** "" instead of null. */
     private static String nullToEmpty(String s) {
-        return s == null ? "" : s;
+        if (s == null) {
+            return "";
+        }
+        return s;
     }
 }

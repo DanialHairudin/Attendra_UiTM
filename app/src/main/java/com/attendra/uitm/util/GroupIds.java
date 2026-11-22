@@ -23,6 +23,9 @@ public final class GroupIds {
 
     /** "CS2405A" → "CDCS2405A". */
     public static String toCdcs(String id) {
-        return isOldFormat(id) ? "CD" + id : id;
+        if (isOldFormat(id)) {
+            return "CD" + id;
+        }
+        return id;
     }
 }
