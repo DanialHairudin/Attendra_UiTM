@@ -1,0 +1,502 @@
+package com.attendra.uitm.ui.student;
+
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.attendra.uitm.BuildConfig;
+import com.attendra.uitm.R;
+import com.attendra.uitm.data.AttendanceJava;
+import com.attendra.uitm.data.Callback;
+import com.attendra.uitm.data.Db;
+import com.attendra.uitm.data.SeedCache;
+import com.attendra.uitm.data.SessionWatcher;
+import com.attendra.uitm.data.TestWorld;
+import com.attendra.uitm.data.Subscriptions;
+import com.attendra.uitm.data.UserJava;
+import com.attendra.uitm.databinding.StudentHomePageBinding;
+import com.attendra.uitm.databinding.ItemCourseRowBinding;
+import com.attendra.uitm.model.Attendance;
+import com.attendra.uitm.model.Course;
+import com.attendra.uitm.model.Registration;
+import com.attendra.uitm.model.Session;
+import com.attendra.uitm.ui.common.MainTabsPage;
+import com.attendra.uitm.ui.common.SessionText;
+import com.attendra.uitm.ui.common.Ui;
+import com.attendra.uitm.ui.settings.ProfilePage;
+import com.attendra.uitm.util.Formats;
+import com.attendra.uitm.util.Names;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+/** Student Dashboard Page. */
+public class StudentHomePage extends Fragment {
+
+    private static final long TICK_MS = 30_000;
+    private static final String INDEX_GROUP = "group";
+    private static final String INDEX_CLUB = "club:";
+
+    private StudentHomePageBinding binding;
+    private final Subscriptions subs = new Subscriptions();
+    private SessionWatcher watcher;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Runnable tick = new Runnable() {
+        @Override
+        public void run() {
+            render();
+            handler.postDelayed(this, TICK_MS);
+        }
+    };
+
+    private boolean seedReady;
+    private Map<String, Session> mySessions = new HashMap<>();
+    /** True for the Test Student, who only sees the Test Lecturer's sessions (TestWorld). */
+    private boolean myTest;
+    private String watchedGroup;
+    /** The session shown on the open-session card (for Simulate check-in). */
+    private Session openSession;
+    /** sessionId → status ("present", "late", "absent"); null = not loaded yet. */
+    private Map<String, String> myAttendance;
+    /** sessionId → courseId ("" for club sessions), read once per session. */
+    private final Map<String, String> courseOfSession = new HashMap<>();
+    private final Set<String> courseLookups = new HashSet<>();
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        binding = StudentHomePageBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        Ui.setEmpty(binding.emptyCourses, R.drawable.ic_chart,
+                R.string.empty_courses_title, R.string.empty_courses_body);
+        binding.txtDate.setText(Formats.dateLine(System.currentTimeMillis()));
+        binding.btnAvatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ProfilePage.open(requireContext(), Registration.ROLE_STUDENT);
+            }
+        });
+        binding.btnSeeAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainTabsPage) requireActivity()).selectTab(R.id.nav_attendance);
+            }
+        });
+        binding.btnCheckIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (openSession != null) {
+                    CheckInPage.open(requireContext(), openSession.id);
+                }
+            }
+        });
+        binding.btnSimulate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                simulateCheckIn();
+            }
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        String uid = user.getUid();
+        myTest = TestWorld.cached(uid);
+
+        loadSeed();
+
+        createWatcher();
+
+        watchProfile(uid);
+
+        watchClubs(uid);
+
+        watchAttendance(uid);
+
+        handler.post(tick);
+    }
+
+    /** Loads course and room names. */
+    private void loadSeed() {
+        SeedCache.load(new Callback<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                seedReady = true;
+                render();
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+            }
+        });
+    }
+
+    /** Prepares the listener for the student's sessions. */
+    private void createWatcher() {
+        watcher = new SessionWatcher(new SessionWatcher.Listener() {
+            @Override
+            public void onSessions(Map<String, Session> all, boolean ready) {
+                mySessions = all;
+                render();
+            }
+
+            @Override
+            public void onError(String message) {
+                showError(message);
+            }
+        });
+    }
+
+    /** Follows the student's profile (name and group). */
+    private void watchProfile(String uid) {
+        subs.listen(UserJava.profileRef(uid, Registration.ROLE_STUDENT),
+                new Callback<DataSnapshot>() {
+                    @Override
+                    public void onSuccess(DataSnapshot profile) {
+                        boolean test = Boolean.TRUE.equals(profile.child("isTest").getValue(Boolean.class));
+                        if (test != myTest) {
+                            myTest = test;
+                            render();
+                        }
+                        String name = profile.child("name").getValue(String.class);
+                        if (binding != null && name != null) {
+                            binding.txtGreeting.setText(getString(R.string.greeting_student,
+                                    Names.greetingName(profile)));
+                            binding.btnAvatar.setText(Names.initials(name));
+                        }
+                        // Follow the sessions of the student's (current) group.
+                        String groupId = profile.child("groupId").getValue(String.class);
+                        if (groupId != null && !groupId.equals(watchedGroup)) {
+                            watcher.unwatchIndex(INDEX_GROUP);
+                            watcher.watchIndex(INDEX_GROUP,
+                                    Db.root().child("sessionsByGroup").child(groupId));
+                            watchedGroup = groupId;
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        showError(message);
+                    }
+                });
+    }
+
+    /** Follows the student's clubs. */
+    private void watchClubs(String uid) {
+        subs.listen(UserJava.clubsQuery(uid, Registration.ROLE_STUDENT),
+                new Callback<DataSnapshot>() {
+                    @Override
+                    public void onSuccess(DataSnapshot snapshot) {
+                        List<String> clubs = UserJava.clubIds(snapshot, uid,
+                                Registration.ROLE_STUDENT);
+                        // Follow sessionsByClub for every joined club, and stop following clubs the
+                        // student has left.
+                        for (String name : watcher.indexNames()) {
+                            if (name.startsWith(INDEX_CLUB)
+                                    && !clubs.contains(name.substring(INDEX_CLUB.length()))) {
+                                watcher.unwatchIndex(name);
+                            }
+                        }
+                        for (String clubId : clubs) {
+                            watcher.watchIndex(INDEX_CLUB + clubId,
+                                    Db.root().child("sessionsByClub").child(clubId));
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        showError(message);
+                    }
+                });
+    }
+
+    /** Follows the student's attendance records. */
+    private void watchAttendance(String uid) {
+        subs.listen(Db.root().child("studentAttendance").child(uid), new Callback<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot snapshot) {
+                Map<String, String> map = new HashMap<>();
+                for (DataSnapshot rec : snapshot.getChildren()) {
+                    String status = rec.child("status").getValue(String.class);
+                    if (status != null) {
+                        map.put(rec.getKey(), status);
+                    }
+                }
+                myAttendance = map;
+                lookUpCourses(map.keySet());
+                render();
+            }
+
+            @Override
+            public void onError(String message) {
+                myAttendance = new HashMap<>();
+                showError(message);
+                render();
+            }
+        });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        subs.clear();
+        if (watcher != null) {
+            watcher.stop();
+        }
+        handler.removeCallbacks(tick);
+        myAttendance = null;
+        watchedGroup = null;
+    }
+
+    /** Reads sessions/{sid}/courseId once for each attended session we don't know yet. */
+    private void lookUpCourses(Set<String> sessionIds) {
+        for (String sid : sessionIds) {
+            if (courseOfSession.containsKey(sid) || !courseLookups.add(sid)) continue;
+            Db.readOnce(Db.root().child("sessions").child(sid).child("courseId"),
+                    new Callback<DataSnapshot>() {
+                        @Override
+                        public void onSuccess(DataSnapshot snapshot) {
+                            String courseId = snapshot.getValue(String.class);
+                            if (courseId == null) {
+                                courseOfSession.put(sid, "");
+                            } else {
+                                courseOfSession.put(sid, courseId);
+                            }
+                            render();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            courseLookups.remove(sid); // Try again on the next update
+                        }
+                    });
+        }
+    }
+
+    // ------------------------------------------------------------------ render
+
+    /** Draws the whole page again. */
+    private void render() {
+        if (binding == null || !seedReady) return;
+        long now = System.currentTimeMillis();
+        binding.txtDate.setText(Formats.dateLine(now));
+        renderOpenSession(now);
+        renderOverall();
+        renderCourses();
+    }
+
+    /** The card shows the open session (for my group or clubs) that closes first. */
+    private void renderOpenSession(long now) {
+        Session open = null;
+        for (Session s : mySessions.values()) {
+            // Real students never see test sessions, and the Test Student only sees those.
+            if (TestWorld.of(s) != myTest) continue;
+            if (s.isCheckInOpen(now) && (open == null || s.end < open.end)) {
+                open = s;
+            }
+        }
+        if (open == null) {
+            binding.cardOpen.setVisibility(View.GONE);
+            return;
+        }
+        binding.cardOpen.setVisibility(View.VISIBLE);
+        binding.txtOpenCloses.setText(getString(R.string.closes_at, Formats.time(open.end)));
+        binding.txtOpenTitle.setText(open.title);
+        binding.txtOpenMeta.setText(SessionText.join(SessionText.course(open),
+                SessionText.room(requireContext(), open)));
+
+        boolean done = myAttendance != null && Attendance.attended(myAttendance.get(open.id));
+        if (done) {
+            binding.btnCheckIn.setVisibility(View.GONE);
+            binding.txtCheckedIn.setVisibility(View.VISIBLE);
+        } else {
+            binding.btnCheckIn.setVisibility(View.VISIBLE);
+            binding.txtCheckedIn.setVisibility(View.GONE);
+        }
+        openSession = open;
+        if (BuildConfig.DEBUG && myTest && !done) {
+            binding.btnSimulate.setVisibility(View.VISIBLE);
+        } else {
+            binding.btnSimulate.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * DEBUG only: writes a present/late record (method "debug") for the open session, as a real
+     * check-in would, so the Live Monitor can be tested before the GPS check-in exists.
+     */
+    private void simulateCheckIn() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (!BuildConfig.DEBUG || openSession == null || user == null) return;
+        binding.btnSimulate.setEnabled(false);
+        new AttendanceJava().simulateCheckIn(openSession, user.getUid(),
+                new Callback<String>() {
+                    @Override
+                    public void onSuccess(String status) {
+                        if (binding == null) return;
+                        binding.btnSimulate.setEnabled(true);
+                        if (Attendance.LATE.equals(status)) {
+                            Snackbar.make(binding.getRoot(), getString(R.string.simulate_done,
+                                    getString(R.string.status_late)), Snackbar.LENGTH_LONG).show();
+                        } else {
+                            Snackbar.make(binding.getRoot(), getString(R.string.simulate_done,
+                                    getString(R.string.status_present)),
+                                            Snackbar.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        if (binding == null) return;
+                        binding.btnSimulate.setEnabled(true);
+                        showError(message);
+                    }
+                });
+    }
+
+    /** The overall attendance percentage. */
+    private void renderOverall() {
+        if (myAttendance == null) {
+            binding.txtOverallPct.setText(R.string.dash);
+            binding.txtOverallDetail.setText(R.string.loading);
+            return;
+        }
+        int total = myAttendance.size();
+        if (total == 0) {
+            binding.txtOverallPct.setText(R.string.dash);
+            binding.txtOverallDetail.setText(R.string.no_attendance_yet);
+            return;
+        }
+        int attended = 0;
+        for (String status : myAttendance.values()) {
+            if (Attendance.attended(status)) {
+                attended++;
+            }
+        }
+        binding.txtOverallPct.setText(getString(R.string.percent,
+                Formats.percent(attended, total)));
+        binding.txtOverallDetail.setText(getResources().getQuantityString(R.plurals.overall_detail, total, attended, total));
+    }
+
+    /** One row per course: attended / recorded sessions of that course. */
+    private void renderCourses() {
+        binding.listCourses.removeAllViews();
+        if (myAttendance == null) {
+            Ui.showListState(Ui.ListState.LOADING, binding.txtCoursesLoading,
+                    binding.emptyCourses, binding.listCourses);
+            return;
+        }
+        // courseId → {attended, total}; TreeMap keeps a stable order
+        Map<String, int[]> perCourse = new TreeMap<>();
+        boolean waiting = false;
+        for (Map.Entry<String, String> e : myAttendance.entrySet()) {
+            String courseId = courseOfSession.get(e.getKey());
+            if (courseId == null) {
+                waiting = true; // Still reading this session's course
+                continue;
+            }
+            if (courseId.isEmpty()) continue; // Club session
+            int[] counts = perCourse.get(courseId);
+            if (counts == null) {
+                counts = new int[2];
+                perCourse.put(courseId, counts);
+            }
+            if (Attendance.attended(e.getValue())) {
+                counts[0]++;
+            }
+            counts[1]++;
+        }
+        if (perCourse.isEmpty()) {
+            if (waiting) {
+                Ui.showListState(Ui.ListState.LOADING, binding.txtCoursesLoading,
+                        binding.emptyCourses, binding.listCourses);
+            } else {
+                Ui.showListState(Ui.ListState.EMPTY, binding.txtCoursesLoading, binding.emptyCourses,
+                        binding.listCourses);
+            }
+            return;
+        }
+        Ui.showListState(Ui.ListState.CONTENT, binding.txtCoursesLoading, binding.emptyCourses,
+                binding.listCourses);
+
+        List<String> ids = new ArrayList<>(perCourse.keySet());
+        Collections.sort(ids, new Comparator<String>() {
+            @Override
+            public int compare(String a, String b) {
+                return label(a).compareToIgnoreCase(label(b));
+            }
+        });
+        for (String courseId : ids) {
+            addCourseRow(perCourse, courseId);
+        }
+    }
+
+    /** Adds the row of one course. */
+    private void addCourseRow(Map<String, int[]> perCourse, String courseId) {
+        int[] counts = perCourse.get(courseId);
+        int pct = Formats.percent(counts[0], counts[1]);
+        ItemCourseRowBinding row = ItemCourseRowBinding.inflate(getLayoutInflater(),
+                binding.listCourses, false);
+        row.courseTitle.setText(label(courseId));
+        row.courseBar.setProgress(pct);
+        row.coursePct.setText(getString(R.string.percent, pct));
+        row.getRoot().setContentDescription(getString(R.string.course_pct_description,
+                label(courseId), pct));
+        row.getRoot().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainTabsPage) requireActivity()).selectTab(R.id.nav_attendance);
+            }
+        });
+        Ui.addRow(binding.listCourses, row.getRoot());
+    }
+
+    /** The course code and name. */
+    private String label(String courseId) {
+        Course c = SeedCache.course(courseId);
+        if (c != null) {
+            return c.label();
+        }
+        return courseId;
+    }
+
+    /** Shows an error message. */
+    private void showError(String message) {
+        if (binding != null) {
+            Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+}

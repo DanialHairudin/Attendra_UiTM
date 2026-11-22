@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Phone check before the Student Dashboard: a loading circle, or "Phone already linked". -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/phone_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg">
+
+    <ProgressBar
+        android:id="@+id/progress_phone"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center" />
+
+    <include
+        android:id="@+id/state"
+        layout="@layout/include_check_in_state"
+        android:visibility="gone" />
+</FrameLayout>

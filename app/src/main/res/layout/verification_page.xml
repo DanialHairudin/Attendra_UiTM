@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Email Verification Page: 6 code boxes, countdown, Verify, Resend code. -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:padding="28dp">
+
+        <FrameLayout
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:background="@drawable/bg_verify_icon">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_mail"
+                app:tint="@color/goldText" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:accessibilityHeading="true"
+            android:text="@string/verify_title"
+            android:textAppearance="@style/TextAppearance.Attendra.H1" />
+
+        <!-- Filled in code so the email address can be bold -->
+        <TextView
+            android:id="@+id/txt_verify_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:lineSpacingMultiplier="1.2"
+            android:textAppearance="@style/TextAppearance.Attendra.Body.Muted" />
+
+        <!-- The six boxes. -->
+        <LinearLayout
+            android:id="@+id/code_boxes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-4dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="-4dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/code_1"
+                style="@style/Widget.Attendra.CodeBox"
+                android:importantForAutofill="no"
+                android:hint="@string/code_digit_1" />
+
+            <EditText
+                android:id="@+id/code_2"
+                style="@style/Widget.Attendra.CodeBox"
+                android:importantForAutofill="no"
+                android:hint="@string/code_digit_2" />
+
+            <EditText
+                android:id="@+id/code_3"
+                style="@style/Widget.Attendra.CodeBox"
+                android:importantForAutofill="no"
+                android:hint="@string/code_digit_3" />
+
+            <EditText
+                android:id="@+id/code_4"
+                style="@style/Widget.Attendra.CodeBox"
+                android:importantForAutofill="no"
+                android:hint="@string/code_digit_4" />
+
+            <EditText
+                android:id="@+id/code_5"
+                style="@style/Widget.Attendra.CodeBox"
+                android:importantForAutofill="no"
+                android:hint="@string/code_digit_5" />
+
+            <EditText
+                android:id="@+id/code_6"
+                style="@style/Widget.Attendra.CodeBox"
+                android:importantForAutofill="no"
+                android:hint="@string/code_digit_6" />
+        </LinearLayout>
+
+        <!-- "Code expires in 0:59" -->
+        <TextView
+            android:id="@+id/txt_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:accessibilityLiveRegion="none"
+            android:fontFeatureSettings="tnum"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+
+        <!-- Expired / incorrect / too many attempts / send failed -->
+        <TextView
+            android:id="@+id/txt_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:accessibilityLiveRegion="polite"
+            android:textAppearance="@style/TextAppearance.Attendra.Caption"
+            android:textColor="@color/rejected"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_verify"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="20dp"
+            android:text="@string/verify_button" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/verify_no_code_yet"
+                android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_resend"
+                style="@style/Widget.Attendra.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFeatureSettings="tnum"
+                android:text="@string/verify_resend" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/verify_wrong_email"
+                android:textAppearance="@style/TextAppearance.Attendra.Caption" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_change_email"
+                style="@style/Widget.Attendra.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/verify_change_it" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_back_to_login"
+            style="@style/Widget.Attendra.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/back_to_login" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

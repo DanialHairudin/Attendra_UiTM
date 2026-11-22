@@ -1,0 +1,202 @@
+package com.attendra.uitm.data;
+
+import com.attendra.uitm.model.Attendance;
+import com.attendra.uitm.model.AttendanceRecord;
+import com.attendra.uitm.model.Registration;
+import com.attendra.uitm.model.Session;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.ServerValue;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/** Database side of the student's GPS check-in. */
+public class CheckInJava {
+
+    // ============================================================
+    // [READ] Check if the student is allowed to check in
+    // ============================================================
+    /** Is this student allowed into this session? */
+    public void isEligible(Session s, String uid, Callback<Boolean> callback) {
+        TestWorld.mine(Registration.ROLE_STUDENT, new Callback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean test) {
+                if (test != TestWorld.of(s)) {
+                    callback.onSuccess(false);
+                } else {
+                    isMember(s, uid, callback);
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    /** True if the student is in the session's club or group. */
+    private void isMember(Session s, String uid, Callback<Boolean> callback) {
+        if (s.isClub()) {
+            Db.readOnce(Db.root().child("clubMembers").child(s.clubId).child(uid),
+                    new Callback<DataSnapshot>() {
+                        @Override
+                        public void onSuccess(DataSnapshot snap) {
+                            callback.onSuccess(Boolean.TRUE.equals(snap.getValue(Boolean.class)));
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            callback.onError(message);
+                        }
+                    });
+            return;
+        }
+        Db.readOnce(Db.root().child("students").child(uid).child("groupId"),
+                new Callback<DataSnapshot>() {
+                    @Override
+                    public void onSuccess(DataSnapshot snap) {
+                        String groupId = snap.getValue(String.class);
+                        callback.onSuccess(groupId != null && s.groupIds().contains(groupId));
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+    }
+
+    // ============================================================
+    // [READ] Check if the student already checked in
+    // ============================================================
+    /** The student's existing record for this session, or null if there is none. */
+    public void existingRecord(String sessionId, String uid,
+                               Callback<AttendanceRecord> callback) {
+        Db.readOnce(Db.root().child("attendance").child(sessionId).child(uid),
+                new Callback<DataSnapshot>() {
+                    @Override
+                    public void onSuccess(DataSnapshot snap) {
+                        if (snap.exists()) {
+                            callback.onSuccess(snap.getValue(AttendanceRecord.class));
+                        } else {
+                            callback.onSuccess(null);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+    }
+
+    // ============================================================
+    // [CREATE] Save the student's check-in (present / late)
+    // ============================================================
+    /** Accepted check-in. */
+    public void writeAccepted(Session s, String uid, String deviceHash, String status, double lat,
+                              double lng, double distance, double accuracy,
+                              Callback<Long> callback) {
+        Map<String, Object> record = new HashMap<>();
+        record.put("status", status);
+        record.put("time", ServerValue.TIMESTAMP);
+        record.put("distance", round1(distance));
+        record.put("accuracy", round1(accuracy));
+        record.put("method", AttendanceRecord.METHOD_GPS);
+        record.put("deviceHash", deviceHash); // The rules compare it with the student's phone
+        record.put("lat", round5(lat));
+        record.put("lng", round5(lng));
+
+        Map<String, Object> mirror = new HashMap<>();
+        mirror.put("status", status);
+        mirror.put("time", ServerValue.TIMESTAMP);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("attendance/" + s.id + "/" + uid, record);
+        updates.put("studentAttendance/" + uid + "/" + s.id, mirror);
+        updates.put("attempts/" + s.id + "/" + newAttemptKey(s.id),
+                attempt(uid, deviceHash, Attendance.RESULT_ACCEPTED, null, lat, lng, distance,
+                        accuracy));
+
+        Db.write(updates, new Callback<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+                // Read the record back to show the exact server time it was saved at.
+                existingRecord(s.id, uid, new Callback<AttendanceRecord>() {
+                    @Override
+                    public void onSuccess(AttendanceRecord saved) {
+                        if (saved != null) {
+                            callback.onSuccess(saved.time);
+                        } else {
+                            callback.onSuccess(System.currentTimeMillis());
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onSuccess(System.currentTimeMillis());
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    // ============================================================
+    // [CREATE] Save a failed check-in attempt
+    // ============================================================
+    /**
+     * Rejected attempt (MOCK_LOCATION or OUTSIDE_RADIUS): logged in attempts only, so the lecturer
+     * sees it on the Live Monitor.
+     */
+    public void logRejected(Session s, String uid, String deviceHash, String reason, double lat,
+                            double lng, Double distance, double accuracy,
+                            Callback<Void> callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("attempts/" + s.id + "/" + newAttemptKey(s.id),
+                attempt(uid, deviceHash, Attendance.RESULT_REJECTED, reason, lat, lng, distance,
+                        accuracy));
+        Db.write(updates, callback);
+    }
+
+    /** A new unique key under attempts/{sessionId}. */
+    private static String newAttemptKey(String sessionId) {
+        return Db.root().child("attempts").child(sessionId).push().getKey();
+    }
+
+    /** The values saved for one check-in attempt. */
+    private static Map<String, Object> attempt(String uid, String deviceHash, String result,
+                                               String reason, double lat, double lng,
+                                               Double distance, double accuracy) {
+        Map<String, Object> a = new HashMap<>();
+        a.put("uid", uid);
+        a.put("deviceHash", deviceHash);
+        a.put("time", ServerValue.TIMESTAMP);
+        a.put("result", result);
+        if (reason != null) {
+            a.put("reason", reason);
+        }
+        if (distance != null) {
+            a.put("distance", round1(distance));
+        }
+        a.put("accuracy", round1(accuracy));
+        a.put("lat", round5(lat));
+        a.put("lng", round5(lng));
+        return a;
+    }
+
+    /** 5 decimals of a degree is about 1 m: enough to see where, not more. */
+    static double round5(double degrees) {
+        return Math.round(degrees * 1e5) / 1e5;
+    }
+
+    /** Rounds metres to 1 decimal. */
+    static double round1(double metres) {
+        return Math.round(metres * 10) / 10.0;
+    }
+}
